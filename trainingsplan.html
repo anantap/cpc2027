@@ -28,16 +28,69 @@
 
   .page {
     min-height: 100vh;
-    padding: 56px 64px;
+    padding: 56px 64px 110px;
     page-break-after: always;
     break-after: page;
-    display: flex;
+    display: none;
     flex-direction: column;
+  }
+
+  .page.active {
+    display: flex;
   }
 
   .page:last-child {
     page-break-after: auto;
     break-after: auto;
+  }
+
+  /* ===== App-style bottom nav (screen only) ===== */
+  .nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 16px 0 22px;
+    background: linear-gradient(to top, var(--bg) 60%, transparent);
+  }
+
+  .nav-arrow {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 8px 12px;
+    line-height: 1;
+    transition: color 0.15s ease;
+  }
+
+  .nav-arrow:hover { color: var(--accent); }
+  .nav-arrow:disabled { color: #444; cursor: default; }
+
+  .nav-dots {
+    display: flex;
+    gap: 10px;
+  }
+
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+
+  .nav-dot.active {
+    background: var(--accent);
+    transform: scale(1.25);
   }
 
   .eyebrow {
@@ -235,6 +288,11 @@
     .page {
       padding: 24px 8px;
       min-height: auto;
+      display: flex !important;
+    }
+
+    .nav {
+      display: none !important;
     }
 
     .eyebrow, .section-label, .ex-reps, .phase-dates {
@@ -271,7 +329,7 @@
 <body>
 
 <!-- PAGINA 1 — TRAININGSPLANNING -->
-<section class="page">
+<section class="page active">
   <div class="eyebrow">Trainingsplan</div>
   <h1>Naar de CPC 10K — maart 2027</h1>
   <p class="subtitle">
@@ -448,6 +506,59 @@
 
   <div class="footer-tag">CPC 10K — Yoga rustdag</div>
 </section>
+
+<nav class="nav">
+  <button class="nav-arrow" id="prevBtn" aria-label="Vorige pagina">‹</button>
+  <div class="nav-dots" id="navDots">
+    <button class="nav-dot active" data-index="0" aria-label="Pagina 1"></button>
+    <button class="nav-dot" data-index="1" aria-label="Pagina 2"></button>
+    <button class="nav-dot" data-index="2" aria-label="Pagina 3"></button>
+  </div>
+  <button class="nav-arrow" id="nextBtn" aria-label="Volgende pagina">›</button>
+</nav>
+
+<script>
+  (function () {
+    var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+    var dots = Array.prototype.slice.call(document.querySelectorAll('.nav-dot'));
+    var prevBtn = document.getElementById('prevBtn');
+    var nextBtn = document.getElementById('nextBtn');
+    var current = 0;
+
+    function show(index) {
+      current = Math.max(0, Math.min(pages.length - 1, index));
+      pages.forEach(function (p, i) { p.classList.toggle('active', i === current); });
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === current); });
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === pages.length - 1;
+      window.scrollTo(0, 0);
+    }
+
+    prevBtn.addEventListener('click', function () { show(current - 1); });
+    nextBtn.addEventListener('click', function () { show(current + 1); });
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () { show(parseInt(dot.dataset.index, 10)); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') show(current + 1);
+      if (e.key === 'ArrowLeft') show(current - 1);
+    });
+
+    var touchStartX = null;
+    document.addEventListener('touchstart', function (e) {
+      touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+    document.addEventListener('touchend', function (e) {
+      if (touchStartX === null) return;
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+      touchStartX = null;
+    }, { passive: true });
+
+    show(0);
+  })();
+</script>
 
 </body>
 </html>
