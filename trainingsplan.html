@@ -116,6 +116,52 @@
     line-height: 1.5;
   }
 
+  /* ===== Checkbox (shared across phases & exercises) ===== */
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--line);
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .checkbox::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  .check-row {
+    cursor: pointer;
+  }
+
+  .check-row.checked .checkbox {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .check-row.checked .checkbox::after {
+    content: "✓";
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0d0f13;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .check-row.checked .phase-title,
+  .check-row.checked .ex-name {
+    color: var(--text-dim);
+    text-decoration: line-through;
+    text-decoration-color: var(--text-dim);
+  }
+
   /* ===== Page 1: Phases ===== */
   .phases {
     display: flex;
@@ -129,6 +175,9 @@
     border-left: 3px solid var(--accent);
     border-radius: 10px;
     padding: 18px 22px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
   }
 
   .phase-dates {
@@ -227,8 +276,8 @@
 
   .exercise {
     display: flex;
-    align-items: baseline;
-    gap: 20px;
+    align-items: center;
+    gap: 16px;
     padding: 18px 0;
     border-bottom: 1px solid var(--line);
   }
@@ -318,6 +367,26 @@
 
     .pill { border: 1px solid #cccccc !important; }
 
+    .checkbox {
+      border-color: #999999 !important;
+      background: #ffffff !important;
+    }
+
+    .check-row.checked .checkbox {
+      background: #ffffff !important;
+      border-color: #15803d !important;
+    }
+
+    .check-row.checked .checkbox::after {
+      color: #15803d !important;
+    }
+
+    .check-row.checked .phase-title,
+    .check-row.checked .ex-name {
+      color: #444444 !important;
+      text-decoration: line-through;
+    }
+
     h1 { color: #111111 !important; }
   }
 
@@ -337,25 +406,37 @@
   </p>
 
   <div class="phases">
-    <div class="phase">
-      <div class="phase-dates">NU → EIND AUGUSTUS 2026</div>
-      <div class="phase-title">Couch to 5K afmaken</div>
-      <div class="phase-desc">Het programma uitlopen en de basis van hardlopen opbouwen.</div>
+    <div class="phase check-row" data-id="phase-0">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
+      <div class="phase-body">
+        <div class="phase-dates">NU → EIND AUGUSTUS 2026</div>
+        <div class="phase-title">Couch to 5K afmaken</div>
+        <div class="phase-desc">Het programma uitlopen en de basis van hardlopen opbouwen.</div>
+      </div>
     </div>
-    <div class="phase">
-      <div class="phase-dates">SEPTEMBER → NOVEMBER 2026</div>
-      <div class="phase-title">5K consolideren</div>
-      <div class="phase-desc">Comfortabel worden op 5 km, zonder de afstand nog te verhogen.</div>
+    <div class="phase check-row" data-id="phase-1">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
+      <div class="phase-body">
+        <div class="phase-dates">SEPTEMBER → NOVEMBER 2026</div>
+        <div class="phase-title">5K consolideren</div>
+        <div class="phase-desc">Comfortabel worden op 5 km, zonder de afstand nog te verhogen.</div>
+      </div>
     </div>
-    <div class="phase">
-      <div class="phase-dates">DECEMBER 2026 → FEBRUARI 2027</div>
-      <div class="phase-title">Rustig opbouwen naar 10K</div>
-      <div class="phase-desc">Geleidelijk van 5 km naar 10 km, stap voor stap.</div>
+    <div class="phase check-row" data-id="phase-2">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
+      <div class="phase-body">
+        <div class="phase-dates">DECEMBER 2026 → FEBRUARI 2027</div>
+        <div class="phase-title">Rustig opbouwen naar 10K</div>
+        <div class="phase-desc">Geleidelijk van 5 km naar 10 km, stap voor stap.</div>
+      </div>
     </div>
-    <div class="phase">
-      <div class="phase-dates">FEBRUARI → HALF MAART 2027</div>
-      <div class="phase-title">Laatste weken: gericht op de 10K</div>
-      <div class="phase-desc">Specifiek toewerken naar de CPC Loop, met tapering richting de wedstrijd.</div>
+    <div class="phase check-row" data-id="phase-3">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
+      <div class="phase-body">
+        <div class="phase-dates">FEBRUARI → HALF MAART 2027</div>
+        <div class="phase-title">Laatste weken: gericht op de 10K</div>
+        <div class="phase-desc">Specifiek toewerken naar de CPC Loop, met tapering richting de wedstrijd.</div>
+      </div>
     </div>
   </div>
 
@@ -383,7 +464,8 @@
   <p class="subtitle">Dynamische warming-up, vóór elke looptraining.</p>
 
   <div class="exercise-list">
-    <div class="exercise">
+    <div class="exercise check-row" data-id="warmup-0">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">01</div>
       <div class="ex-body">
         <div class="ex-name">Pogo jumps op 2 benen</div>
@@ -391,7 +473,8 @@
       </div>
       <div class="ex-reps">30x</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="warmup-1">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">02</div>
       <div class="ex-body">
         <div class="ex-name">Pogo jumps op één been</div>
@@ -399,7 +482,8 @@
       </div>
       <div class="ex-reps">15x per been</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="warmup-2">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">03</div>
       <div class="ex-body">
         <div class="ex-name">Leg swings voor/achter</div>
@@ -407,7 +491,8 @@
       </div>
       <div class="ex-reps">10x per been</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="warmup-3">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">04</div>
       <div class="ex-body">
         <div class="ex-name">Leg swings zijwaarts</div>
@@ -415,7 +500,8 @@
       </div>
       <div class="ex-reps">10x per been</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="warmup-4">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">05</div>
       <div class="ex-body">
         <div class="ex-name">Kuiten rekken op een traptrede</div>
@@ -438,7 +524,8 @@
   </div>
 
   <div class="exercise-list">
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-0">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">01</div>
       <div class="ex-body">
         <div class="ex-name">Kat-koe</div>
@@ -446,7 +533,8 @@
       </div>
       <div class="ex-reps">8 ademhalingen</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-1">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">02</div>
       <div class="ex-body">
         <div class="ex-name">Neerwaartse hond</div>
@@ -454,7 +542,8 @@
       </div>
       <div class="ex-reps">5–8 ademhalingen</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-2">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">03</div>
       <div class="ex-body">
         <div class="ex-name">Lage lunge</div>
@@ -462,7 +551,8 @@
       </div>
       <div class="ex-reps">5 per kant</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-3">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">04</div>
       <div class="ex-body">
         <div class="ex-name">Staande voorwaartse buiging</div>
@@ -470,7 +560,8 @@
       </div>
       <div class="ex-reps">5</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-4">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">05</div>
       <div class="ex-body">
         <div class="ex-name">Liggende figure-4</div>
@@ -478,7 +569,8 @@
       </div>
       <div class="ex-reps">5 per kant</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-5">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">06</div>
       <div class="ex-body">
         <div class="ex-name">Tenenstretch</div>
@@ -486,7 +578,8 @@
       </div>
       <div class="ex-reps">op gevoel</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-6">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">07</div>
       <div class="ex-body">
         <div class="ex-name">Liggende draai</div>
@@ -494,7 +587,8 @@
       </div>
       <div class="ex-reps">5 per kant</div>
     </div>
-    <div class="exercise">
+    <div class="exercise check-row" data-id="yoga-7">
+      <div class="checkbox" role="checkbox" aria-checked="false"></div>
       <div class="ex-num">08</div>
       <div class="ex-body">
         <div class="ex-name">Kindhouding</div>
@@ -557,6 +651,29 @@
     }, { passive: true });
 
     show(0);
+  })();
+
+  (function () {
+    var STORAGE_KEY = 'cpc10k-checks';
+    var checks = {};
+    try { checks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) { checks = {}; }
+
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.check-row'));
+    rows.forEach(function (row) {
+      var id = row.dataset.id;
+      var checkbox = row.querySelector('.checkbox');
+      if (checks[id]) {
+        row.classList.add('checked');
+        checkbox.setAttribute('aria-checked', 'true');
+      }
+      row.addEventListener('click', function () {
+        var isChecked = !row.classList.contains('checked');
+        row.classList.toggle('checked', isChecked);
+        checkbox.setAttribute('aria-checked', String(isChecked));
+        checks[id] = isChecked;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(checks));
+      });
+    });
   })();
 </script>
 
