@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naar de CPC 10K — maart 2027</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #15171c;
+    --bg-alt: #1c1f26;
+    --text: #e9ebef;
+    --text-dim: #9aa1ad;
+    --accent: #4ee08a;
+    --line: #2a2e37;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    min-height: 100vh;
+    padding: 56px 64px;
+    page-break-after: always;
+    break-after: page;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .eyebrow {
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin: 0 0 36px 0;
+    line-height: 1.5;
+  }
+
+  /* ===== Page 1: Phases ===== */
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .phase {
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px 22px;
+  }
+
+  .phase-dates {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+
+  .phase-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .phase-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .section-label {
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin: 32px 0 14px 0;
+  }
+
+  .week-rhythm {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .pill strong { color: var(--accent); }
+
+  .principles {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .principles li {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    padding-left: 18px;
+    position: relative;
+  }
+
+  .principles li::before {
+    content: "—";
+    color: var(--accent);
+    position: absolute;
+    left: 0;
+  }
+
+  .principles strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* ===== Page 2 & 3: Exercise list ===== */
+  .note {
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 32px;
+  }
+
+  .exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .exercise {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .exercise:first-child { border-top: 1px solid var(--line); }
+
+  .ex-num {
+    font-size: 13px;
+    color: var(--text-dim);
+    width: 20px;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  .ex-body {
+    flex: 1;
+  }
+
+  .ex-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .ex-desc {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  .ex-reps {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .footer-tag {
+    margin-top: auto;
+    padding-top: 24px;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ===== Print overrides ===== */
+  @media print {
+    :root { color-scheme: light; }
+
+    html, body {
+      background: #ffffff !important;
+      color: #111111 !important;
+    }
+
+    .page {
+      padding: 24px 8px;
+      min-height: auto;
+    }
+
+    .eyebrow, .section-label, .ex-reps, .phase-dates {
+      color: #15803d !important;
+    }
+
+    .subtitle, .phase-desc, .ex-desc, .principles li, .footer-tag, .note {
+      color: #444444 !important;
+    }
+
+    .phase, .note, .pill {
+      background: #ffffff !important;
+      border-color: #cccccc !important;
+    }
+
+    .phase { border-left-color: #15803d !important; }
+    .note { border-left-color: #15803d !important; }
+
+    .exercise { border-bottom-color: #dddddd !important; }
+    .exercise:first-child { border-top-color: #dddddd !important; }
+
+    .ex-num, .pill strong, .principles strong { color: #111111 !important; }
+
+    .pill { border: 1px solid #cccccc !important; }
+
+    h1 { color: #111111 !important; }
+  }
+
+  @page {
+    margin: 12mm;
+  }
+</style>
+</head>
+<body>
+
+<!-- PAGINA 1 — TRAININGSPLANNING -->
+<section class="page">
+  <div class="eyebrow">Trainingsplan</div>
+  <h1>Naar de CPC 10K — maart 2027</h1>
+  <p class="subtitle">
+    Gestart met Couch to 5K (nu week 3, eind juni 2026). Doel: de 10&nbsp;km van de CPC Loop in Den Haag, half maart 2027.
+  </p>
+
+  <div class="phases">
+    <div class="phase">
+      <div class="phase-dates">NU → EIND AUGUSTUS 2026</div>
+      <div class="phase-title">Couch to 5K afmaken</div>
+      <div class="phase-desc">Het programma uitlopen en de basis van hardlopen opbouwen.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-dates">SEPTEMBER → NOVEMBER 2026</div>
+      <div class="phase-title">5K consolideren</div>
+      <div class="phase-desc">Comfortabel worden op 5 km, zonder de afstand nog te verhogen.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-dates">DECEMBER 2026 → FEBRUARI 2027</div>
+      <div class="phase-title">Rustig opbouwen naar 10K</div>
+      <div class="phase-desc">Geleidelijk van 5 km naar 10 km, stap voor stap.</div>
+    </div>
+    <div class="phase">
+      <div class="phase-dates">FEBRUARI → HALF MAART 2027</div>
+      <div class="phase-title">Laatste weken: gericht op de 10K</div>
+      <div class="phase-desc">Specifiek toewerken naar de CPC Loop, met tapering richting de wedstrijd.</div>
+    </div>
+  </div>
+
+  <div class="section-label">Weekritme</div>
+  <div class="week-rhythm">
+    <div class="pill"><strong>3x</strong> looptraining per week</div>
+    <div class="pill">Warming-up vóór elke run (pag. 2)</div>
+    <div class="pill">Yoga op rustdagen (pag. 3)</div>
+  </div>
+
+  <div class="section-label">Principes</div>
+  <ul class="principles">
+    <li><strong>Max ~10%</strong> meer afstand per week.</li>
+    <li>Rustdagen serieus nemen — herstel is onderdeel van de training.</li>
+    <li>Lopen op gevoel: de praat-test als richtlijn.</li>
+    <li>Een tempo van <strong>7–9 min/km</strong> is prima.</li>
+    <li>Bij scherpe pijn: rust nemen, niet doorlopen.</li>
+  </ul>
+</section>
+
+<!-- PAGINA 2 — WARMING-UP -->
+<section class="page">
+  <div class="eyebrow">Vóór elke run</div>
+  <h1>Warming-up</h1>
+  <p class="subtitle">Dynamische warming-up, vóór elke looptraining.</p>
+
+  <div class="exercise-list">
+    <div class="exercise">
+      <div class="ex-num">01</div>
+      <div class="ex-body">
+        <div class="ex-name">Pogo jumps op 2 benen</div>
+        <div class="ex-desc">Kleine, snelle stuitersprongen op de plek om de enkels en kuiten op te wekken.</div>
+      </div>
+      <div class="ex-reps">30x</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">02</div>
+      <div class="ex-body">
+        <div class="ex-name">Pogo jumps op één been</div>
+        <div class="ex-desc">Zelfde stuiterbeweging, nu op één been voor stabiliteit en enkelkracht.</div>
+      </div>
+      <div class="ex-reps">15x per been</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">03</div>
+      <div class="ex-body">
+        <div class="ex-name">Leg swings voor/achter</div>
+        <div class="ex-desc">Been gecontroleerd voor en achter zwaaien om heupflexoren en hamstrings los te maken.</div>
+      </div>
+      <div class="ex-reps">10x per been</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">04</div>
+      <div class="ex-body">
+        <div class="ex-name">Leg swings zijwaarts</div>
+        <div class="ex-desc">Been zijwaarts zwaaien voor mobiliteit van de heupen in het zijvlak.</div>
+      </div>
+      <div class="ex-reps">10x per been</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">05</div>
+      <div class="ex-body">
+        <div class="ex-name">Kuiten rekken op een traptrede</div>
+        <div class="ex-desc">Hak laten zakken over de rand van een trede om de kuiten dynamisch te rekken.</div>
+      </div>
+      <div class="ex-reps">10x</div>
+    </div>
+  </div>
+
+  <div class="footer-tag">CPC 10K — Warming-up</div>
+</section>
+
+<!-- PAGINA 3 — YOGA -->
+<section class="page">
+  <div class="eyebrow">Op rustdagen</div>
+  <h1>Yoga voor rustdagen</h1>
+
+  <div class="note">
+    Zacht is het doel — zoek de rek, niet de pijn. Adem rustig door en stop direct bij scherpe pijn.
+  </div>
+
+  <div class="exercise-list">
+    <div class="exercise">
+      <div class="ex-num">01</div>
+      <div class="ex-body">
+        <div class="ex-name">Kat-koe</div>
+        <div class="ex-desc">Op handen en knieën de rug afwisselend ronden en hollen, gekoppeld aan de ademhaling.</div>
+      </div>
+      <div class="ex-reps">8 ademhalingen</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">02</div>
+      <div class="ex-body">
+        <div class="ex-name">Neerwaartse hond</div>
+        <div class="ex-desc">Omgekeerde V-vorm die de hamstrings, kuiten en schouders rekt.</div>
+      </div>
+      <div class="ex-reps">5–8 ademhalingen</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">03</div>
+      <div class="ex-body">
+        <div class="ex-name">Lage lunge</div>
+        <div class="ex-desc">Voorste knie gebogen, achterste heup naar voren laten zakken om de heupbuiger te rekken.</div>
+      </div>
+      <div class="ex-reps">5 per kant</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">04</div>
+      <div class="ex-body">
+        <div class="ex-name">Staande voorwaartse buiging</div>
+        <div class="ex-desc">Vanuit staand voorover buigen, knieën licht gebogen, voor de rug en hamstrings.</div>
+      </div>
+      <div class="ex-reps">5</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">05</div>
+      <div class="ex-body">
+        <div class="ex-name">Liggende figure-4</div>
+        <div class="ex-desc">Liggend op de rug, enkel over de knie kruisen voor een diepe rek in de heup.</div>
+      </div>
+      <div class="ex-reps">5 per kant</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">06</div>
+      <div class="ex-body">
+        <div class="ex-name">Tenenstretch</div>
+        <div class="ex-desc">Zittend op de hielen met tenen omgekruld, voor mobiliteit in de voet.</div>
+      </div>
+      <div class="ex-reps">op gevoel</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">07</div>
+      <div class="ex-body">
+        <div class="ex-name">Liggende draai</div>
+        <div class="ex-desc">Liggend op de rug, knieën zijwaarts laten zakken voor een zachte rek door de rug.</div>
+      </div>
+      <div class="ex-reps">5 per kant</div>
+    </div>
+    <div class="exercise">
+      <div class="ex-num">08</div>
+      <div class="ex-body">
+        <div class="ex-name">Kindhouding</div>
+        <div class="ex-desc">Zittend op de hielen voorover vouwen met armen gestrekt, om volledig te ontspannen.</div>
+      </div>
+      <div class="ex-reps">10 ademhalingen</div>
+    </div>
+  </div>
+
+  <div class="footer-tag">CPC 10K — Yoga rustdag</div>
+</section>
+
+</body>
+</html>
