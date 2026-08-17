@@ -13,6 +13,7 @@
     --text-dim: #9aa1ad;
     --accent: #4ee08a;
     --accent-blue: #8ab4ff;
+    --accent-orange: #f5913d;
     --line: #2a2e37;
   }
 
@@ -343,6 +344,28 @@
     margin-top: 4px;
   }
 
+  .run-item.interval,
+  .run-item.tempo {
+    border-color: var(--accent-orange);
+    background: rgba(245, 145, 61, 0.08);
+  }
+
+  .run-item.interval .run-dist,
+  .run-item.tempo .run-dist {
+    color: var(--accent-orange);
+  }
+
+  .interval-tag,
+  .tempo-tag {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent-orange);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
   .note-blue {
     background: var(--bg-alt);
     border: 1px solid var(--line);
@@ -480,6 +503,19 @@
     .run-item.parkrun .run-dist,
     .parkrun-tag {
       color: #1d4ed8 !important;
+    }
+
+    .run-item.interval,
+    .run-item.tempo {
+      border-color: #b45309 !important;
+      background: #ffffff !important;
+    }
+
+    .run-item.interval .run-dist,
+    .run-item.tempo .run-dist,
+    .interval-tag,
+    .tempo-tag {
+      color: #b45309 !important;
     }
 
     .exercise { border-bottom-color: #dddddd !important; }
@@ -732,9 +768,9 @@
       </div>
     </div>
     <div class="week-card">
-      <div class="week-head"><div class="week-num">Week 3</div><div class="week-focus">Eerste extra kilometer</div></div>
+      <div class="week-head"><div class="week-num">Week 3</div><div class="week-focus">Eerste extra kilometer + interval</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item interval"><div class="run-label">Run 1</div><div class="run-dist">5× 4 min</div><div class="run-desc">hardlopen / 2 min pauze</div><div class="interval-tag">interval</div></div>
         <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">7 km</div><div class="run-desc">rustig</div></div>
         <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
@@ -756,9 +792,9 @@
       </div>
     </div>
     <div class="week-card">
-      <div class="week-head"><div class="week-num">Week 6</div><div class="week-focus">Eerste keer 8 km</div></div>
+      <div class="week-head"><div class="week-num">Week 6</div><div class="week-focus">Eerste keer 8 km + interval</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item interval"><div class="run-label">Run 1</div><div class="run-dist">5× 400 m</div><div class="run-desc">hardlopen / 200 m pauze</div><div class="interval-tag">interval</div></div>
         <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">8 km</div><div class="run-desc">rustig</div></div>
         <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
@@ -780,9 +816,9 @@
       </div>
     </div>
     <div class="week-card">
-      <div class="week-head"><div class="week-num">Week 9</div><div class="week-focus">Dicht bij 9 km</div></div>
+      <div class="week-head"><div class="week-num">Week 9</div><div class="week-focus">Dicht bij 9 km + tempoduurloop</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item tempo"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">op wedstrijdtempo</div><div class="tempo-tag">tempo</div></div>
         <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">9 km</div><div class="run-desc">rustig</div></div>
         <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
@@ -796,9 +832,9 @@
       </div>
     </div>
     <div class="week-card">
-      <div class="week-head"><div class="week-num">Week 11</div><div class="week-focus">9 km opnieuw</div></div>
+      <div class="week-head"><div class="week-num">Week 11</div><div class="week-focus">9 km opnieuw + tempoduurloop</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item tempo"><div class="run-label">Run 1</div><div class="run-dist">8 km</div><div class="run-desc">laatste 3 km op wedstrijdtempo</div><div class="tempo-tag">tempo</div></div>
         <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">9 km</div><div class="run-desc">rustig</div></div>
         <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
@@ -815,7 +851,7 @@
 
   <div class="section-label">Vuistregels</div>
   <ul class="principles">
-    <li>Tempo: praat-test, ook op de parkrun; kun je niet meer kletsen, dan ga je te snel.</li>
+    <li>Rustige runs op de praat-test, ook op de parkrun. Interval- en tempodagen zijn bewust sneller — dat klopt zo.</li>
     <li>Herstel: rustdag tussen elke run; warming-up vóór, yoga op rustdagen.</li>
     <li>Opbouw: nooit meer dan <strong>~10%</strong> erbij op de lange duurloop per week — vandaar de cutback-weken.</li>
     <li>Flexibel: lukt een week niet, herhaal 'm — er is ruim tijd tot de CPC.</li>
