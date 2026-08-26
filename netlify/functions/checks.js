@@ -1,7 +1,11 @@
 const { getStore } = require('@netlify/blobs');
 
 exports.handler = async (event) => {
-  const store = getStore('cpc10k-checks');
+  const store = getStore({
+    name: 'cpc10k-checks',
+    siteID: '758e7c83-ece5-4563-b312-96ebd5c8b054',
+    token: process.env.BLOBS_API_TOKEN,
+  });
 
   if (event.httpMethod === 'GET') {
     const data = await store.get('state', { type: 'json' });
