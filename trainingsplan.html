@@ -1111,24 +1111,38 @@
   })();
 
   (function () {
-    var STORAGE_KEY = 'cpc10k-checks';
+    var API_URL = '/api/checks';
     var checks = {};
-    try { checks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) { checks = {}; }
-
     var rows = Array.prototype.slice.call(document.querySelectorAll('.check-row'));
+
+    function applyChecks() {
+      rows.forEach(function (row) {
+        var id = row.dataset.id;
+        var checkbox = row.querySelector('.checkbox');
+        var isChecked = !!checks[id];
+        row.classList.toggle('checked', isChecked);
+        checkbox.setAttribute('aria-checked', String(isChecked));
+      });
+    }
+
+    fetch(API_URL)
+      .then(function (res) { return res.ok ? res.json() : {}; })
+      .then(function (data) { checks = data || {}; applyChecks(); })
+      .catch(function () { applyChecks(); });
+
     rows.forEach(function (row) {
       var id = row.dataset.id;
       var checkbox = row.querySelector('.checkbox');
-      if (checks[id]) {
-        row.classList.add('checked');
-        checkbox.setAttribute('aria-checked', 'true');
-      }
       row.addEventListener('click', function () {
         var isChecked = !row.classList.contains('checked');
         row.classList.toggle('checked', isChecked);
         checkbox.setAttribute('aria-checked', String(isChecked));
         checks[id] = isChecked;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(checks));
+        fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(checks),
+        }).catch(function () {});
       });
     });
   })();
