@@ -903,13 +903,40 @@
       return card;
     }
 
-    // Runs fill the week's slots in date order; any beyond the plan are listed as extra.
+    // Usual run days, counted from Monday: Run 1 on Wednesday, Run 2 on Friday, Run 3 on Sunday.
+    var RUN_DAYS = [2, 4, 6];
+
+    // Pair runs with sessions in date order, matching as many as possible and keeping each run
+    // as close to its session's usual day as it can. Returns the run (or undefined) per session.
+    function assignRuns(weekRuns, start, slotCount) {
+      var offsets = weekRuns.map(function (r) { return dayNumber(r.date) - start; });
+      var pairs = Math.min(weekRuns.length, slotCount);
+      var best = null;
+      (function search(run, slot, matched, cost, picked) {
+        if (matched === pairs) {
+          if (!best || cost < best.cost) best = { cost: cost, picked: picked.slice() };
+          return;
+        }
+        if (run >= weekRuns.length || slot >= slotCount) return;
+        picked.push([run, slot]);
+        search(run + 1, slot + 1, matched + 1, cost + Math.abs(offsets[run] - RUN_DAYS[slot]), picked);
+        picked.pop();
+        search(run, slot + 1, matched, cost, picked);
+        search(run + 1, slot, matched, cost, picked);
+      })(0, 0, 0, 0, []);
+      var bySlot = [];
+      best.picked.forEach(function (p) { bySlot[p[1]] = weekRuns[p[0]]; });
+      return bySlot;
+    }
+
+    // Runs go to the session for their weekday; any beyond the plan are listed as extra.
     function matchWeek(card, weekRuns, start) {
       var items = Array.prototype.slice.call(card.querySelectorAll('.run-item'));
       var weekOver = start + 7 <= today;
+      var bySlot = assignRuns(weekRuns, start, items.length);
 
       items.forEach(function (item, i) {
-        var run = weekRuns[i];
+        var run = bySlot[i];
         setChecked(item, !!run);
         if (run) {
           setStatus(item, 'done', 'Gedaan');
@@ -919,7 +946,7 @@
         }
       });
 
-      var extra = weekRuns.slice(items.length);
+      var extra = weekRuns.filter(function (run) { return bySlot.indexOf(run) === -1; });
       if (extra.length) {
         var grid = el('div', 'runs-grid extra-runs');
         extra.forEach(function (run) {
