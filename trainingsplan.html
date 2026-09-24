@@ -289,6 +289,16 @@
     cursor: pointer;
   }
 
+  /* A planned session shows no status, just the skip button in its place. */
+  .run-item.planned .run-status { display: none; }
+
+  .run-item.planned .skip-btn {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    margin-top: 0;
+  }
+
   .skip-btn:hover { color: var(--text); border-color: var(--text-faint); }
 
   .activity {
@@ -931,10 +941,11 @@
       });
       item.appendChild(plan);
       item.appendChild(el('div', 'run-status', 'Gepland'));
+      item.classList.add('planned');
     });
 
     function setStatus(item, state, label) {
-      item.classList.remove('done', 'missed', 'skipped');
+      item.classList.remove('planned', 'done', 'missed', 'skipped');
       if (state) item.classList.add(state);
       item.querySelector('.run-status').textContent = label;
     }
@@ -951,7 +962,7 @@
         var skipped = skips.indexOf(id) !== -1;
         if (skipped) setStatus(item, 'skipped', 'Overgeslagen');
         else if (weekOver) setStatus(item, 'missed', 'Niet gelopen');
-        else setStatus(item, null, 'Gepland');
+        else setStatus(item, 'planned', 'Gepland');
         button.textContent = skipped ? 'Ongedaan maken' : 'Overslaan';
       }
 
