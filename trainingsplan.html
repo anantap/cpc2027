@@ -170,7 +170,7 @@
     transition: transform 0.2s ease;
   }
 
-  .phase-section.open .chevron { transform: rotate(180deg); }
+  .phase-section.open > .phase-toggle .chevron { transform: rotate(180deg); }
 
   .phase-body {
     display: none;
@@ -370,6 +370,7 @@
   @media (max-width: 600px) {
     .week-head { flex-wrap: wrap; row-gap: 2px; }
     .week-focus { order: 1; flex-basis: 100%; }
+    .week-head .chevron { margin-left: auto; }
     .week-total { order: 2; flex-basis: 100%; margin-left: 0; }
   }
 
@@ -445,6 +446,30 @@
     border-radius: 12px;
     padding: 14px 14px 16px;
   }
+
+  .week-head {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .week-head .chevron {
+    width: 20px;
+    height: 20px;
+    align-self: center;
+  }
+
+  .week-card:not(.collapsed) .week-head .chevron { transform: rotate(180deg); }
+
+  .week-card.collapsed .runs-grid { display: none; }
+  .week-card.collapsed .week-progress { margin-bottom: 0; }
+  .week-card.collapsed .week-head { margin-bottom: 8px; }
+
+  .week-card.completed .week-num,
+  .week-card.completed .week-focus,
+  .week-card.completed .week-total,
+  .week-card.completed .week-total strong { color: var(--text-faint); }
+  .week-card.completed .week-focus { text-decoration: line-through; }
+  .week-card.completed .week-progress div { background: var(--text-faint); }
 
   .week-card.current {
     border-color: var(--accent);
@@ -820,6 +845,7 @@
     }
 
     var skipped = SKIPPED_WEEKS.map(dayNumber);
+    var today = dayNumber(new Date().toISOString().slice(0, 10));
 
     // First day of a plan week, stepping over skipped weeks (they only fall in consolidation/tussenfase).
     function weekStart(plan, week) {
@@ -871,7 +897,27 @@
       }
     });
 
-    var today = dayNumber(new Date().toISOString().slice(0, 10));
+    // Every week folds open and closed from its header; this week starts open.
+    var CHEVRON = '<svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
+    function setWeekOpen(card, open) {
+      card.classList.toggle('collapsed', !open);
+      card.querySelector('.week-head').setAttribute('aria-expanded', String(open));
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
+      var head = card.querySelector('.week-head');
+      var start = weekStart(card.dataset.plan, Number(card.dataset.week));
+      head.insertAdjacentHTML('beforeend', CHEVRON);
+      head.setAttribute('role', 'button');
+      head.setAttribute('tabindex', '0');
+      head.addEventListener('click', function () { setWeekOpen(card, card.classList.contains('collapsed')); });
+      head.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); head.click(); }
+      });
+      setWeekOpen(card, start <= today && today < start + 7);
+    });
+
     var DAYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 
     // Run sessions are ticked from Suunto data.
@@ -1081,7 +1127,7 @@
       var time = runs.reduce(function (sum, r) { return sum + r.moving_time_s; }, 0);
       var paces = runs.filter(function (r) { return r.distance_km >= 1; })
         .map(function (r) { return r.moving_time_s / r.distance_km; });
-      document.getElementById('stat-total').innerHTML = formatKm(km) + '<small> km</small>';
+      document.getElementById('stat-total').textContent = formatKm(km);
       document.getElementById('stat-avg').innerHTML = formatPaceSec(time / km);
       if (paces.length) document.getElementById('stat-best').innerHTML = formatPaceSec(Math.min.apply(null, paces));
     }
@@ -1119,8 +1165,18 @@
       toggle.addEventListener('click', function () { setOpen(!section.classList.contains('open')); });
     });
 
-    // A phase with planned runs is struck through once every one of them is done.
+    // A week, or a phase with planned runs, is complete once every session is done or skipped.
+    function isSettled(container) {
+      var slots = container.querySelectorAll('.runs-grid:not(.extra-runs) .run-item');
+      var settled = container.querySelectorAll('.runs-grid:not(.extra-runs) .run-item.done, ' +
+        '.runs-grid:not(.extra-runs) .run-item.skipped');
+      return slots.length > 0 && settled.length === slots.length;
+    }
+
     function markCompletedPhases() {
+      Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
+        card.classList.toggle('completed', isSettled(card));
+      });
       Array.prototype.forEach.call(document.querySelectorAll('.phase-section'), function (section) {
         var slots = section.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
         if (!slots.length) return;
@@ -1137,6 +1193,11 @@
       applyStats(runs);
       applyRuns(runs);
       markCompletedPhases();
+      // Past weeks that still have open sessions stay open; finished weeks fold away.
+      Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
+        var start = weekStart(card.dataset.plan, Number(card.dataset.week));
+        if (start + 7 <= today) setWeekOpen(card, !card.classList.contains('completed'));
+      });
     });
   })();
 </script>
