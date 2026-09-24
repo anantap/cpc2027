@@ -205,9 +205,10 @@
   .run-plan .run-desc { display: inline; }
   .run-plan .run-desc::before { content: " · "; }
   .run-plan .interval-tag,
-  .run-plan .tempo-tag {
-    display: inline-block;
-    margin: 4px 0 0;
+  .run-plan .tempo-tag,
+  .run-plan .race-tag {
+    display: table;
+    margin: 6px 0 0;
     padding: 1px 6px;
     border: 1px solid var(--text-faint);
     border-radius: 4px;
@@ -540,6 +541,7 @@
 
 
   .interval-tag,
+  .race-tag,
   .tempo-tag {
     display: block;
     font-size: 10px;
@@ -822,7 +824,33 @@
       <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="phase-body">
-      <div class="note">Specifiek toewerken naar de CPC Loop, met tapering richting de wedstrijd. Het schema voor deze weken volgt nog.</div>
+      <div class="note">Specifiek toewerken naar de CPC Loop, met tapering richting de wedstrijd.</div>
+      <div class="weeks">
+    <div class="week-card" data-plan="final" data-week="1">
+      <div class="week-head"><div class="week-num">Week 1</div><div class="week-focus">Laatste lange duurloop</div></div>
+      <div class="runs-grid">
+        <div class="run-item tempo check-row" data-id="final-w1-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">2 km rustig, 2 km op wedstrijdtempo, 1 km uitlopen</div><div class="tempo-tag">tempo</div></div>
+        <div class="run-item check-row" data-id="final-w1-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">8 km</div><div class="run-desc">rustig — de laatste lange duurloop</div></div>
+        <div class="run-item check-row" data-id="final-w1-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+      </div>
+    </div>
+    <div class="week-card" data-plan="final" data-week="2">
+      <div class="week-head"><div class="week-num">Week 2</div><div class="week-focus">Afbouwen ↓</div></div>
+      <div class="runs-grid">
+        <div class="run-item check-row" data-id="final-w2-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">4 km</div><div class="run-desc">rustig + 4× 20 sec vlot versnellen</div></div>
+        <div class="run-item check-row" data-id="final-w2-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="final-w2-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3</div><div class="run-dist">4 km</div><div class="run-desc">rustig</div></div>
+      </div>
+    </div>
+    <div class="week-card" data-plan="final" data-week="3">
+      <div class="week-head"><div class="week-num">Week 3</div><div class="week-focus">Wedstrijdweek — CPC Loop</div></div>
+      <div class="runs-grid">
+        <div class="run-item check-row" data-id="final-w3-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">4 km</div><div class="run-desc">rustig + 3× 20 sec vlot versnellen</div></div>
+        <div class="run-item check-row" data-id="final-w3-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2</div><div class="run-dist">3 km</div><div class="run-desc">heel rustig — of een rustdag</div></div>
+        <div class="run-item race check-row" data-id="final-w3-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · zo</div><div class="run-dist">10 km</div><div class="run-desc">CPC Loop Den Haag — geniet ervan</div><div class="race-tag">wedstrijd</div></div>
+      </div>
+    </div>
+      </div>
     </div>
   </section>
 
@@ -860,6 +888,8 @@
     // First day of a plan week, stepping over skipped weeks (they only fall in consolidation/tussenfase).
     function weekStart(plan, week) {
       if (plan === 'build') return dayNumber(PLAN_STARTS.build) + (week - 1) * 7;
+      // The taper follows straight on from the 12 build-up weeks.
+      if (plan === 'final') return dayNumber(PLAN_STARTS.build) + (week + 11) * 7;
       var day = dayNumber(PLAN_STARTS.consol);
       var n = plan === 'tussen' ? week + 8 : week;
       for (;;) {
