@@ -1189,9 +1189,9 @@
       card.querySelector('.week-num').insertAdjacentElement('afterend',
         el('div', 'week-dates', formatDay(start) + ' – ' + formatDay(start + 6)));
       if (skipped.indexOf(start - 7) !== -1) {
-        card.parentNode.insertBefore(
-          el('div', 'week-card skipped', 'Overgeslagen (ziek) · ' + formatDay(start - 7) + ' – ' + formatDay(start - 1)),
-          card);
+        var marker = el('div', 'week-card skipped', 'Overgeslagen (ziek) · ' + formatDay(start - 7) + ' – ' + formatDay(start - 1));
+        marker.dataset.start = String(start - 7);
+        card.parentNode.insertBefore(marker, card);
       }
     });
 
@@ -1273,13 +1273,26 @@
       }
     }
 
+    function runsBetween(runs, start, end) {
+      return runs.filter(function (r) {
+        var d = dayNumber(r.date);
+        return d >= start && d < end;
+      });
+    }
+
     function applyRuns(runs) {
+      // Runs in a skipped week aren't part of the plan, but still show them on the marker.
+      Array.prototype.forEach.call(document.querySelectorAll('.week-card.skipped'), function (card) {
+        var inWeek = runsBetween(runs, Number(card.dataset.start), Number(card.dataset.start) + 7);
+        if (inWeek.length) {
+          card.appendChild(document.createTextNode(' · gelopen: ' +
+            inWeek.map(function (r) { return formatKm(r.distance_km) + ' km'; }).join(', ')));
+        }
+      });
+
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
         var start = weekStart(card.dataset.plan, Number(card.dataset.week));
-        var weekRuns = runs.filter(function (r) {
-          var d = dayNumber(r.date);
-          return d >= start && d < start + 7;
-        });
+        var weekRuns = runsBetween(runs, start, start + 7);
         if (weekRuns.length || start <= dayNumber(new Date().toISOString().slice(0, 10))) {
           matchWeek(card, weekRuns);
         }
