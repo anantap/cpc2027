@@ -986,7 +986,7 @@
       if (paces.length) document.getElementById('stat-best').innerHTML = formatPaceSec(Math.min.apply(null, paces));
     }
 
-    // Phases: dates from the plan weeks; done ones struck through, the current one open.
+    // Phases: dates from the plan weeks; the current one opens by default.
     var CPC_DAY = dayNumber('2027-03-14');
     var buildWeeks = document.querySelectorAll('.week-card[data-plan="build"]').length;
     var tussenWeeks = document.querySelectorAll('.week-card[data-plan="tussen"]').length;
@@ -1001,12 +1001,14 @@
     Array.prototype.forEach.call(document.querySelectorAll('.phase-section'), function (section) {
       var range = PHASES[section.dataset.phase];
       var toggle = section.querySelector('.phase-toggle');
-      var completed = range[1] < today;
-      var current = !completed && (range[0] === null || range[0] <= today);
+      var current = range[1] >= today && (range[0] === null || range[0] <= today);
       section.querySelector('.phase-dates').textContent = range[0] === null
         ? 'tot ' + formatDay(range[1])
         : formatDay(range[0]) + ' – ' + formatDay(range[1]) + (current ? ' · nu' : '');
-      section.classList.toggle('completed', completed);
+      // Phases without planned runs (Couch to 5K, the final weeks) count as done once their dates pass.
+      if (!section.querySelector('.week-card[data-plan] .run-item')) {
+        section.classList.toggle('completed', range[1] < today);
+      }
       section.classList.toggle('current', current);
 
       function setOpen(open) {
@@ -1017,10 +1019,21 @@
       toggle.addEventListener('click', function () { setOpen(!section.classList.contains('open')); });
     });
 
+    // A phase with planned runs is struck through once every one of them is done.
+    function markCompletedPhases() {
+      Array.prototype.forEach.call(document.querySelectorAll('.phase-section'), function (section) {
+        var slots = section.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
+        if (!slots.length) return;
+        var done = section.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.done');
+        section.classList.toggle('completed', done.length === slots.length);
+      });
+    }
+
     getJson('/api/runs', []).then(function (runs) {
       if (!Array.isArray(runs)) return;
       applyStats(runs);
       applyRuns(runs);
+      markCompletedPhases();
     });
   })();
 </script>
