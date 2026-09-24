@@ -251,6 +251,46 @@
   .run-item.missed .run-label { color: var(--text-faint); }
   .run-item.missed .checkbox { border-style: dashed; }
 
+  .runs-grid .run-item.skipped {
+    background: transparent;
+    border-style: solid;
+  }
+
+  .run-item.skipped .run-dist,
+  .run-item.skipped .run-desc,
+  .run-item.skipped .run-label { color: var(--text-faint); }
+  .run-item.skipped .run-dist { text-decoration: line-through; }
+
+  .run-item.skipped .checkbox::after {
+    content: "–";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  .run-item.skipped .checkbox { position: relative; }
+
+  .skip-btn {
+    grid-column: 2 / -1;
+    justify-self: start;
+    margin-top: 10px;
+    padding: 5px 12px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .skip-btn:hover { color: var(--text); border-color: var(--text-faint); }
+
   .activity {
     grid-column: 1 / -1;
     margin-top: 12px;
@@ -848,8 +888,41 @@
     });
 
     function setStatus(item, state, label) {
-      item.classList.add(state);
+      item.classList.remove('done', 'missed', 'skipped');
+      if (state) item.classList.add(state);
       item.querySelector('.run-status').textContent = label;
+    }
+
+    var skips = [];
+
+    // A session without a run can be marked as skipped by hand (and undone); saved for every device.
+    function addSkipButton(item, weekOver) {
+      var id = item.dataset.id;
+      var button = el('button', 'skip-btn');
+      button.type = 'button';
+
+      function render() {
+        var skipped = skips.indexOf(id) !== -1;
+        if (skipped) setStatus(item, 'skipped', 'Overgeslagen');
+        else if (weekOver) setStatus(item, 'missed', 'Niet gelopen');
+        else setStatus(item, null, 'Gepland');
+        button.textContent = skipped ? 'Ongedaan maken' : 'Overslaan';
+      }
+
+      button.addEventListener('click', function () {
+        var skipped = skips.indexOf(id) === -1;
+        if (skipped) skips.push(id); else skips.splice(skips.indexOf(id), 1);
+        render();
+        markCompletedPhases();
+        fetch('/api/skips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, skipped: skipped }),
+        }).catch(function () {});
+      });
+
+      item.appendChild(button);
+      render();
     }
 
     function setChecked(row, isChecked) {
@@ -941,8 +1014,8 @@
         if (run) {
           setStatus(item, 'done', 'Gedaan');
           item.appendChild(activityCard(run));
-        } else if (weekOver) {
-          setStatus(item, 'missed', 'Niet gelopen');
+        } else {
+          addSkipButton(item, weekOver);
         }
       });
 
@@ -1051,12 +1124,15 @@
       Array.prototype.forEach.call(document.querySelectorAll('.phase-section'), function (section) {
         var slots = section.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
         if (!slots.length) return;
-        var done = section.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.done');
+        var done = section.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.done, ' +
+          '.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.skipped');
         section.classList.toggle('completed', done.length === slots.length);
       });
     }
 
-    getJson('/api/runs', []).then(function (runs) {
+    Promise.all([getJson('/api/runs', []), getJson('/api/skips', [])]).then(function (results) {
+      var runs = results[0];
+      if (Array.isArray(results[1])) skips = results[1];
       if (!Array.isArray(runs)) return;
       applyStats(runs);
       applyRuns(runs);
