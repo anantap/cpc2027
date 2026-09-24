@@ -193,6 +193,23 @@
     margin-top: 8px;
   }
 
+  .week-dates {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .week-head { flex-wrap: wrap; row-gap: 2px; }
+    .week-focus { order: 1; flex-basis: 100%; }
+  }
+
+  .week-card.skipped {
+    border-left-color: var(--line);
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
   /* ===== Page 1: Phases ===== */
   .phases {
     display: flex;
@@ -751,6 +768,12 @@
     </div>
   </div>
 
+  <div class="section-label">Tussenfase — tot de 10K-opbouw</div>
+  <div class="note">
+    Tussen de consolidatie en de start van de 10K-opbouw (30 november) houd je de basis vast: elke week hetzelfde, niets erbij. Voelt het zwaar, loop dan de lange run ook 5 km.
+  </div>
+  <div class="weeks" id="tussenfase-weeks"></div>
+
   <div class="section-label">Vuistregels</div>
   <ul class="principles">
     <li>Tempo: praat-test, ook op de parkrun; kun je niet meer kletsen, dan ga je te snel.</li>
@@ -1141,7 +1164,71 @@
   (function () {
     // Monday of week 1 of each plan; runs are matched to weeks by date.
     var PLAN_STARTS = { consol: '2026-08-17', build: '2026-11-30' };
+    // Mondays of weeks taken off (e.g. sick); later consolidation weeks shift one week.
+    var SKIPPED_WEEKS = [];
     var DAY = 86400000;
+    var MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+
+    function dayNumber(date) {
+      return Math.floor(Date.parse(date + 'T00:00:00Z') / DAY);
+    }
+
+    function formatDay(day) {
+      var d = new Date(day * DAY);
+      return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()];
+    }
+
+    var skipped = SKIPPED_WEEKS.map(dayNumber);
+
+    // First day of a plan week, stepping over skipped weeks (they only fall in consolidation/tussenfase).
+    function weekStart(plan, week) {
+      if (plan === 'build') return dayNumber(PLAN_STARTS.build) + (week - 1) * 7;
+      var day = dayNumber(PLAN_STARTS.consol);
+      var n = plan === 'tussen' ? week + 8 : week;
+      for (;;) {
+        if (skipped.indexOf(day) === -1 && --n === 0) return day;
+        day += 7;
+      }
+    }
+
+    function el(tag, className, html) {
+      var node = document.createElement(tag);
+      node.className = className;
+      if (html) node.innerHTML = html;
+      return node;
+    }
+
+    // Tussenfase: same maintenance week from the end of consolidation until the build-up starts.
+    (function buildTussenfase() {
+      var container = document.getElementById('tussenfase-weeks');
+      var buildStart = dayNumber(PLAN_STARTS.build);
+      for (var week = 1; weekStart('tussen', week) < buildStart; week++) {
+        var id = 'tussen-w' + week;
+        var card = el('div', 'week-card');
+        card.dataset.plan = 'tussen';
+        card.dataset.week = String(week);
+        card.innerHTML =
+          '<div class="week-head"><div class="week-num">Week ' + week + '</div><div class="week-focus">Basis vasthouden</div></div>' +
+          '<div class="runs-grid">' +
+          '<div class="run-item check-row" data-id="' + id + '-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>' +
+          '<div class="run-item check-row" data-id="' + id + '-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig</div></div>' +
+          '<div class="run-item parkrun check-row" data-id="' + id + '-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>' +
+          '</div>';
+        container.appendChild(card);
+      }
+    })();
+
+    // Date range on every week card, and a marker for each skipped week.
+    Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
+      var start = weekStart(card.dataset.plan, Number(card.dataset.week));
+      card.querySelector('.week-num').insertAdjacentElement('afterend',
+        el('div', 'week-dates', formatDay(start) + ' – ' + formatDay(start + 6)));
+      if (skipped.indexOf(start - 7) !== -1) {
+        card.parentNode.insertBefore(
+          el('div', 'week-card skipped', 'Overgeslagen (ziek) · ' + formatDay(start - 7) + ' – ' + formatDay(start - 1)),
+          card);
+      }
+    });
 
     var checks = {};
     var auto = {};
@@ -1156,10 +1243,6 @@
         row.classList.toggle('auto', !!auto[id]);
         checkbox.setAttribute('aria-checked', String(isChecked));
       });
-    }
-
-    function dayNumber(date) {
-      return Math.floor(Date.parse(date + 'T00:00:00Z') / DAY);
     }
 
     function formatKm(km) {
@@ -1234,7 +1317,7 @@
 
     function applyRuns(runs) {
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
-        var start = dayNumber(PLAN_STARTS[card.dataset.plan]) + (Number(card.dataset.week) - 1) * 7;
+        var start = weekStart(card.dataset.plan, Number(card.dataset.week));
         var weekRuns = runs.filter(function (r) {
           var d = dayNumber(r.date);
           return d >= start && d < start + 7;
