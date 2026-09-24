@@ -1239,7 +1239,31 @@
         var start = weekStart(card.dataset.plan, Number(card.dataset.week));
         if (start + 7 <= today) setWeekOpen(card, !card.classList.contains('completed'));
       });
+      scrollToTrainingWeek();
     });
+
+    // The week you're training in, going by your runs rather than the calendar: the latest week
+    // with a finished run, or the week after it once that week is complete.
+    function trainingWeek() {
+      var weeks = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan]'));
+      var last = -1;
+      weeks.forEach(function (card, i) { if (card.querySelector('.run-item.done')) last = i; });
+      if (last === -1) return weeks[0];
+      return weeks[last].classList.contains('completed') && weeks[last + 1] ? weeks[last + 1] : weeks[last];
+    }
+
+    function scrollToTrainingWeek() {
+      var card = trainingWeek();
+      if (!card) return;
+      var section = card.closest('.phase-section');
+      if (!section.classList.contains('open')) section.querySelector('.phase-toggle').click();
+      setWeekOpen(card, true);
+      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      setTimeout(function () {
+        var top = card.getBoundingClientRect().top + window.pageYOffset - 16;
+        window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
+      }, 250);
+    }
   })();
 </script>
 
