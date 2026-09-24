@@ -8,14 +8,15 @@
 <style>
   :root {
     color-scheme: dark;
-    --bg: #15171c;
-    --bg-alt: #1c1f26;
-    --text: #e9ebef;
-    --text-dim: #9aa1ad;
-    --accent: #4ee08a;
-    --accent-blue: #8ab4ff;
-    --accent-orange: #f5913d;
-    --line: #2a2e37;
+    --bg: #0f0f0f;
+    --bg-alt: #171717;
+    --surface: #1f1f1f;
+    --text: #ededed;
+    --text-dim: #8f8f8f;
+    --text-faint: #5c5c5c;
+    --accent: #2f9a5e;
+    --accent-soft: rgba(47, 154, 94, 0.12);
+    --line: #2a2a2a;
   }
 
   * { box-sizing: border-box; }
@@ -153,7 +154,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0d0f13;
+    color: var(--bg);
     font-size: 14px;
     font-weight: 700;
   }
@@ -166,59 +167,106 @@
     text-decoration-color: var(--text-dim);
   }
 
-  /* ===== Runs from Suunto (via Intervals.icu) ===== */
-  .run-item.check-row { cursor: default; }
+  /* ===== Run sessions: done / planned / missed ===== */
+  .runs-grid .run-item {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    column-gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    cursor: default;
+  }
+
+  .run-plan { min-width: 0; }
+  .run-plan .run-label { margin-bottom: 1px; }
+  .run-plan .run-dist,
+  .run-plan .run-desc { display: inline; }
+  .run-plan .run-desc::before { content: " · "; }
+  .run-plan .interval-tag,
+  .run-plan .tempo-tag {
+    display: inline-block;
+    margin: 4px 0 0;
+    padding: 1px 6px;
+    border: 1px solid var(--text-faint);
+    border-radius: 4px;
+  }
+
+  .run-status {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .runs-grid .run-item.done {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  .run-item.done .run-status {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
 
   .check-row.checked.run-item .run-dist {
-    color: var(--text-dim);
+    color: var(--text);
     text-decoration: none;
   }
 
+  .runs-grid .run-item.missed {
+    background: transparent;
+    border-style: dashed;
+  }
+
+  .run-item.missed .run-dist,
+  .run-item.missed .run-desc,
+  .run-item.missed .run-label { color: var(--text-faint); }
+  .run-item.missed .checkbox { border-style: dashed; }
+
   .activity {
-    margin-top: 8px;
-    padding: 9px 10px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 8px;
+    grid-column: 1 / -1;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(47, 154, 94, 0.35);
   }
 
   .act-date {
-    font-size: 11px;
+    font-size: 11.5px;
     color: var(--text-dim);
   }
 
-  .act-date span { white-space: nowrap; }
-
   .act-name {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 600;
-    margin: 1px 0 7px;
+    margin: 1px 0 8px;
   }
 
   .act-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 
   .act-stat .k {
-    font-size: 9.5px;
+    font-size: 10px;
     color: var(--text-dim);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
   .act-stat .v {
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 700;
     white-space: nowrap;
-  }
-
-  .missed-tag {
-    font-size: 11px;
-    color: var(--text-dim);
-    font-style: italic;
-    margin-top: 4px;
   }
 
   .week-total {
@@ -230,11 +278,29 @@
 
   .week-total strong { color: var(--text); }
 
-  .extra-runs {
-    margin-top: 12px;
+  .week-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+    margin: -2px 0 12px;
+    overflow: hidden;
   }
 
-  .extra-runs .run-label { margin-bottom: 0; }
+  .week-progress div {
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .now-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .extra-runs { margin-top: 8px; }
 
   .week-dates {
     font-size: 11.5px;
@@ -263,7 +329,7 @@
   .phase {
     background: var(--bg-alt);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
+    border-left: 3px solid var(--text-faint);
     border-radius: 10px;
     padding: 18px 22px;
     display: flex;
@@ -272,7 +338,7 @@
   }
 
   .phase-dates {
-    color: var(--accent);
+    color: var(--text-dim);
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -292,7 +358,7 @@
   }
 
   .section-label {
-    color: var(--accent);
+    color: var(--text-dim);
     font-size: 13px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -315,7 +381,7 @@
     color: var(--text);
   }
 
-  .pill strong { color: var(--accent); }
+  .pill strong { color: var(--text); }
 
   .principles {
     margin: 0;
@@ -336,7 +402,7 @@
 
   .principles li::before {
     content: "—";
-    color: var(--accent);
+    color: var(--text-faint);
     position: absolute;
     left: 0;
   }
@@ -356,9 +422,12 @@
   .week-card {
     background: var(--bg-alt);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
-    border-radius: 10px;
-    padding: 14px 18px;
+    border-radius: 12px;
+    padding: 14px 14px 16px;
+  }
+
+  .week-card.current {
+    border-color: var(--accent);
   }
 
   .week-head {
@@ -369,7 +438,7 @@
   }
 
   .week-num {
-    color: var(--accent);
+    color: var(--text);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -383,9 +452,9 @@
   }
 
   .runs-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .run-label {
@@ -399,7 +468,7 @@
   .run-dist {
     font-size: 15px;
     font-weight: 700;
-    color: var(--accent);
+    color: var(--text);
   }
 
   .run-desc {
@@ -414,50 +483,22 @@
     border: 1px solid transparent;
   }
 
-  .run-item.interval,
-  .run-item.tempo {
-    border-color: var(--accent-orange);
-    background: rgba(245, 145, 61, 0.08);
-  }
-
-  .run-item.interval .run-dist,
-  .run-item.tempo .run-dist {
-    color: var(--accent-orange);
-  }
 
   .interval-tag,
   .tempo-tag {
     display: block;
     font-size: 10px;
     font-weight: 700;
-    color: var(--accent-orange);
+    color: var(--text);
     letter-spacing: 0.05em;
     text-transform: uppercase;
     margin-top: 4px;
   }
 
-  .note-blue {
-    background: var(--bg-alt);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--accent-blue);
-    border-radius: 10px;
-    padding: 16px 20px;
-    font-size: 14px;
-    color: var(--text-dim);
-    line-height: 1.5;
-    margin-bottom: 24px;
-  }
-
-  .note-blue strong {
-    color: var(--text);
-    font-weight: 600;
-  }
-
-  /* ===== Page 3 & 4: Exercise list ===== */
   .note {
     background: var(--bg-alt);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
+    border-left: 3px solid var(--text-faint);
     border-radius: 10px;
     padding: 16px 20px;
     font-size: 14px;
@@ -550,7 +591,7 @@
       color: #444444 !important;
     }
 
-    .phase, .note, .pill, .week-card, .note-blue {
+    .phase, .note, .pill, .week-card {
       background: #ffffff !important;
       border-color: #cccccc !important;
     }
@@ -562,8 +603,6 @@
     .week-num, .run-dist { color: #15803d !important; }
     .run-desc { color: #444444 !important; }
 
-    .note-blue { border-left-color: #1d4ed8 !important; color: #444444 !important; }
-    .note-blue strong { color: #111111 !important; }
 
     .run-item.interval,
     .run-item.tempo {
@@ -1248,6 +1287,21 @@
       return runRows.indexOf(row) === -1;
     });
 
+    // Lay each run session out as: checkbox · planned run · status chip (activity card goes below).
+    runRows.forEach(function (item) {
+      var plan = el('div', 'run-plan');
+      Array.prototype.slice.call(item.children).forEach(function (child) {
+        if (!child.classList.contains('checkbox')) plan.appendChild(child);
+      });
+      item.appendChild(plan);
+      item.appendChild(el('div', 'run-status', 'Gepland'));
+    });
+
+    function setStatus(item, state, label) {
+      item.classList.add(state);
+      item.querySelector('.run-status').textContent = label;
+    }
+
     function setChecked(row, isChecked) {
       row.classList.toggle('checked', isChecked);
       row.querySelector('.checkbox').setAttribute('aria-checked', String(isChecked));
@@ -1315,26 +1369,42 @@
       items.forEach(function (item, i) {
         var run = weekRuns[i];
         setChecked(item, !!run);
-        if (run) item.appendChild(activityCard(run));
-        else if (weekOver) item.appendChild(el('div', 'missed-tag', 'niet gelopen'));
+        if (run) {
+          setStatus(item, 'done', 'Gedaan');
+          item.appendChild(activityCard(run));
+        } else if (weekOver) {
+          setStatus(item, 'missed', 'Niet gelopen');
+        }
       });
 
       var extra = weekRuns.slice(items.length);
       if (extra.length) {
         var grid = el('div', 'runs-grid extra-runs');
         extra.forEach(function (run) {
-          var item = el('div', 'run-item', '<div class="run-label">Extra</div>');
+          var item = el('div', 'run-item check-row checked done',
+            '<div class="checkbox" role="checkbox" aria-checked="true"></div>' +
+            '<div class="run-plan"><div class="run-label">Extra run</div></div>' +
+            '<div class="run-status">Extra</div>');
           item.appendChild(activityCard(run));
           grid.appendChild(item);
         });
         card.appendChild(grid);
       }
 
+      var done = Math.min(weekRuns.length, items.length);
+      var progress = el('div', 'week-progress', '<div></div>');
+      progress.firstChild.style.width = Math.round((done / items.length) * 100) + '%';
+      card.querySelector('.week-head').insertAdjacentElement('afterend', progress);
+      if (!weekOver) {
+        card.classList.add('current');
+        card.querySelector('.week-dates').insertAdjacentElement('afterend', el('div', 'now-tag', 'Deze week'));
+      }
+
       var km = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
       var time = weekRuns.reduce(function (sum, r) { return sum + r.moving_time_s; }, 0);
       var planned = items.reduce(function (sum, i) { return sum + plannedKm(i); }, 0);
       card.querySelector('.week-head').appendChild(el('div', 'week-total',
-        '<strong>' + formatKm(km) + '</strong> / ' + formatKm(planned) + ' km' + (time ? ' · ' + formatDuration(time) : '')));
+        '<strong>' + done + '/' + items.length + '</strong> runs · ' + formatKm(km) + ' / ' + formatKm(planned) + ' km' + (time ? ' · ' + formatDuration(time) : '')));
     }
 
     function runsBetween(runs, start, end) {
