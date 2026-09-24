@@ -166,6 +166,33 @@
     text-decoration-color: var(--text-dim);
   }
 
+  /* ===== Strava: matched runs & weekly totals ===== */
+  .check-row.auto { cursor: default; }
+
+  .run-actual {
+    font-size: 11.5px;
+    color: var(--accent);
+    line-height: 1.35;
+    margin-top: 4px;
+  }
+
+  .run-actual .hr { color: var(--text-dim); white-space: nowrap; }
+
+  .week-total {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .week-total strong { color: var(--text); }
+
+  .week-extra {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
   /* ===== Page 1: Phases ===== */
   .phases {
     display: flex;
@@ -634,7 +661,7 @@
   </div>
 
   <div class="weeks">
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="1">
       <div class="week-head">
         <div class="week-num">Week 1</div>
         <div class="week-focus">Routine hervinden na C25K</div>
@@ -645,7 +672,7 @@
         <div class="run-item parkrun check-row" data-id="consol-w1-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="2">
       <div class="week-head">
         <div class="week-num">Week 2</div>
         <div class="week-focus">Volume wennen</div>
@@ -656,7 +683,7 @@
         <div class="run-item parkrun check-row" data-id="consol-w2-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="3">
       <div class="week-head">
         <div class="week-num">Week 3</div>
         <div class="week-focus">Naar drie keer richting 5K</div>
@@ -667,7 +694,7 @@
         <div class="run-item parkrun check-row" data-id="consol-w3-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="4">
       <div class="week-head">
         <div class="week-num">Week 4</div>
         <div class="week-focus">Kern: drie keer 5K</div>
@@ -678,7 +705,7 @@
         <div class="run-item parkrun check-row" data-id="consol-w4-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="5">
       <div class="week-head">
         <div class="week-num">Week 5</div>
         <div class="week-focus">Variatie, zachte ondergrond</div>
@@ -689,7 +716,7 @@
         <div class="run-item parkrun check-row" data-id="consol-w5-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="6">
       <div class="week-head">
         <div class="week-num">Week 6</div>
         <div class="week-focus">Soepelheid (optionele strides)</div>
@@ -700,7 +727,7 @@
         <div class="run-item parkrun check-row" data-id="consol-w6-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="7">
       <div class="week-head">
         <div class="week-num">Week 7</div>
         <div class="week-focus">Eerste voorzichtige verlenging</div>
@@ -711,7 +738,7 @@
         <div class="run-item check-row" data-id="consol-w7-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3</div><div class="run-dist">6 km</div><div class="run-desc">rustig (lange duurloop)</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="consol" data-week="8">
       <div class="week-head">
         <div class="week-num">Week 8</div>
         <div class="week-focus">Klaar voor de 10K-opbouw</div>
@@ -753,100 +780,100 @@
   </div>
 
   <div class="weeks">
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="1">
       <div class="week-head"><div class="week-num">Week 1</div><div class="week-focus">Aansluiten op de consolidatiefase</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w1-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w1-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w1-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="2">
       <div class="week-head"><div class="week-num">Week 2</div><div class="week-focus">Ritme vasthouden</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w2-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w2-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w2-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="3">
       <div class="week-head"><div class="week-num">Week 3</div><div class="week-focus">Eerste extra kilometer + interval</div></div>
       <div class="runs-grid">
-        <div class="run-item interval"><div class="run-label">Run 1</div><div class="run-dist">5× 4 min</div><div class="run-desc">hard / 2 min rustig inlopen of wandelen</div><div class="interval-tag">interval</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">7 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item interval check-row" data-id="build-w3-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5× 4 min</div><div class="run-desc">hard / 2 min rustig inlopen of wandelen</div><div class="interval-tag">interval</div></div>
+        <div class="run-item check-row" data-id="build-w3-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">7 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w3-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="4">
       <div class="week-head"><div class="week-num">Week 4</div><div class="week-focus">Herstelweek ↓</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig (cutback)</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w4-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w4-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig (cutback)</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w4-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="5">
       <div class="week-head"><div class="week-num">Week 5</div><div class="week-focus">Terugkeer op 7 km</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">7 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w5-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w5-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">7 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w5-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="6">
       <div class="week-head"><div class="week-num">Week 6</div><div class="week-focus">Eerste keer 8 km + interval</div></div>
       <div class="runs-grid">
-        <div class="run-item interval"><div class="run-label">Run 1</div><div class="run-dist">5× 400 m</div><div class="run-desc">hard / 200 m rustig inlopen of wandelen</div><div class="interval-tag">interval</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">8 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item interval check-row" data-id="build-w6-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5× 400 m</div><div class="run-desc">hard / 200 m rustig inlopen of wandelen</div><div class="interval-tag">interval</div></div>
+        <div class="run-item check-row" data-id="build-w6-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">8 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w6-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="7">
       <div class="week-head"><div class="week-num">Week 7</div><div class="week-focus">Herstelweek ↓</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig (cutback)</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w7-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w7-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig (cutback)</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w7-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="8">
       <div class="week-head"><div class="week-num">Week 8</div><div class="week-focus">8 km bevestigen</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">8 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w8-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w8-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">8 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w8-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="9">
       <div class="week-head"><div class="week-num">Week 9</div><div class="week-focus">Dicht bij 9 km + tempoduurloop</div></div>
       <div class="runs-grid">
-        <div class="run-item tempo"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">op wedstrijdtempo</div><div class="tempo-tag">tempo</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">9 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item tempo check-row" data-id="build-w9-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">op wedstrijdtempo</div><div class="tempo-tag">tempo</div></div>
+        <div class="run-item check-row" data-id="build-w9-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">9 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w9-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="10">
       <div class="week-head"><div class="week-num">Week 10</div><div class="week-focus">Herstelweek ↓</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">7 km</div><div class="run-desc">rustig (cutback)</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w10-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w10-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">7 km</div><div class="run-desc">rustig (cutback)</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w10-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="11">
       <div class="week-head"><div class="week-num">Week 11</div><div class="week-focus">9 km opnieuw + tempoduurloop</div></div>
       <div class="runs-grid">
-        <div class="run-item tempo"><div class="run-label">Run 1</div><div class="run-dist">8 km</div><div class="run-desc">laatste 3 km op wedstrijdtempo</div><div class="tempo-tag">tempo</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">9 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item tempo check-row" data-id="build-w11-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">8 km</div><div class="run-desc">laatste 3 km op wedstrijdtempo</div><div class="tempo-tag">tempo</div></div>
+        <div class="run-item check-row" data-id="build-w11-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">9 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w11-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
-    <div class="week-card">
+    <div class="week-card" data-plan="build" data-week="12">
       <div class="week-head"><div class="week-num">Week 12</div><div class="week-focus">De eerste 10 km</div></div>
       <div class="runs-grid">
-        <div class="run-item"><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
-        <div class="run-item"><div class="run-label">Run 2 · lang</div><div class="run-dist">10 km</div><div class="run-desc">rustig — je haalt de 10 km</div></div>
-        <div class="run-item parkrun"><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
+        <div class="run-item check-row" data-id="build-w12-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>
+        <div class="run-item check-row" data-id="build-w12-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2 · lang</div><div class="run-dist">10 km</div><div class="run-desc">rustig — je haalt de 10 km</div></div>
+        <div class="run-item parkrun check-row" data-id="build-w12-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · za</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div><div class="parkrun-tag">parkrun · 9:00</div></div>
       </div>
     </div>
   </div>
@@ -1112,34 +1139,134 @@
   })();
 
   (function () {
-    var API_URL = '/api/checks';
+    // Monday of week 1 of each plan; runs are matched to weeks by date.
+    var PLAN_STARTS = { consol: '2026-08-31', build: '2026-11-30' };
+    var DAY = 86400000;
+
     var checks = {};
+    var auto = {};
     var rows = Array.prototype.slice.call(document.querySelectorAll('.check-row'));
 
     function applyChecks() {
       rows.forEach(function (row) {
         var id = row.dataset.id;
         var checkbox = row.querySelector('.checkbox');
-        var isChecked = !!checks[id];
+        var isChecked = !!(checks[id] || auto[id]);
         row.classList.toggle('checked', isChecked);
+        row.classList.toggle('auto', !!auto[id]);
         checkbox.setAttribute('aria-checked', String(isChecked));
       });
     }
 
-    fetch(API_URL)
-      .then(function (res) { return res.ok ? res.json() : {}; })
-      .then(function (data) { checks = data || {}; applyChecks(); })
-      .catch(function () { applyChecks(); });
+    function dayNumber(date) {
+      return Math.floor(Date.parse(date + 'T00:00:00Z') / DAY);
+    }
+
+    function formatKm(km) {
+      return km.toFixed(1).replace('.', ',');
+    }
+
+    function formatPace(run) {
+      var secPerKm = run.moving_time_s / run.distance_km;
+      var min = Math.floor(secPerKm / 60);
+      var sec = Math.round(secPerKm % 60);
+      if (sec === 60) { min += 1; sec = 0; }
+      return min + ':' + (sec < 10 ? '0' : '') + sec + '/km';
+    }
+
+    function plannedKm(item) {
+      var m = /^([\d,.]+)\s*km$/.exec(item.querySelector('.run-dist').textContent.trim());
+      return m ? parseFloat(m[1].replace(',', '.')) : 0;
+    }
+
+    function showActual(item, run) {
+      var el = document.createElement('div');
+      el.className = 'run-actual';
+      el.textContent = formatKm(run.distance_km) + ' km · ' + formatPace(run);
+      if (run.avg_hr) {
+        var hr = document.createElement('span');
+        hr.className = 'hr';
+        hr.textContent = ' · ♥ ' + run.avg_hr;
+        el.appendChild(hr);
+      }
+      el.title = run.name + ' · ' + run.date;
+      item.appendChild(el);
+    }
+
+    // Saturday runs go to the parkrun slot first; the rest fill the other slots in date order.
+    function matchWeek(card, weekRuns) {
+      var items = Array.prototype.slice.call(card.querySelectorAll('.run-item'));
+      var free = items.slice();
+      var extra = [];
+
+      function take(item, run) {
+        free.splice(free.indexOf(item), 1);
+        auto[item.dataset.id] = true;
+        showActual(item, run);
+      }
+
+      var rest = [];
+      weekRuns.forEach(function (run) {
+        var parkrun = free.filter(function (i) { return i.classList.contains('parkrun'); })[0];
+        var isSaturday = new Date(run.date + 'T00:00:00Z').getUTCDay() === 6;
+        if (isSaturday && parkrun) take(parkrun, run); else rest.push(run);
+      });
+      rest.forEach(function (run) {
+        var slot = free.filter(function (i) { return !i.classList.contains('parkrun'); })[0] || free[0];
+        if (slot) take(slot, run); else extra.push(run);
+      });
+
+      var done = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
+      var planned = items.reduce(function (sum, i) { return sum + plannedKm(i); }, 0);
+      var total = document.createElement('div');
+      total.className = 'week-total';
+      total.innerHTML = '<strong>' + formatKm(done) + '</strong> / ' + formatKm(planned) + ' km';
+      card.querySelector('.week-head').appendChild(total);
+
+      if (extra.length) {
+        var note = document.createElement('div');
+        note.className = 'week-extra';
+        note.textContent = '+ ' + extra.length + ' extra run' + (extra.length > 1 ? 's' : '') + ': ' +
+          extra.map(function (r) { return formatKm(r.distance_km) + ' km'; }).join(', ');
+        card.appendChild(note);
+      }
+    }
+
+    function applyRuns(runs) {
+      Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
+        var start = dayNumber(PLAN_STARTS[card.dataset.plan]) + (Number(card.dataset.week) - 1) * 7;
+        var weekRuns = runs.filter(function (r) {
+          var d = dayNumber(r.date);
+          return d >= start && d < start + 7;
+        });
+        if (weekRuns.length || start <= dayNumber(new Date().toISOString().slice(0, 10))) {
+          matchWeek(card, weekRuns);
+        }
+      });
+    }
+
+    function getJson(url, fallback) {
+      return fetch(url)
+        .then(function (res) { return res.ok ? res.json() : fallback; })
+        .catch(function () { return fallback; });
+    }
+
+    Promise.all([getJson('/api/checks', {}), getJson('/api/runs', [])]).then(function (results) {
+      checks = results[0] || {};
+      if (Array.isArray(results[1]) && results[1].length) applyRuns(results[1]);
+      applyChecks();
+    });
 
     rows.forEach(function (row) {
       var id = row.dataset.id;
       var checkbox = row.querySelector('.checkbox');
       row.addEventListener('click', function () {
+        if (auto[id]) return; // ticked by a Strava run
         var isChecked = !row.classList.contains('checked');
         row.classList.toggle('checked', isChecked);
         checkbox.setAttribute('aria-checked', String(isChecked));
         checks[id] = isChecked;
-        fetch(API_URL, {
+        fetch('/api/checks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(checks),
