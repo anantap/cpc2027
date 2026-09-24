@@ -14,8 +14,11 @@
     --text: #ededed;
     --text-dim: #8f8f8f;
     --text-faint: #5c5c5c;
-    --accent: #2f9a5e;
-    --accent-soft: rgba(47, 154, 94, 0.12);
+    --accent: #62466b;
+    --accent-soft: rgba(98, 70, 107, 0.22);
+    /* lighter tint of the accent for small text on the dark background */
+    --accent-text: #b39bbd;
+    --on-accent: #ffffff;
     --line: #2a2a2a;
   }
 
@@ -32,7 +35,7 @@
 
 
   .eyebrow {
-    color: var(--accent);
+    color: var(--accent-text);
     font-size: 13px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -85,7 +88,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--bg);
+    color: var(--on-accent);
     font-size: 14px;
     font-weight: 700;
   }
@@ -181,7 +184,7 @@
     text-decoration: line-through;
   }
 
-  .phase-section.current .phase-dates { color: var(--accent); }
+  .phase-section.current .phase-dates { color: var(--accent-text); }
 
   /* ===== Run sessions: done / planned / missed ===== */
   .runs-grid .run-item {
@@ -230,7 +233,7 @@
   .run-item.done .run-status {
     background: var(--accent);
     border-color: var(--accent);
-    color: var(--bg);
+    color: var(--on-accent);
   }
 
   .check-row.checked.run-item .run-dist {
@@ -252,7 +255,7 @@
     grid-column: 1 / -1;
     margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px solid rgba(47, 154, 94, 0.35);
+    border-top: 1px solid rgba(98, 70, 107, 0.6);
   }
 
   .act-date {
@@ -312,7 +315,7 @@
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--accent);
+    color: var(--accent-text);
     white-space: nowrap;
   }
 
