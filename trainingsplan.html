@@ -166,17 +166,60 @@
     text-decoration-color: var(--text-dim);
   }
 
-  /* ===== Strava: matched runs & weekly totals ===== */
-  .check-row.auto { cursor: default; }
+  /* ===== Runs from Suunto (via Intervals.icu) ===== */
+  .run-item.check-row { cursor: default; }
 
-  .run-actual {
-    font-size: 11.5px;
-    color: var(--accent);
-    line-height: 1.35;
-    margin-top: 4px;
+  .check-row.checked.run-item .run-dist {
+    color: var(--text-dim);
+    text-decoration: none;
   }
 
-  .run-actual .hr { color: var(--text-dim); white-space: nowrap; }
+  .activity {
+    margin-top: 8px;
+    padding: 9px 10px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .act-date {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .act-date span { white-space: nowrap; }
+
+  .act-name {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 1px 0 7px;
+  }
+
+  .act-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+
+  .act-stat .k {
+    font-size: 9.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .act-stat .v {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .missed-tag {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 4px;
+  }
 
   .week-total {
     margin-left: auto;
@@ -187,11 +230,11 @@
 
   .week-total strong { color: var(--text); }
 
-  .week-extra {
-    font-size: 11.5px;
-    color: var(--text-dim);
-    margin-top: 8px;
+  .extra-runs {
+    margin-top: 12px;
   }
+
+  .extra-runs .run-label { margin-bottom: 0; }
 
   .week-dates {
     font-size: 11.5px;
@@ -1196,30 +1239,51 @@
     });
 
     var checks = {};
-    var auto = {};
-    var rows = Array.prototype.slice.call(document.querySelectorAll('.check-row'));
+    var today = dayNumber(new Date().toISOString().slice(0, 10));
+    var DAYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
 
-    function applyChecks() {
-      rows.forEach(function (row) {
-        var id = row.dataset.id;
-        var checkbox = row.querySelector('.checkbox');
-        var isChecked = !!(checks[id] || auto[id]);
-        row.classList.toggle('checked', isChecked);
-        row.classList.toggle('auto', !!auto[id]);
-        checkbox.setAttribute('aria-checked', String(isChecked));
-      });
+    // Run sessions are ticked from Suunto data only; everything else is ticked by hand.
+    var runRows = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan] .run-item'));
+    var manualRows = Array.prototype.slice.call(document.querySelectorAll('.check-row')).filter(function (row) {
+      return runRows.indexOf(row) === -1;
+    });
+
+    function setChecked(row, isChecked) {
+      row.classList.toggle('checked', isChecked);
+      row.querySelector('.checkbox').setAttribute('aria-checked', String(isChecked));
+    }
+
+    function saveChecks() {
+      fetch('/api/checks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checks),
+      }).catch(function () {});
     }
 
     function formatKm(km) {
       return km.toFixed(1).replace('.', ',');
     }
 
+    function pad(n) {
+      return (n < 10 ? '0' : '') + n;
+    }
+
+    function formatDuration(totalSec) {
+      var h = Math.floor(totalSec / 3600);
+      var m = Math.floor((totalSec % 3600) / 60);
+      var sec = Math.round(totalSec % 60);
+      return h ? h + ':' + pad(m) + ':' + pad(sec) : m + ':' + pad(sec);
+    }
+
     function formatPace(run) {
-      var secPerKm = run.moving_time_s / run.distance_km;
-      var min = Math.floor(secPerKm / 60);
-      var sec = Math.round(secPerKm % 60);
-      if (sec === 60) { min += 1; sec = 0; }
-      return min + ':' + (sec < 10 ? '0' : '') + sec + '/km';
+      var secPerKm = Math.round(run.moving_time_s / run.distance_km);
+      return Math.floor(secPerKm / 60) + ':' + pad(secPerKm % 60) + ' /km';
+    }
+
+    function formatRunDate(run) {
+      var day = dayNumber(run.date);
+      return '<span>' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + '</span> · <span>' + run.start.slice(11, 16) + '</span>';
     }
 
     function plannedKm(item) {
@@ -1227,50 +1291,50 @@
       return m ? parseFloat(m[1].replace(',', '.')) : 0;
     }
 
-    function showActual(item, run) {
-      var el = document.createElement('div');
-      el.className = 'run-actual';
-      el.textContent = formatKm(run.distance_km) + ' km · ' + formatPace(run);
-      if (run.avg_hr) {
-        var hr = document.createElement('span');
-        hr.className = 'hr';
-        hr.textContent = ' · ♥ ' + run.avg_hr;
-        el.appendChild(hr);
-      }
-      el.title = run.name + ' · ' + run.date;
-      item.appendChild(el);
+    function stat(label, value) {
+      return '<div class="act-stat"><div class="k">' + label + '</div><div class="v">' + value + '</div></div>';
     }
 
-    // Runs fill the week's slots in date order.
-    function matchWeek(card, weekRuns) {
+    function activityCard(run) {
+      var card = el('div', 'activity',
+        '<div class="act-date"></div><div class="act-name"></div><div class="act-stats">' +
+        stat('Afstand', run.distance_km.toFixed(2).replace('.', ',') + ' km') +
+        stat('Tempo', formatPace(run)) +
+        stat('Tijd', formatDuration(run.moving_time_s)) +
+        '</div>');
+      card.querySelector('.act-date').innerHTML = formatRunDate(run);
+      card.querySelector('.act-name').textContent = run.name || 'Run';
+      return card;
+    }
+
+    // Runs fill the week's slots in date order; any beyond the plan are listed as extra.
+    function matchWeek(card, weekRuns, start) {
       var items = Array.prototype.slice.call(card.querySelectorAll('.run-item'));
-      var free = items.slice();
-      var extra = [];
+      var weekOver = start + 7 <= today;
 
-      function take(item, run) {
-        free.splice(free.indexOf(item), 1);
-        auto[item.dataset.id] = true;
-        showActual(item, run);
-      }
-
-      weekRuns.forEach(function (run) {
-        if (free.length) take(free[0], run); else extra.push(run);
+      items.forEach(function (item, i) {
+        var run = weekRuns[i];
+        setChecked(item, !!run);
+        if (run) item.appendChild(activityCard(run));
+        else if (weekOver) item.appendChild(el('div', 'missed-tag', 'niet gelopen'));
       });
 
-      var done = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
-      var planned = items.reduce(function (sum, i) { return sum + plannedKm(i); }, 0);
-      var total = document.createElement('div');
-      total.className = 'week-total';
-      total.innerHTML = '<strong>' + formatKm(done) + '</strong> / ' + formatKm(planned) + ' km';
-      card.querySelector('.week-head').appendChild(total);
-
+      var extra = weekRuns.slice(items.length);
       if (extra.length) {
-        var note = document.createElement('div');
-        note.className = 'week-extra';
-        note.textContent = '+ ' + extra.length + ' extra run' + (extra.length > 1 ? 's' : '') + ': ' +
-          extra.map(function (r) { return formatKm(r.distance_km) + ' km'; }).join(', ');
-        card.appendChild(note);
+        var grid = el('div', 'runs-grid extra-runs');
+        extra.forEach(function (run) {
+          var item = el('div', 'run-item', '<div class="run-label">Extra</div>');
+          item.appendChild(activityCard(run));
+          grid.appendChild(item);
+        });
+        card.appendChild(grid);
       }
+
+      var km = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
+      var time = weekRuns.reduce(function (sum, r) { return sum + r.moving_time_s; }, 0);
+      var planned = items.reduce(function (sum, i) { return sum + plannedKm(i); }, 0);
+      card.querySelector('.week-head').appendChild(el('div', 'week-total',
+        '<strong>' + formatKm(km) + '</strong> / ' + formatKm(planned) + ' km' + (time ? ' · ' + formatDuration(time) : '')));
     }
 
     function runsBetween(runs, start, end) {
@@ -1281,21 +1345,9 @@
     }
 
     function applyRuns(runs) {
-      // Runs in a skipped week aren't part of the plan, but still show them on the marker.
-      Array.prototype.forEach.call(document.querySelectorAll('.week-card.skipped'), function (card) {
-        var inWeek = runsBetween(runs, Number(card.dataset.start), Number(card.dataset.start) + 7);
-        if (inWeek.length) {
-          card.appendChild(document.createTextNode(' · gelopen: ' +
-            inWeek.map(function (r) { return formatKm(r.distance_km) + ' km'; }).join(', ')));
-        }
-      });
-
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
         var start = weekStart(card.dataset.plan, Number(card.dataset.week));
-        var weekRuns = runsBetween(runs, start, start + 7);
-        if (weekRuns.length || start <= dayNumber(new Date().toISOString().slice(0, 10))) {
-          matchWeek(card, weekRuns);
-        }
+        if (start <= today) matchWeek(card, runsBetween(runs, start, start + 7), start);
       });
     }
 
@@ -1307,24 +1359,23 @@
 
     Promise.all([getJson('/api/checks', {}), getJson('/api/runs', [])]).then(function (results) {
       checks = results[0] || {};
-      if (Array.isArray(results[1]) && results[1].length) applyRuns(results[1]);
-      applyChecks();
+      manualRows.forEach(function (row) { setChecked(row, !!checks[row.dataset.id]); });
+      if (Array.isArray(results[1])) applyRuns(results[1]);
+
+      // Drop run ticks saved by hand before runs came from Suunto.
+      var stale = runRows.filter(function (row) { return row.dataset.id in checks; });
+      if (stale.length) {
+        stale.forEach(function (row) { delete checks[row.dataset.id]; });
+        saveChecks();
+      }
     });
 
-    rows.forEach(function (row) {
-      var id = row.dataset.id;
-      var checkbox = row.querySelector('.checkbox');
+    manualRows.forEach(function (row) {
       row.addEventListener('click', function () {
-        if (auto[id]) return; // ticked by a Strava run
         var isChecked = !row.classList.contains('checked');
-        row.classList.toggle('checked', isChecked);
-        checkbox.setAttribute('aria-checked', String(isChecked));
-        checks[id] = isChecked;
-        fetch('/api/checks', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(checks),
-        }).catch(function () {});
+        setChecked(row, isChecked);
+        checks[row.dataset.id] = isChecked;
+        saveChecks();
       });
     });
   })();
