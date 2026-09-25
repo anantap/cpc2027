@@ -405,6 +405,65 @@
     white-space: nowrap;
   }
 
+  /* ===== Coach summary under a run ===== */
+  .coach {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(98, 70, 107, 0.6);
+    animation: coach-in 0.3s ease both;
+  }
+
+  .coach-k {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin-bottom: 4px;
+  }
+
+  .coach-text {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--text);
+  }
+
+  .coach-tips {
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .coach-tips li {
+    position: relative;
+    padding-left: 18px;
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-dim);
+  }
+
+  .coach-tips li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent-text);
+  }
+
+  .coach.pending .coach-text {
+    color: var(--text-dim);
+    font-style: italic;
+    animation: coach-pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes coach-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes coach-pulse { 50% { opacity: 0.45; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .coach, .coach.pending .coach-text { animation: none; }
+  }
+
   .week-total {
     margin-left: auto;
     font-size: 12px;
@@ -1211,6 +1270,7 @@
         '</div>');
       card.querySelector('.act-date').innerHTML = formatRunDate(run);
       card.querySelector('.act-name').textContent = run.name || 'Run';
+      card.dataset.runId = run.id;
       return card;
     }
 
@@ -1261,7 +1321,7 @@
       if (extra.length) {
         var grid = el('div', 'runs-grid extra-runs');
         extra.forEach(function (run) {
-          var item = el('div', 'run-item check-row checked done',
+          var item = el('div', 'run-item check-row checked done extra',
             '<div class="checkbox" role="checkbox" aria-checked="true"></div>' +
             '<div class="run-plan"><div class="run-label">Extra run</div></div>' +
             '<div class="run-status">Extra</div>');
@@ -1387,6 +1447,7 @@
       applyStats(runs);
       applyRuns(runs);
       markCompletedPhases();
+      setupCoach();
       // Past weeks that still have open sessions stay open; finished weeks fold away.
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
         var start = weekStart(card.dataset.plan, Number(card.dataset.week));
@@ -1394,6 +1455,104 @@
       });
       scrollToTrainingWeek();
     });
+
+    // ===== Coach: a short summary and tips per run, written once by Claude and saved =====
+    function text(node, sel) {
+      var found = node && node.querySelector(sel);
+      return found ? found.textContent.replace(/\s+/g, ' ').trim() : undefined;
+    }
+
+    function sessionInfo(item) {
+      if (!item) return null;
+      var card = item.closest('.week-card');
+      var phase = item.closest('.phase-section');
+      var label = item.querySelector('.run-label').cloneNode(true);
+      Array.prototype.forEach.call(label.querySelectorAll('.run-sep, .run-desc, .missed-note'), function (n) { n.remove(); });
+      return {
+        label: label.textContent.replace(/\s+/g, ' ').trim(),
+        distance: text(item, '.run-dist'),
+        description: text(item, '.run-desc'),
+        week: [text(phase, '.phase-title'), text(card, '.week-num'), text(card, '.week-focus')].filter(Boolean).join(' · '),
+      };
+    }
+
+    function renderCoach(activity, summary) {
+      var box = activity.querySelector('.coach') || activity.appendChild(el('div', 'coach'));
+      box.className = 'coach';
+      box.innerHTML = '<div class="coach-k">Coach</div><p class="coach-text"></p><ul class="coach-tips"></ul>';
+      box.querySelector('.coach-text').textContent = summary.samenvatting;
+      summary.tips.forEach(function (tip) {
+        box.querySelector('.coach-tips').appendChild(el('li', 'coach-tip')).textContent = tip;
+      });
+    }
+
+    function setupCoach() {
+      var activities = Array.prototype.slice.call(document.querySelectorAll('.activity[data-run-id]'));
+      var slots = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item'));
+      if (!activities.length) return;
+
+      // The session that follows this run in the plan (for an extra run: the one after its week).
+      function nextSession(item) {
+        var from = item.classList.contains('extra')
+          ? slots.indexOf(item.closest('.week-card').querySelector('.runs-grid:not(.extra-runs) .run-item:last-child'))
+          : slots.indexOf(item);
+        return slots[from + 1] || null;
+      }
+
+      getJson('/api/summary', {}).then(function (saved) {
+        var queue = [];
+        var busy = false;
+
+        function pump() {
+          if (busy || !queue.length) return;
+          busy = true;
+          var activity = queue.shift();
+          var item = activity.closest('.run-item');
+          fetch('/api/summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: activity.dataset.runId,
+              planned: item.classList.contains('extra') ? { label: 'Extra run, niet in het schema' } : sessionInfo(item),
+              next: sessionInfo(nextSession(item)),
+            }),
+          }).then(function (res) {
+            if (res.status === 202) {
+              setTimeout(function () { queue.push(activity); pump(); }, 8000);
+              return;
+            }
+            if (res.status === 503) {
+              Array.prototype.forEach.call(document.querySelectorAll('.coach.pending'), function (b) { b.remove(); });
+              queue = [];
+              return;
+            }
+            if (!res.ok) throw new Error(res.status);
+            return res.json().then(function (summary) { renderCoach(activity, summary); });
+          }).catch(function () {
+            var box = activity.querySelector('.coach.pending');
+            if (box) box.remove();
+          }).then(function () { busy = false; pump(); });
+        }
+
+        // Missing summaries are written when their run scrolls into view, one at a time.
+        var observer = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            observer.unobserve(entry.target);
+            queue.push(entry.target);
+            pump();
+          });
+        }) : null;
+
+        activities.forEach(function (activity) {
+          var summary = saved && saved[activity.dataset.runId];
+          if (summary) { renderCoach(activity, summary); return; }
+          activity.appendChild(el('div', 'coach pending', '<div class="coach-k">Coach</div><p class="coach-text">Samenvatting wordt geschreven…</p>'));
+          if (observer) observer.observe(activity); else queue.push(activity);
+        });
+        pump();
+      });
+    }
 
     // The week you're training in, going by your runs rather than the calendar: the latest week
     // with a finished run, or the week after it once that week is complete.

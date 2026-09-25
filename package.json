@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/anantap/cpc2027#readme",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@upstash/redis": "^1.39.0"
   }
 }
