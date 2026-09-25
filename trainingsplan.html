@@ -519,14 +519,8 @@
     background: var(--accent);
   }
 
-  .now-tag {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--accent-text);
-    white-space: nowrap;
-  }
+  /* The week you're in: its week number in the accent colour. */
+  .week-card.current .week-num { color: var(--accent-text); }
 
   .extra-runs { margin-top: 8px; }
 
@@ -1372,7 +1366,6 @@
       card.querySelector('.week-head').insertAdjacentElement('afterend', progress);
       if (!weekOver) {
         card.classList.add('current');
-        card.querySelector('.week-dates').insertAdjacentElement('afterend', el('div', 'now-tag', 'Deze week'));
       }
 
       var km = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
