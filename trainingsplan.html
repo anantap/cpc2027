@@ -460,6 +460,20 @@
     color: var(--accent-text);
   }
 
+  .coach.updating .coach-tips {
+    opacity: 0.4;
+    transition: opacity 0.25s ease;
+  }
+
+  .coach.updating .coach-tips::after {
+    content: "Tips worden bijgewerkt…";
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+
   .coach.pending .coach-text {
     color: var(--text-dim);
     font-style: italic;
@@ -1165,6 +1179,7 @@
     }
 
     var skips = [];
+    var refreshCoach = function () {};
 
     // A session without a run can be skipped by hand; the pill in the corner becomes an
     // "Overgeslagen" tag with an X to undo it. Saved for every device.
@@ -1206,6 +1221,7 @@
         if (skipped) skips.push(id); else skips.splice(skips.indexOf(id), 1);
         morph();
         markCompletedPhases();
+        refreshCoach();
         fetch('/api/skips', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1478,6 +1494,7 @@
       var label = item.querySelector('.run-label').cloneNode(true);
       Array.prototype.forEach.call(label.querySelectorAll('.run-sep, .run-desc, .missed-note'), function (n) { n.remove(); });
       return {
+        id: item.dataset.id,
         label: label.textContent.replace(/\s+/g, ' ').trim(),
         distance: text(item, '.run-dist'),
         description: text(item, '.run-desc'),
@@ -1533,13 +1550,77 @@
       var weeks = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan]'));
       if (!activities.length) return;
 
-      // The session that follows this run in the plan (for an extra run: the one after its week).
-      function nextSession(item) {
+      // The session after this run (for an extra run: after its week), passing over skipped ones.
+      function nextSession(item, ignoreSkips) {
         var from = item.classList.contains('extra')
           ? slots.indexOf(item.closest('.week-card').querySelector('.runs-grid:not(.extra-runs) .run-item:last-child'))
           : slots.indexOf(item);
-        return slots[from + 1] || null;
+        for (var i = from + 1; i < slots.length; i++) {
+          if (ignoreSkips || !slots[i].classList.contains('skipped')) return slots[i];
+        }
+        return null;
       }
+
+      // Sessions skipped between this run and the next session.
+      function skippedBefore(item) {
+        var from = slots.indexOf(item);
+        var until = slots.indexOf(nextSession(item));
+        if (from === -1) return [];
+        return slots.slice(from + 1, until === -1 ? slots.length : until).filter(function (s) {
+          return s.classList.contains('skipped');
+        }).slice(0, 4);
+      }
+
+      function nextId(item, ignoreSkips) {
+        var next = nextSession(item, ignoreSkips);
+        return next ? next.dataset.id : null;
+      }
+
+      // Summaries written before this existed were aimed at the next session in the plan.
+      function writtenFor(summary, item) {
+        return summary.next_id !== undefined ? summary.next_id : nextId(item, true);
+      }
+
+      function summaryTask(activity) {
+        var item = activity.closest('.run-item');
+        return {
+          url: '/api/summary',
+          body: function () {
+            return {
+              id: activity.dataset.runId,
+              planned: item.classList.contains('extra') ? { label: 'Extra run, niet in het schema' } : sessionInfo(item),
+              next: sessionInfo(nextSession(item)),
+              skipped: skippedBefore(item).map(sessionInfo),
+            };
+          },
+          render: function (summary) { activity._summary = summary; renderCoach(activity, summary); },
+          fail: function () {
+            var box = activity.querySelector('.coach');
+            if (box && box.classList.contains('pending')) box.remove();
+            else if (box) box.classList.remove('updating');
+          },
+        };
+      }
+
+      // After a skip changes, rewrite the tips of runs whose next session is now a different one.
+      refreshCoach = function () {
+        if (disabled) return;
+        activities.forEach(function (activity) {
+          var item = activity.closest('.run-item');
+          if (!activity._summary || writtenFor(activity._summary, item) === nextId(item)) return;
+          if (activity._refreshing) return;
+          activity._refreshing = true;
+          var box = activity.querySelector('.coach');
+          if (box) box.classList.add('updating');
+          var task = summaryTask(activity);
+          var render = task.render;
+          var fail = task.fail;
+          task.render = function (summary) { activity._refreshing = false; render(summary); refreshCoach(); };
+          task.fail = function () { activity._refreshing = false; fail(); };
+          queue.push(task);
+        });
+        pump();
+      };
 
       // One request to Claude at a time; each task posts, then renders or cleans up.
       var queue = [];
@@ -1595,22 +1676,12 @@
         var savedWeeks = results[1] || {};
 
         activities.forEach(function (activity) {
-          if (saved[activity.dataset.runId]) { renderCoach(activity, saved[activity.dataset.runId]); return; }
-          var box = activity.appendChild(pendingBox('Coach'));
-          var item = activity.closest('.run-item');
-          schedule(activity, {
-            url: '/api/summary',
-            body: function () {
-              return {
-                id: activity.dataset.runId,
-                planned: item.classList.contains('extra') ? { label: 'Extra run, niet in het schema' } : sessionInfo(item),
-                next: sessionInfo(nextSession(item)),
-              };
-            },
-            render: function (summary) { renderCoach(activity, summary); },
-            fail: function () { box.remove(); },
-          });
+          var summary = saved[activity.dataset.runId];
+          if (summary) { activity._summary = summary; renderCoach(activity, summary); return; }
+          activity.appendChild(pendingBox('Coach'));
+          schedule(activity, summaryTask(activity));
         });
+        refreshCoach();
 
         // A week gets its overview once it's over or fully settled, if it has at least one run.
         weeks.forEach(function (card, i) {

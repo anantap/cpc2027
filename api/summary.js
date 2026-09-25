@@ -7,6 +7,10 @@ function clean(value) {
   return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, 160) : undefined;
 }
 
+const SESSION_ID = /^(consol|tussen|build|final)-w\d{1,2}-r\d$/;
+// Tips are rewritten when the next session changes (e.g. it was skipped), at most this often per run.
+const MAX_REWRITES = 6;
+
 function cleanSession(s) {
   if (!s || typeof s !== 'object') return null;
   return { label: clean(s.label), distance: clean(s.distance), description: clean(s.description), week: clean(s.week) };
@@ -37,13 +41,16 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
   // POST: write the summary for one run, once. Only runs we imported can be summarised.
-  const { id, planned, next } = req.body || {};
+  const { id, planned, next, skipped } = req.body || {};
   const index = runs.findIndex((r) => r.id === id);
   if (index === -1) return res.status(404).send('Unknown run');
 
   const key = 'summary:' + id;
+  const nextId = next && typeof next.id === 'string' && SESSION_ID.test(next.id) ? next.id : null;
   const existing = await redis.get(key);
-  if (existing) return res.status(200).json(existing);
+  if (existing && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
+    return res.status(200).json(existing);
+  }
   if (!process.env.ANTHROPIC_API_KEY) return res.status(503).send('Coach not configured');
   if (!(await redis.set('summary-lock:' + id, 1, { nx: true, ex: 120 }))) {
     return res.status(202).json({ pending: true });
@@ -66,9 +73,15 @@ module.exports = async (req, res) => {
       })),
       planned_session: cleanSession(planned),
       next_planned_session: cleanSession(next),
+      skipped_since: (Array.isArray(skipped) ? skipped : []).slice(0, 4).map(cleanSession),
       recent_runs: runs.slice(Math.max(0, index - 6), index).map(describe),
     });
-    const stored = { ...summary, created: new Date().toISOString() };
+    const stored = {
+      ...summary,
+      next_id: nextId,
+      rewrites: existing ? (existing.rewrites || 0) + 1 : 0,
+      created: new Date().toISOString(),
+    };
     await redis.set(key, stored);
     return res.status(200).json(stored);
   } catch (err) {
