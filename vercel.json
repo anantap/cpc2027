@@ -1,8 +1,16 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/trainingsplan.html" }
+    {
+      "source": "/",
+      "destination": "/trainingsplan.html"
+    }
   ],
   "functions": {
-    "api/summary.js": { "maxDuration": 60 }
+    "api/summary.js": {
+      "maxDuration": 60
+    },
+    "api/week-summary.js": {
+      "maxDuration": 60
+    }
   }
 }

@@ -429,6 +429,15 @@
     color: var(--text);
   }
 
+  .coach-sub { margin-top: 10px; }
+
+  .week-coach {
+    margin: 0 0 12px;
+    padding: 12px;
+    border: 1px dashed rgba(98, 70, 107, 0.6);
+    border-radius: 10px;
+  }
+
   .coach-tips {
     margin: 8px 0 0;
     padding: 0;
@@ -1486,9 +1495,42 @@
       });
     }
 
+    function renderWeekCoach(box, summary) {
+      box.className = 'coach week-coach';
+      box.innerHTML = '<div class="coach-k">Weekoverzicht</div><p class="coach-text"></p>' +
+        '<div class="coach-k coach-sub">Focus volgende week</div><ul class="coach-tips"></ul>';
+      box.querySelector('.coach-text').textContent = summary.samenvatting;
+      summary.focus.forEach(function (point) {
+        box.querySelector('.coach-tips').appendChild(el('li', 'coach-tip')).textContent = point;
+      });
+      if (!summary.focus.length) box.querySelector('.coach-sub').remove();
+    }
+
+    function isoDay(day) {
+      return new Date(day * DAY).toISOString().slice(0, 10);
+    }
+
+    function weekInfo(card) {
+      if (!card) return null;
+      var phase = card.closest('.phase-section');
+      var items = card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item');
+      return {
+        title: [text(phase, '.phase-title'), text(card, '.week-num')].filter(Boolean).join(' · '),
+        focus: text(card, '.week-focus'),
+        sessions: Array.prototype.map.call(items, function (item) {
+          var info = sessionInfo(item);
+          info.status = item.classList.contains('done') ? 'gedaan'
+            : item.classList.contains('skipped') ? 'overgeslagen'
+            : item.classList.contains('missed') ? 'niet gelopen' : 'gepland';
+          return info;
+        }),
+      };
+    }
+
     function setupCoach() {
       var activities = Array.prototype.slice.call(document.querySelectorAll('.activity[data-run-id]'));
       var slots = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item'));
+      var weeks = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan]'));
       if (!activities.length) return;
 
       // The session that follows this run in the plan (for an extra run: the one after its week).
@@ -1499,56 +1541,99 @@
         return slots[from + 1] || null;
       }
 
-      getJson('/api/summary', {}).then(function (saved) {
-        var queue = [];
-        var busy = false;
+      // One request to Claude at a time; each task posts, then renders or cleans up.
+      var queue = [];
+      var busy = false;
+      var disabled = false;
 
-        function pump() {
-          if (busy || !queue.length) return;
-          busy = true;
-          var activity = queue.shift();
-          var item = activity.closest('.run-item');
-          fetch('/api/summary', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: activity.dataset.runId,
-              planned: item.classList.contains('extra') ? { label: 'Extra run, niet in het schema' } : sessionInfo(item),
-              next: sessionInfo(nextSession(item)),
-            }),
-          }).then(function (res) {
-            if (res.status === 202) {
-              setTimeout(function () { queue.push(activity); pump(); }, 8000);
-              return;
-            }
-            if (res.status === 503) {
-              Array.prototype.forEach.call(document.querySelectorAll('.coach.pending'), function (b) { b.remove(); });
-              queue = [];
-              return;
-            }
-            if (!res.ok) throw new Error(res.status);
-            return res.json().then(function (summary) { renderCoach(activity, summary); });
-          }).catch(function () {
-            var box = activity.querySelector('.coach.pending');
-            if (box) box.remove();
-          }).then(function () { busy = false; pump(); });
-        }
+      function pump() {
+        if (busy || disabled || !queue.length) return;
+        busy = true;
+        var task = queue.shift();
+        fetch(task.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(task.body()),
+        }).then(function (res) {
+          if (res.status === 202) {
+            setTimeout(function () { queue.push(task); pump(); }, 8000);
+            return;
+          }
+          if (res.status === 503) {
+            disabled = true;
+            Array.prototype.forEach.call(document.querySelectorAll('.coach.pending'), function (b) { b.remove(); });
+            return;
+          }
+          if (!res.ok) throw new Error(res.status);
+          return res.json().then(task.render);
+        }).catch(function () {
+          task.fail();
+        }).then(function () { busy = false; pump(); });
+      }
 
-        // Missing summaries are written when their run scrolls into view, one at a time.
-        var observer = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) {
-            if (!entry.isIntersecting) return;
-            observer.unobserve(entry.target);
-            queue.push(entry.target);
-            pump();
-          });
-        }) : null;
+      // Missing summaries are written when they scroll into view.
+      var observer = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
+          queue.push(entry.target._coachTask);
+          pump();
+        });
+      }) : null;
+
+      function schedule(target, task) {
+        target._coachTask = task;
+        if (observer) observer.observe(target); else queue.push(task);
+      }
+
+      function pendingBox(label) {
+        return el('div', 'coach pending', '<div class="coach-k">' + label + '</div><p class="coach-text">Samenvatting wordt geschreven…</p>');
+      }
+
+      Promise.all([getJson('/api/summary', {}), getJson('/api/week-summary', {})]).then(function (results) {
+        var saved = results[0] || {};
+        var savedWeeks = results[1] || {};
 
         activities.forEach(function (activity) {
-          var summary = saved && saved[activity.dataset.runId];
-          if (summary) { renderCoach(activity, summary); return; }
-          activity.appendChild(el('div', 'coach pending', '<div class="coach-k">Coach</div><p class="coach-text">Samenvatting wordt geschreven…</p>'));
-          if (observer) observer.observe(activity); else queue.push(activity);
+          if (saved[activity.dataset.runId]) { renderCoach(activity, saved[activity.dataset.runId]); return; }
+          var box = activity.appendChild(pendingBox('Coach'));
+          var item = activity.closest('.run-item');
+          schedule(activity, {
+            url: '/api/summary',
+            body: function () {
+              return {
+                id: activity.dataset.runId,
+                planned: item.classList.contains('extra') ? { label: 'Extra run, niet in het schema' } : sessionInfo(item),
+                next: sessionInfo(nextSession(item)),
+              };
+            },
+            render: function (summary) { renderCoach(activity, summary); },
+            fail: function () { box.remove(); },
+          });
+        });
+
+        // A week gets its overview once it's over or fully settled, if it has at least one run.
+        weeks.forEach(function (card, i) {
+          var start = weekStart(card.dataset.plan, Number(card.dataset.week));
+          var finished = start + 7 <= today || card.classList.contains('completed');
+          if (!finished || !card.querySelector('.run-item.done')) return;
+          var key = card.dataset.plan + '-w' + card.dataset.week;
+          var body = card.querySelector('.week-body');
+          var box = body.insertBefore(pendingBox('Weekoverzicht'), body.firstChild);
+          box.classList.add('week-coach');
+          if (savedWeeks[key]) { renderWeekCoach(box, savedWeeks[key]); return; }
+          schedule(box, {
+            url: '/api/week-summary',
+            body: function () {
+              var info = weekInfo(card);
+              info.key = key;
+              info.start = isoDay(start);
+              info.next = weekInfo(weeks[i + 1]);
+              return info;
+            },
+            render: function (summary) { renderWeekCoach(box, summary); },
+            fail: function () { box.remove(); },
+          });
         });
         pump();
       });
