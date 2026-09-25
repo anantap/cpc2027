@@ -201,9 +201,15 @@
 
   .run-plan { min-width: 0; }
   .run-plan .run-label { margin-bottom: 1px; }
-  .run-plan .run-dist,
-  .run-plan .run-desc { display: inline; }
-  .run-plan .run-desc::before { content: " · "; }
+
+  .run-label .run-desc,
+  .run-label .run-sep {
+    display: inline;
+    font-size: 12px;
+    letter-spacing: normal;
+    text-transform: none;
+    line-height: 1.3;
+  }
   .run-plan .interval-tag,
   .run-plan .tempo-tag,
   .run-plan .race-tag {
@@ -281,7 +287,17 @@
   .run-item.skipped .run-status { display: none; }
 
   .missed-note { display: none; }
-  .run-item.missed .missed-note { display: inline; }
+  .run-item.past .missed-note { display: inline; }
+
+  /* A fixed slot for the pill, so the text never re-wraps when it widens. */
+  .runs-grid .run-item.planned,
+  .runs-grid .run-item.missed,
+  .runs-grid .run-item.skipped { grid-template-columns: 22px minmax(0, 1fr) 122px; }
+
+  @media (max-width: 600px) {
+    .week-card { padding-left: 12px; padding-right: 12px; }
+    .runs-grid .run-item { padding: 12px 10px; column-gap: 10px; }
+  }
 
   .skip-ctl {
     grid-column: 3;
@@ -306,19 +322,15 @@
   .skip-ctl:hover:not(.is-skipped) { color: var(--text); border-color: var(--text-faint); }
 
   .skip-ctl.is-skipped {
-    padding-right: 4px;
+    padding: 0 4px 0 10px;
     cursor: default;
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
   }
 
   .skip-x {
     display: none;
     width: 20px;
     height: 20px;
-    margin-left: 6px;
+    margin-left: 5px;
     padding: 0;
     border: 0;
     border-radius: 50%;
@@ -1065,6 +1077,14 @@
       Array.prototype.slice.call(item.children).forEach(function (child) {
         if (!child.classList.contains('checkbox')) plan.appendChild(child);
       });
+      // The note moves up behind the run number: "RUN 2 • 4× kort versnellen".
+      var desc = plan.querySelector('.run-desc');
+      if (desc) {
+        desc.textContent = desc.textContent.replace(/^\+\s*/, '');
+        var label = plan.querySelector('.run-label');
+        label.appendChild(el('span', 'run-sep', ' • '));
+        label.appendChild(desc);
+      }
       item.appendChild(plan);
       item.appendChild(el('div', 'run-status', 'Gepland'));
       item.classList.add('planned');
@@ -1086,7 +1106,12 @@
         '<button class="skip-x" type="button" aria-label="Overslaan ongedaan maken">' +
         '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>');
       var label = ctl.querySelector('.skip-label');
-      item.querySelector('.run-label').insertAdjacentHTML('beforeend', '<span class="missed-note"> · niet gelopen</span>');
+      var runLabel = item.querySelector('.run-label');
+      var sep = runLabel.querySelector('.run-sep');
+      var note = el('span', 'missed-note', ' · niet gelopen');
+      if (sep) runLabel.insertBefore(note, sep); else runLabel.appendChild(note);
+      // Past sessions keep "niet gelopen" when skipped too, so the label never re-wraps.
+      item.classList.toggle('past', weekOver);
 
       function render() {
         var skipped = skips.indexOf(id) !== -1;
