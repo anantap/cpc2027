@@ -275,32 +275,86 @@
 
   .run-item.skipped .checkbox { position: relative; }
 
-  .skip-btn {
-    grid-column: 2 / -1;
-    justify-self: start;
-    margin-top: 10px;
-    padding: 5px 12px;
-    background: none;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    color: var(--text-dim);
-    font: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-  }
+  /* Sessions without a run: one pill in the corner, "Overslaan" or "Overgeslagen ×". */
+  .run-item.planned .run-status,
+  .run-item.missed .run-status,
+  .run-item.skipped .run-status { display: none; }
 
-  /* A planned session shows no status, just the skip button in its place. */
-  .run-item.planned .run-status { display: none; }
+  .missed-note { display: none; }
+  .run-item.missed .missed-note { display: inline; }
 
-  .run-item.planned .skip-btn {
+  .skip-ctl {
     grid-column: 3;
     grid-row: 1;
     justify-self: end;
-    margin-top: 0;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    transition: width 0.25s ease, color 0.2s ease, border-color 0.2s ease;
   }
 
-  .skip-btn:hover { color: var(--text); border-color: var(--text-faint); }
+  .skip-ctl:hover:not(.is-skipped) { color: var(--text); border-color: var(--text-faint); }
+
+  .skip-ctl.is-skipped {
+    padding-right: 4px;
+    cursor: default;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .skip-x {
+    display: none;
+    width: 20px;
+    height: 20px;
+    margin-left: 6px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--line);
+    color: var(--text-dim);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .skip-x svg {
+    width: 10px;
+    height: 10px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+  }
+
+  .skip-x:hover { color: var(--text); }
+
+  .skip-ctl.is-skipped .skip-x {
+    display: inline-flex;
+    animation: skip-x-in 0.2s ease 0.12s both;
+  }
+
+  @keyframes skip-x-in {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skip-ctl { transition: none; }
+    .skip-ctl.is-skipped .skip-x { animation: none; }
+  }
 
   .activity {
     grid-column: 1 / -1;
@@ -982,33 +1036,63 @@
 
     var skips = [];
 
-    // A session without a run can be marked as skipped by hand (and undone); saved for every device.
+    // A session without a run can be skipped by hand; the pill in the corner becomes an
+    // "Overgeslagen" tag with an X to undo it. Saved for every device.
     function addSkipButton(item, weekOver) {
       var id = item.dataset.id;
-      var button = el('button', 'skip-btn');
-      button.type = 'button';
+      var ctl = el('div', 'skip-ctl', '<span class="skip-label"></span>' +
+        '<button class="skip-x" type="button" aria-label="Overslaan ongedaan maken">' +
+        '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>');
+      var label = ctl.querySelector('.skip-label');
+      item.querySelector('.run-label').insertAdjacentHTML('beforeend', '<span class="missed-note"> · niet gelopen</span>');
 
       function render() {
         var skipped = skips.indexOf(id) !== -1;
-        if (skipped) setStatus(item, 'skipped', 'Overgeslagen');
-        else if (weekOver) setStatus(item, 'missed', 'Niet gelopen');
-        else setStatus(item, 'planned', 'Gepland');
-        button.textContent = skipped ? 'Ongedaan maken' : 'Overslaan';
+        setStatus(item, skipped ? 'skipped' : weekOver ? 'missed' : 'planned', '');
+        ctl.classList.toggle('is-skipped', skipped);
+        label.textContent = skipped ? 'Overgeslagen' : 'Overslaan';
+        if (skipped) { ctl.removeAttribute('role'); ctl.removeAttribute('tabindex'); }
+        else { ctl.setAttribute('role', 'button'); ctl.setAttribute('tabindex', '0'); }
       }
 
-      button.addEventListener('click', function () {
-        var skipped = skips.indexOf(id) === -1;
-        if (skipped) skips.push(id); else skips.splice(skips.indexOf(id), 1);
+      // Swap the content, then animate the pill from its old width to its new one.
+      function morph() {
+        var from = ctl.getBoundingClientRect().width;
         render();
+        ctl.style.width = '';
+        var to = ctl.getBoundingClientRect().width;
+        ctl.style.width = from + 'px';
+        ctl.getBoundingClientRect();
+        ctl.style.width = to + 'px';
+        setTimeout(function () { ctl.style.width = ''; }, 300);
+      }
+
+      function setSkipped(skipped) {
+        if (skipped) skips.push(id); else skips.splice(skips.indexOf(id), 1);
+        morph();
         markCompletedPhases();
         fetch('/api/skips', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: id, skipped: skipped }),
         }).catch(function () {});
+      }
+
+      ctl.addEventListener('click', function () {
+        if (!ctl.classList.contains('is-skipped')) setSkipped(true);
+      });
+      ctl.addEventListener('keydown', function (e) {
+        if ((e.key === 'Enter' || e.key === ' ') && !ctl.classList.contains('is-skipped')) {
+          e.preventDefault();
+          setSkipped(true);
+        }
+      });
+      ctl.querySelector('.skip-x').addEventListener('click', function (e) {
+        e.stopPropagation();
+        setSkipped(false);
       });
 
-      item.appendChild(button);
+      item.appendChild(ctl);
       render();
     }
 
