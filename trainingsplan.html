@@ -406,7 +406,7 @@
     height: 4px;
     border-radius: 2px;
     background: var(--line);
-    margin: -2px 0 12px;
+    margin: -2px 0 0;
     overflow: hidden;
   }
 
@@ -525,9 +525,24 @@
 
   .week-card:not(.collapsed) .week-head .chevron { transform: rotate(180deg); }
 
-  .week-card.collapsed .runs-grid { display: none; }
-  .week-card.collapsed .week-progress { margin-bottom: 0; }
-  .week-card.collapsed .week-head { margin-bottom: 8px; }
+  .week-body { padding-top: 12px; }
+  .week-card.collapsed .week-body { display: none; }
+
+  /* State changes fade rather than jump. */
+  .runs-grid .run-item {
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+  }
+
+  .run-label, .run-dist, .run-desc, .week-num, .week-focus, .week-total, .phase-title, .phase-dates {
+    transition: color 0.25s ease;
+  }
+
+  .week-progress div { transition: width 0.4s ease, background-color 0.25s ease; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .runs-grid .run-item, .run-label, .run-dist, .run-desc, .week-num, .week-focus,
+    .week-total, .phase-title, .phase-dates, .week-progress div, .chevron { transition: none; }
+  }
 
   .week-card.completed .week-num,
   .week-card.completed .week-focus,
@@ -952,6 +967,27 @@
       }
     }
 
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Open or close a block with a height + fade animation. `apply` flips the class that shows it.
+    function slide(block, open, apply) {
+      if (block._anim) block._anim.cancel();
+      if (reduceMotion || !block.animate) { apply(); return; }
+      var from = open ? 0 : block.offsetHeight;
+      if (open) apply();
+      var to = open ? block.scrollHeight : 0;
+      block.style.overflow = 'hidden';
+      var anim = block.animate(
+        [{ height: from + 'px', opacity: open ? 0 : 1 }, { height: to + 'px', opacity: open ? 1 : 0 }],
+        { duration: open ? 260 : 200, easing: 'cubic-bezier(0.2, 0, 0, 1)' });
+      block._anim = anim;
+      anim.onfinish = function () {
+        block._anim = null;
+        block.style.overflow = '';
+        if (!open) apply();
+      };
+    }
+
     function el(tag, className, html) {
       var node = document.createElement(tag);
       node.className = className;
@@ -994,9 +1030,10 @@
     // Every week folds open and closed from its header; this week starts open.
     var CHEVRON = '<svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 
-    function setWeekOpen(card, open) {
-      card.classList.toggle('collapsed', !open);
+    function setWeekOpen(card, open, animate) {
       card.querySelector('.week-head').setAttribute('aria-expanded', String(open));
+      function apply() { card.classList.toggle('collapsed', !open); }
+      if (animate) slide(card.querySelector('.week-body'), open, apply); else apply();
     }
 
     Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
@@ -1005,7 +1042,12 @@
       head.insertAdjacentHTML('beforeend', CHEVRON);
       head.setAttribute('role', 'button');
       head.setAttribute('tabindex', '0');
-      head.addEventListener('click', function () { setWeekOpen(card, card.classList.contains('collapsed')); });
+      var body = el('div', 'week-body');
+      body.appendChild(card.querySelector('.runs-grid'));
+      card.appendChild(body);
+      head.addEventListener('click', function () {
+        setWeekOpen(card, head.getAttribute('aria-expanded') !== 'true', true);
+      });
       head.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); head.click(); }
       });
@@ -1201,7 +1243,7 @@
           item.appendChild(activityCard(run));
           grid.appendChild(item);
         });
-        card.appendChild(grid);
+        card.querySelector('.week-body').appendChild(grid);
       }
 
       var done = Math.min(weekRuns.length, items.length);
@@ -1282,12 +1324,14 @@
       }
       section.classList.toggle('current', current);
 
-      function setOpen(open) {
-        section.classList.toggle('open', open);
+      function setOpen(open, animate) {
         toggle.setAttribute('aria-expanded', String(open));
+        function apply() { section.classList.toggle('open', open); }
+        if (animate) slide(section.querySelector('.phase-body'), open, apply); else apply();
       }
+      section._setOpen = setOpen;
       setOpen(current);
-      toggle.addEventListener('click', function () { setOpen(!section.classList.contains('open')); });
+      toggle.addEventListener('click', function () { setOpen(toggle.getAttribute('aria-expanded') !== 'true', true); });
     });
 
     // A week, or a phase with planned runs, is complete once every session is done or skipped.
@@ -1340,9 +1384,8 @@
       var card = trainingWeek();
       if (!card) return;
       var section = card.closest('.phase-section');
-      if (!section.classList.contains('open')) section.querySelector('.phase-toggle').click();
+      if (!section.classList.contains('open')) section._setOpen(true);
       setWeekOpen(card, true);
-      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       setTimeout(function () {
         var top = card.getBoundingClientRect().top + window.pageYOffset - 16;
         window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
