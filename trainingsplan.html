@@ -1890,15 +1890,20 @@
       fab.addEventListener('click', function () { scrollToTrainingWeek(0); });
       window.addEventListener('scroll', updateFab, { passive: true });
       window.addEventListener('resize', updateFab);
+      // Opening or closing a phase changes the layout without scrolling; check again after the animation.
+      Array.prototype.forEach.call(document.querySelectorAll('.phase-toggle'), function (toggle) {
+        toggle.addEventListener('click', function () { setTimeout(updateFab, 300); });
+      });
       setTimeout(updateFab, 1200);
     }
 
+    // Shown only while the week's phase is open and the week is off screen.
     function updateFab() {
       if (!fabCard) return;
+      var phaseOpen = fabCard.closest('.phase-section').classList.contains('open');
       var box = fabCard.getBoundingClientRect();
       var visible = box.bottom > pinnedHeaderHeight() + 40 && box.top < window.innerHeight - 80;
-      // Shown whenever the week is off screen (also inside a closed phase: tapping opens it).
-      fab.classList.toggle('show', !visible);
+      fab.classList.toggle('show', phaseOpen && !visible);
       fab.classList.toggle('down', box.top >= window.innerHeight - 80);
     }
   })();
