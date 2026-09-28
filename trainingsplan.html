@@ -136,6 +136,23 @@
 
   .top-intro { display: flow-root; will-change: opacity; }
 
+  .top .eyebrow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .top .eyebrow.swap { animation: label-in 0.25s ease; }
+
+  @keyframes label-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .top .eyebrow.swap { animation: none; }
+  }
+
   .stat {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -1512,6 +1529,28 @@
       var progress = introHeight ? Math.min(1, Math.max(0, (window.pageYOffset - start) / introHeight)) : 0;
       intro.style.opacity = String(Math.max(0, 1 - progress * 1.6));
       header.classList.toggle('pinned', progress >= 1);
+      updateLabel();
+    }
+
+    // Once a phase's own title has scrolled under the header, the label shows that phase.
+    var label = header.querySelector('.eyebrow');
+    var phaseSections = Array.prototype.slice.call(document.querySelectorAll('.phase-section'));
+    var labelText = label.textContent;
+
+    function updateLabel() {
+      var line = header.getBoundingClientRect().bottom;
+      var text = 'Trainingsplan';
+      phaseSections.forEach(function (section) {
+        var box = section.getBoundingClientRect();
+        var title = section.querySelector('.phase-toggle').getBoundingClientRect();
+        if (title.bottom <= line && box.bottom > line) text = section.querySelector('.phase-title').textContent;
+      });
+      if (text === labelText) return;
+      labelText = text;
+      label.textContent = text;
+      label.classList.remove('swap');
+      void label.offsetWidth;
+      label.classList.add('swap');
     }
 
     // Scroll position at which the header's top reaches the top of the screen.
