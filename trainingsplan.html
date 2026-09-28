@@ -103,6 +103,8 @@
     font-stretch: 125%;
   }
 
+  .phase-stats { margin-bottom: 16px; }
+
   /* ===== Floating "back to my week" button ===== */
   .fab {
     position: fixed;
@@ -1498,15 +1500,48 @@
     }
 
     // Totals over every run so far; fastest pace ignores very short runs.
-    function applyStats(runs) {
-      if (!runs.length) return;
+    function totals(runs) {
       var km = runs.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
       var time = runs.reduce(function (sum, r) { return sum + r.moving_time_s; }, 0);
       var paces = runs.filter(function (r) { return r.distance_km >= 1; })
         .map(function (r) { return r.moving_time_s / r.distance_km; });
-      document.getElementById('stat-total').textContent = formatKm(km);
-      document.getElementById('stat-avg').innerHTML = formatPaceSec(time / km);
-      if (paces.length) document.getElementById('stat-best').innerHTML = formatPaceSec(Math.min.apply(null, paces));
+      return {
+        km: formatKm(km),
+        avg: formatPaceSec(time / km),
+        best: paces.length ? formatPaceSec(Math.min.apply(null, paces)) : '–',
+      };
+    }
+
+    function applyStats(runs) {
+      if (!runs.length) return;
+      var t = totals(runs);
+      document.getElementById('stat-total').textContent = t.km;
+      document.getElementById('stat-avg').innerHTML = t.avg;
+      document.getElementById('stat-best').innerHTML = t.best;
+    }
+
+    // A finished phase gets the same three totals as the header, for its own runs.
+    function applyPhaseStats(runs) {
+      Array.prototype.forEach.call(document.querySelectorAll('.phase-section'), function (section) {
+        var key = section.dataset.phase;
+        var range = PHASES[key];
+        var finished = range[1] < today || section.classList.contains('completed');
+        var phaseRuns = runs.filter(function (r) {
+          if (key === 'c25k') return r.source === 'c25k';
+          var d = dayNumber(r.date);
+          return r.source !== 'c25k' && d >= range[0] && d <= range[1];
+        });
+        var old = section.querySelector('.phase-stats');
+        if (old) old.remove();
+        if (!finished || !phaseRuns.length) return;
+        var t = totals(phaseRuns);
+        var box = el('div', 'stats phase-stats',
+          '<div class="stat"><div class="k">Totaal km</div><div class="v">' + t.km + '</div></div>' +
+          '<div class="stat"><div class="k">Gem. tempo</div><div class="v">' + t.avg + '</div></div>' +
+          '<div class="stat"><div class="k">Snelste tempo</div><div class="v">' + t.best + '</div></div>');
+        var body = section.querySelector('.phase-body');
+        body.insertBefore(box, body.firstChild);
+      });
     }
 
     // Phases: dates from the plan weeks; the current one opens by default.
@@ -1614,6 +1649,7 @@
       renderC25k(runs);
       applyRuns(runs);
       markCompletedPhases();
+      applyPhaseStats(runs);
       setupCoach();
       // Past weeks that still have open sessions stay open; finished weeks fold away.
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
