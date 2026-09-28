@@ -811,7 +811,6 @@
   .note {
     background: var(--bg-alt);
     border: 1px solid var(--line);
-    border-left: 3px solid var(--text-faint);
     border-radius: 10px;
     padding: 16px 20px;
     font-size: 14px;
@@ -1887,7 +1886,7 @@
     function setupFab(card) {
       if (fabCard) return;
       fabCard = card;
-      fab.querySelector('.fab-label').textContent = text(card, '.week-num');
+      fab.querySelector('.fab-label').textContent = 'Deze week';
       fab.addEventListener('click', function () { scrollToTrainingWeek(0); });
       window.addEventListener('scroll', updateFab, { passive: true });
       window.addEventListener('resize', updateFab);
