@@ -4,6 +4,26 @@ const { fetchRuns } = require('../lib/intervals');
 // Refresh from Intervals.icu at most this often; otherwise serve the cached list.
 const MAX_AGE_S = 5 * 60;
 
+// The Couch to 5K list can also live in the private C25K_RUNS environment variable, as
+// [{date, start, distance_km, moving_time_s}, ...].
+function c25kFromEnv() {
+  try {
+    const list = JSON.parse(process.env.C25K_RUNS || '[]');
+    return list.map((r) => ({
+      id: 'c25k-' + r.date,
+      name: 'Watch to 5K',
+      source: 'c25k',
+      date: r.date,
+      start: r.start,
+      distance_km: Number(r.distance_km),
+      moving_time_s: Number(r.moving_time_s),
+    }));
+  } catch (err) {
+    console.error('C25K_RUNS is not valid JSON:', err);
+    return [];
+  }
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).send('Method Not Allowed');
 
@@ -23,8 +43,8 @@ module.exports = async (req, res) => {
     }
   }
 
-  // Couch to 5K runs from the one-off Apple Health import come first.
-  const c25k = (await redis.get('c25k')) || [];
+  // Couch to 5K runs (from Apple Health, before Suunto) come first.
+  const c25k = (await redis.get('c25k')) || c25kFromEnv();
 
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json(c25k.concat(runs));
