@@ -110,39 +110,34 @@
     gap: 8px;
   }
 
-  /* Header: sticks so that only the label and totals stay in view; the title scrolls away
-     underneath the label while fading out, then a divider appears. */
-  .top {
+  /* Only the label bar sticks; the title and totals scroll away under it while fading out,
+     then a divider appears under the bar. */
+  .topbar {
     position: sticky;
-    top: calc(-1 * var(--intro-h, 0px));
+    top: 0;
     z-index: 20;
-    margin: 0 -16px 28px;
-    padding: 0 16px 12px;
+    margin: 0 -16px;
+    padding: 12px 16px 10px;
     background: var(--bg);
     border-bottom: 1px solid transparent;
     transition: border-color 0.25s ease;
   }
 
-  .top.pinned { border-bottom-color: var(--line); }
+  .topbar.pinned { border-bottom-color: var(--line); }
 
-  .top .eyebrow {
-    position: sticky;
-    top: 0;
-    z-index: 1;
+  .topbar .eyebrow {
     margin: 0;
-    padding: 12px 0 10px;
-    background: var(--bg);
-  }
-
-  .top-intro { display: flow-root; will-change: opacity; }
-
-  .top .eyebrow {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .top .eyebrow.swap { animation: label-in 0.25s ease; }
+  .top {
+    margin-bottom: 28px;
+    will-change: opacity;
+  }
+
+  .topbar .eyebrow.swap { animation: label-in 0.25s ease; }
 
   @keyframes label-in {
     from { opacity: 0; transform: translateY(4px); }
@@ -150,7 +145,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .top .eyebrow.swap { animation: none; }
+    .topbar .eyebrow.swap { animation: none; }
   }
 
   .stat {
@@ -777,8 +772,8 @@
 </head>
 <body>
 <main class="wrap">
+  <div class="topbar" id="topbar"><div class="eyebrow">Trainingsplan</div></div>
   <header class="top" id="top">
-    <div class="eyebrow">Trainingsplan</div>
     <div class="top-intro">
       <h1>Naar de CPC 10K — maart 2027</h1>
       <p class="subtitle">Doel: de 10&nbsp;km van de CPC Loop in Den Haag, half maart 2027. Runs komen automatisch binnen vanuit Suunto.</p>
@@ -1513,37 +1508,30 @@
       });
     }
 
-    // ===== Sticky header: the title fades out as it slides under the label =====
+    // ===== Sticky label bar: title and totals fade out as they scroll under it =====
+    var topbar = document.getElementById('topbar');
     var header = document.getElementById('top');
-    var intro = header.querySelector('.top-intro');
-    var introHeight = 0;
-
-    function measureHeader() {
-      introHeight = intro.offsetHeight;
-      header.style.setProperty('--intro-h', introHeight + 'px');
-      updateHeader();
-    }
-
-    function updateHeader() {
-      var start = headerStart();
-      var progress = introHeight ? Math.min(1, Math.max(0, (window.pageYOffset - start) / introHeight)) : 0;
-      intro.style.opacity = String(Math.max(0, 1 - progress * 1.6));
-      header.classList.toggle('pinned', progress >= 1);
-      updateLabel();
-    }
-
-    // Once a phase's own title has scrolled under the header, the label shows that phase.
-    var label = header.querySelector('.eyebrow');
+    var label = topbar.querySelector('.eyebrow');
     var phaseSections = Array.prototype.slice.call(document.querySelectorAll('.phase-section'));
     var labelText = label.textContent;
 
-    function updateLabel() {
-      var line = header.getBoundingClientRect().bottom;
+    function updateHeader() {
+      var barBottom = topbar.getBoundingClientRect().bottom;
+      var box = header.getBoundingClientRect();
+      // 0 while the header is fully below the bar, 1 once it has fully scrolled under it.
+      var progress = box.height ? Math.min(1, Math.max(0, (barBottom - box.top) / box.height)) : 0;
+      header.style.opacity = String(Math.max(0, 1 - progress * 1.4));
+      topbar.classList.toggle('pinned', progress >= 1);
+      updateLabel(barBottom);
+    }
+
+    // The label shows the last phase whose title has scrolled under the bar.
+    function updateLabel(line) {
       var text = 'Trainingsplan';
       phaseSections.forEach(function (section) {
-        var box = section.getBoundingClientRect();
-        var title = section.querySelector('.phase-toggle').getBoundingClientRect();
-        if (title.bottom <= line && box.bottom > line) text = section.querySelector('.phase-title').textContent;
+        if (section.querySelector('.phase-toggle').getBoundingClientRect().bottom <= line) {
+          text = section.querySelector('.phase-title').textContent;
+        }
       });
       if (text === labelText) return;
       labelText = text;
@@ -1553,25 +1541,13 @@
       label.classList.add('swap');
     }
 
-    // Scroll position at which the header's top reaches the top of the screen.
-    var headerTop = null;
-    function headerStart() {
-      if (headerTop === null) {
-        header.style.position = 'static';
-        headerTop = header.getBoundingClientRect().top + window.pageYOffset;
-        header.style.position = '';
-      }
-      return headerTop;
-    }
-
     function pinnedHeaderHeight() {
-      return header.offsetHeight - introHeight;
+      return topbar.offsetHeight;
     }
 
     window.addEventListener('scroll', updateHeader, { passive: true });
-    window.addEventListener('resize', function () { headerTop = null; measureHeader(); });
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { headerTop = null; measureHeader(); });
-    measureHeader();
+    window.addEventListener('resize', updateHeader);
+    updateHeader();
 
     Promise.all([getJson('/api/runs', []), getJson('/api/skips', [])]).then(function (results) {
       var runs = results[0];
