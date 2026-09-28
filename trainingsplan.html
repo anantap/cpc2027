@@ -75,7 +75,7 @@
   .wrap {
     max-width: 720px;
     margin: 0 auto;
-    padding: 40px 16px 64px;
+    padding: 28px 16px 64px;
   }
 
   .check-row.checked .checkbox {
@@ -108,8 +108,33 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    margin: 0 0 28px;
   }
+
+  /* Header: sticks so that only the label and totals stay in view; the title scrolls away
+     underneath the label while fading out, then a divider appears. */
+  .top {
+    position: sticky;
+    top: calc(-1 * var(--intro-h, 0px));
+    z-index: 20;
+    margin: 0 -16px 28px;
+    padding: 0 16px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.25s ease;
+  }
+
+  .top.pinned { border-bottom-color: var(--line); }
+
+  .top .eyebrow {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0;
+    padding: 12px 0 10px;
+    background: var(--bg);
+  }
+
+  .top-intro { display: flow-root; will-change: opacity; }
 
   .stat {
     background: var(--surface);
@@ -735,15 +760,18 @@
 </head>
 <body>
 <main class="wrap">
-  <div class="eyebrow">Trainingsplan</div>
-  <h1>Naar de CPC 10K — maart 2027</h1>
-  <p class="subtitle">Doel: de 10&nbsp;km van de CPC Loop in Den Haag, half maart 2027. Runs komen automatisch binnen vanuit Suunto.</p>
-
-  <div class="stats">
-    <div class="stat"><div class="k">Totaal km</div><div class="v" id="stat-total">–</div></div>
-    <div class="stat"><div class="k">Gem. tempo</div><div class="v" id="stat-avg">–</div></div>
-    <div class="stat"><div class="k">Snelste tempo</div><div class="v" id="stat-best">–</div></div>
-  </div>
+  <header class="top" id="top">
+    <div class="eyebrow">Trainingsplan</div>
+    <div class="top-intro">
+      <h1>Naar de CPC 10K — maart 2027</h1>
+      <p class="subtitle">Doel: de 10&nbsp;km van de CPC Loop in Den Haag, half maart 2027. Runs komen automatisch binnen vanuit Suunto.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="k">Totaal km</div><div class="v" id="stat-total">–</div></div>
+      <div class="stat"><div class="k">Gem. tempo</div><div class="v" id="stat-avg">–</div></div>
+      <div class="stat"><div class="k">Snelste tempo</div><div class="v" id="stat-best">–</div></div>
+    </div>
+  </header>
 
   <section class="phase-section" data-phase="c25k">
     <button class="phase-toggle" type="button" aria-expanded="false">
@@ -1468,6 +1496,44 @@
       });
     }
 
+    // ===== Sticky header: the title fades out as it slides under the label =====
+    var header = document.getElementById('top');
+    var intro = header.querySelector('.top-intro');
+    var introHeight = 0;
+
+    function measureHeader() {
+      introHeight = intro.offsetHeight;
+      header.style.setProperty('--intro-h', introHeight + 'px');
+      updateHeader();
+    }
+
+    function updateHeader() {
+      var start = headerStart();
+      var progress = introHeight ? Math.min(1, Math.max(0, (window.pageYOffset - start) / introHeight)) : 0;
+      intro.style.opacity = String(Math.max(0, 1 - progress * 1.6));
+      header.classList.toggle('pinned', progress >= 1);
+    }
+
+    // Scroll position at which the header's top reaches the top of the screen.
+    var headerTop = null;
+    function headerStart() {
+      if (headerTop === null) {
+        header.style.position = 'static';
+        headerTop = header.getBoundingClientRect().top + window.pageYOffset;
+        header.style.position = '';
+      }
+      return headerTop;
+    }
+
+    function pinnedHeaderHeight() {
+      return header.offsetHeight - introHeight;
+    }
+
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    window.addEventListener('resize', function () { headerTop = null; measureHeader(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { headerTop = null; measureHeader(); });
+    measureHeader();
+
     Promise.all([getJson('/api/runs', []), getJson('/api/skips', [])]).then(function (results) {
       var runs = results[0];
       if (Array.isArray(results[1])) skips = results[1];
@@ -1736,7 +1802,7 @@
       if (!section.classList.contains('open')) section._setOpen(true);
       setWeekOpen(card, true);
       setTimeout(function () {
-        var top = card.getBoundingClientRect().top + window.pageYOffset - 16;
+        var top = card.getBoundingClientRect().top + window.pageYOffset - pinnedHeaderHeight() - 12;
         window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
       }, 250);
     }
