@@ -4,14 +4,17 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const START = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/;
 
 // One-off import of the Couch to 5K runs (recorded before Suunto), kept in Redis rather
-// than in the public repo. The Intervals.icu athlete ID acts as the password.
+// than in the public repo. The first import needs no password; replacing an existing import
+// needs the Intervals.icu athlete ID.
 module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
   const { athlete, runs } = req.body || {};
-  if (!process.env.INTERVALS_ATHLETE_ID || String(athlete || '').trim() !== process.env.INTERVALS_ATHLETE_ID) {
-    return res.status(403).send('Onjuist athlete ID');
+  const existing = await redis.get('c25k');
+  const authorised = process.env.INTERVALS_ATHLETE_ID && String(athlete || '').trim() === process.env.INTERVALS_ATHLETE_ID;
+  if (existing && existing.length && !authorised) {
+    return res.status(403).send('Er zijn al runs geïmporteerd; vul je athlete ID in om ze te vervangen');
   }
   if (!Array.isArray(runs) || !runs.length || runs.length > 100) {
     return res.status(400).send('Geen geldige lijst met runs');
