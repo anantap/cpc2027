@@ -1520,7 +1520,7 @@
       box.className = 'coach week-coach';
       box.innerHTML = '<div class="coach-k"></div><p class="coach-text"></p>' +
         '<div class="coach-k coach-sub"></div><ul class="coach-tips"></ul>';
-      box.querySelector('.coach-k').textContent = from ? 'Weekoverzicht · ' + from.toLowerCase() : 'Weekoverzicht';
+      box.querySelector('.coach-k').textContent = from ? 'Vorige week' : 'Weekoverzicht';
       box.querySelector('.coach-sub').textContent = from ? 'Focus deze week' : 'Focus volgende week';
       box.querySelector('.coach-text').textContent = summary.samenvatting;
       summary.focus.forEach(function (point) {
