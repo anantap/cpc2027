@@ -840,12 +840,13 @@
     <button class="phase-toggle" type="button" aria-expanded="false">
       <span class="phase-head">
         <span class="phase-dates"></span>
-        <span class="phase-title">Couch to 5K afmaken</span>
+        <span class="phase-title">Couch to 5K</span>
       </span>
       <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="phase-body">
       <div class="note">Het programma uitlopen en de basis van hardlopen opbouwen.</div>
+      <div class="weeks" id="c25k-weeks"></div>
     </div>
   </section>
   <section class="phase-section" data-phase="consol">
@@ -1610,6 +1611,7 @@
       if (Array.isArray(results[1])) skips = results[1];
       if (!Array.isArray(runs)) return;
       applyStats(runs);
+      renderC25k(runs);
       applyRuns(runs);
       markCompletedPhases();
       setupCoach();
@@ -1620,6 +1622,55 @@
       });
       scrollToTrainingWeek();
     });
+
+    // ===== Couch to 5K: runs from the Apple Health import, grouped by calendar week =====
+    function renderC25k(runs) {
+      var list = runs.filter(function (r) { return r.source === 'c25k'; });
+      var container = document.getElementById('c25k-weeks');
+      if (!list.length || !container) return;
+
+      var first = dayNumber(list[0].date);
+      var firstMonday = first - ((new Date(first * DAY).getUTCDay() + 6) % 7);
+      var weeks = [];
+      list.forEach(function (run) {
+        var n = Math.floor((dayNumber(run.date) - firstMonday) / 7);
+        (weeks[n] = weeks[n] || []).push(run);
+      });
+
+      weeks.forEach(function (weekRuns, n) {
+        if (!weekRuns) return;
+        var start = firstMonday + n * 7;
+        var km = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
+        var time = weekRuns.reduce(function (sum, r) { return sum + r.moving_time_s; }, 0);
+        var card = el('div', 'week-card c25k-week completed',
+          '<div class="week-head"><div class="week-num">Week ' + (n + 1) + '</div>' +
+          '<div class="week-dates">' + formatDay(start) + ' – ' + formatDay(start + 6) + '</div>' +
+          '<div class="week-total"><strong>' + weekRuns.length + '</strong> ' + (weekRuns.length === 1 ? 'run' : 'runs') + ' · ' + formatKm(km) + ' km · ' + formatDuration(time) + '</div>' +
+          CHEVRON + '</div><div class="week-body"><div class="runs-grid"></div></div>');
+        weekRuns.forEach(function (run, i) {
+          var item = el('div', 'run-item check-row checked done',
+            '<div class="checkbox" role="checkbox" aria-checked="true"></div>' +
+            '<div class="run-plan"><div class="run-label">Run ' + (i + 1) + '</div></div>' +
+            '<div class="run-status">Gedaan</div>');
+          var activity = activityCard(run);
+          activity.classList.add('no-coach');
+          item.appendChild(activity);
+          card.querySelector('.runs-grid').appendChild(item);
+        });
+        var head = card.querySelector('.week-head');
+        head.setAttribute('role', 'button');
+        head.setAttribute('tabindex', '0');
+        head.addEventListener('click', function () {
+          setWeekOpen(card, head.getAttribute('aria-expanded') !== 'true', true);
+        });
+        setWeekOpen(card, false);
+        container.appendChild(card);
+      });
+
+      var section = container.closest('.phase-section');
+      section.querySelector('.phase-dates').textContent =
+        formatDay(dayNumber(list[0].date)) + ' – ' + formatDay(dayNumber(list[list.length - 1].date));
+    }
 
     // ===== Coach: a short summary and tips per run, written once by Claude and saved =====
     function text(node, sel) {
@@ -1688,7 +1739,7 @@
     }
 
     function setupCoach() {
-      var activities = Array.prototype.slice.call(document.querySelectorAll('.activity[data-run-id]'));
+      var activities = Array.prototype.slice.call(document.querySelectorAll('.activity[data-run-id]:not(.no-coach)'));
       var slots = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item'));
       var weeks = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan]'));
       if (!activities.length) return;

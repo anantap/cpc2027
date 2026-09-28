@@ -23,6 +23,9 @@ module.exports = async (req, res) => {
     }
   }
 
+  // Couch to 5K runs from the one-off Apple Health import come first.
+  const c25k = (await redis.get('c25k')) || [];
+
   res.setHeader('Cache-Control', 'no-store');
-  return res.status(200).json(runs);
+  return res.status(200).json(c25k.concat(runs));
 };
