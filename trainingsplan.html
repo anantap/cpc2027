@@ -1515,10 +1515,13 @@
       });
     }
 
-    function renderWeekCoach(box, summary) {
+    // `from` is set when last week's overview is shown at the top of the current week.
+    function renderWeekCoach(box, summary, from) {
       box.className = 'coach week-coach';
-      box.innerHTML = '<div class="coach-k">Weekoverzicht</div><p class="coach-text"></p>' +
-        '<div class="coach-k coach-sub">Focus volgende week</div><ul class="coach-tips"></ul>';
+      box.innerHTML = '<div class="coach-k"></div><p class="coach-text"></p>' +
+        '<div class="coach-k coach-sub"></div><ul class="coach-tips"></ul>';
+      box.querySelector('.coach-k').textContent = from ? 'Weekoverzicht · ' + from.toLowerCase() : 'Weekoverzicht';
+      box.querySelector('.coach-sub').textContent = from ? 'Focus deze week' : 'Focus volgende week';
       box.querySelector('.coach-text').textContent = summary.samenvatting;
       summary.focus.forEach(function (point) {
         box.querySelector('.coach-tips').appendChild(el('li', 'coach-tip')).textContent = point;
@@ -1692,10 +1695,13 @@
           var finished = start + 7 <= today || card.classList.contains('completed');
           if (!finished || !card.querySelector('.run-item.done')) return;
           var key = card.dataset.plan + '-w' + card.dataset.week;
-          var body = card.querySelector('.week-body');
+          // Last week's overview goes to the top of the current week, where it's in view.
+          var host = weeks[i + 1] && weeks[i + 1].classList.contains('current') ? weeks[i + 1] : card;
+          var from = host === card ? null : text(card, '.week-num');
+          var body = host.querySelector('.week-body');
           var box = body.insertBefore(pendingBox('Weekoverzicht'), body.firstChild);
           box.classList.add('week-coach');
-          if (savedWeeks[key]) { renderWeekCoach(box, savedWeeks[key]); return; }
+          if (savedWeeks[key]) { renderWeekCoach(box, savedWeeks[key], from); return; }
           schedule(box, {
             url: '/api/week-summary',
             body: function () {
@@ -1705,7 +1711,7 @@
               info.next = weekInfo(weeks[i + 1]);
               return info;
             },
-            render: function (summary) { renderWeekCoach(box, summary); },
+            render: function (summary) { renderWeekCoach(box, summary, from); },
             fail: function () { box.remove(); },
           });
         });
