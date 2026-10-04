@@ -534,6 +534,11 @@
 
   .week-coach {
     margin: 0 0 12px;
+  }
+
+  .week-body > .week-coach:last-child { margin: 12px 0 0; }
+
+  .week-coach {
     padding: 12px;
     border: 1px dashed rgba(98, 70, 107, 0.6);
     border-radius: 10px;
@@ -1923,7 +1928,10 @@
           var host = weeks[i + 1] && weeks[i + 1].classList.contains('current') ? weeks[i + 1] : card;
           var from = host === card ? null : text(card, '.week-num');
           var body = host.querySelector('.week-body');
-          var box = body.insertBefore(pendingBox('Weekoverzicht'), body.firstChild);
+          // In the current week, last week's overview sits on top; a week's own overview comes after its last run.
+          var box = from
+            ? body.insertBefore(pendingBox('Weekoverzicht'), body.firstChild)
+            : body.appendChild(pendingBox('Weekoverzicht'));
           box.classList.add('week-coach');
           if (savedWeeks[key]) { renderWeekCoach(box, savedWeeks[key], from); return; }
           schedule(box, {
