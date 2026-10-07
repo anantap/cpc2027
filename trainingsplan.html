@@ -1655,13 +1655,14 @@
       applyRuns(runs);
       markCompletedPhases();
       applyPhaseStats(runs);
-      setupCoach();
+      var coachReady = setupCoach();
       // Past weeks that still have open sessions stay open; finished weeks fold away.
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
         var start = weekStart(card.dataset.plan, Number(card.dataset.week));
         if (start + 7 <= today) setWeekOpen(card, !card.classList.contains('completed'));
       });
-      scrollToTrainingWeek();
+      // Coach boxes above the runs change the layout, so scroll once they're in place.
+      coachReady.then(function () { scrollToTrainingWeek(); });
     });
 
     // ===== Couch to 5K: runs from the Apple Health import, grouped by calendar week =====
@@ -1783,7 +1784,7 @@
       var activities = Array.prototype.slice.call(document.querySelectorAll('.activity[data-run-id]:not(.no-coach)'));
       var slots = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item'));
       var weeks = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan]'));
-      if (!activities.length) return;
+      if (!activities.length) return Promise.resolve();
 
       // The session after this run (for an extra run: after its week), passing over skipped ones.
       function nextSession(item, ignoreSkips) {
@@ -1906,7 +1907,7 @@
         return el('div', 'coach pending', '<div class="coach-k">' + label + '</div><p class="coach-text">Samenvatting wordt geschreven…</p>');
       }
 
-      Promise.all([getJson('/api/summary', {}), getJson('/api/week-summary', {})]).then(function (results) {
+      return Promise.all([getJson('/api/summary', {}), getJson('/api/week-summary', {})]).then(function (results) {
         var saved = results[0] || {};
         var savedWeeks = results[1] || {};
 
@@ -1967,8 +1968,11 @@
       var section = card.closest('.phase-section');
       if (!section.classList.contains('open')) section._setOpen(true);
       setWeekOpen(card, true);
+      // Land on your latest run in that week, so it and the sessions after it are in view.
+      var done = card.querySelectorAll('.run-item.done');
+      var target = done.length ? done[done.length - 1] : card;
       setTimeout(function () {
-        var top = card.getBoundingClientRect().top + window.pageYOffset - pinnedHeaderHeight() - 12;
+        var top = target.getBoundingClientRect().top + window.pageYOffset - pinnedHeaderHeight() - 12;
         window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
       }, delay === undefined ? 250 : delay);
       setupFab(card);
