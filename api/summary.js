@@ -10,6 +10,11 @@ function clean(value) {
 const SESSION_ID = /^(consol|tussen|build|final)-w\d{1,2}-r\d$/;
 // Tips are rewritten when the next session changes (e.g. it was skipped), at most this often per run.
 const MAX_REWRITES = 6;
+// Splits are moving time from this version on. The first version (marked 'moving', live from
+// BAD_SPLITS_SINCE) also dropped running seconds where the GPS distance didn't update, so its
+// summaries were written with splits that were too fast.
+const SPLITS = 'moving-v2';
+const BAD_SPLITS_SINCE = '2026-10-09T11:29:00Z';
 
 function cleanSession(s) {
   if (!s || typeof s !== 'object') return null;
@@ -48,8 +53,9 @@ module.exports = async (req, res) => {
   const key = 'summary:' + id;
   const nextId = next && typeof next.id === 'string' && SESSION_ID.test(next.id) ? next.id : null;
   const existing = await redis.get(key);
-  // Summaries from before splits were moving time get checked once (see below).
-  const current = existing && existing.splits === 'moving';
+  // Summaries from before the current splits get checked once (see below).
+  const current = existing && existing.splits === SPLITS;
+  const badSplits = existing && existing.splits === 'moving' && existing.created >= BAD_SPLITS_SINCE;
   if (current && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
     return res.status(200).json(existing);
   }
@@ -71,9 +77,10 @@ module.exports = async (req, res) => {
       console.error('Splits:', err);
       if (existing && !current) return res.status(200).json(existing);
     }
-    // An old summary only needs rewriting if a stop skewed its splits or its next session changed.
-    if (existing && !current && !stopped && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
-      const checked = { ...existing, splits: 'moving' };
+    // An old summary is rewritten if its splits were off (a stop, or the first moving-time version)
+    // or its next session changed.
+    if (existing && !current && !badSplits && !stopped && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
+      const checked = { ...existing, splits: SPLITS };
       await redis.set(key, checked);
       return res.status(200).json(checked);
     }
@@ -92,7 +99,7 @@ module.exports = async (req, res) => {
     const stored = {
       ...summary,
       next_id: nextId,
-      splits: 'moving',
+      splits: SPLITS,
       rewrites: existing ? (existing.rewrites || 0) + 1 : 0,
       created: new Date().toISOString(),
     };

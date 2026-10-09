@@ -1926,8 +1926,8 @@
           if (summary) {
             activity._summary = summary;
             renderCoach(activity, summary);
-            // Written when splits still counted stops: checked once, and rewritten if a stop skewed them.
-            if (summary.splits !== 'moving') schedule(activity, upgradeTask(activity));
+            // Written with older splits: checked once, and rewritten if those were off.
+            if (summary.splits !== 'moving-v2') schedule(activity, upgradeTask(activity));
             return;
           }
           activity.appendChild(pendingBox('Coach'));
