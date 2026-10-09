@@ -48,7 +48,9 @@ module.exports = async (req, res) => {
   const key = 'summary:' + id;
   const nextId = next && typeof next.id === 'string' && SESSION_ID.test(next.id) ? next.id : null;
   const existing = await redis.get(key);
-  if (existing && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
+  // Summaries from before splits were moving time get checked once (see below).
+  const current = existing && existing.splits === 'moving';
+  if (current && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
     return res.status(200).json(existing);
   }
   if (!process.env.ANTHROPIC_API_KEY) return res.status(503).send('Coach not configured');
@@ -59,10 +61,21 @@ module.exports = async (req, res) => {
   try {
     const run = runs[index];
     let splits = [];
+    let stopped = false;
     try {
-      splits = await fetchSplits(run.id);
+      const both = await fetchSplits(run.id);
+      splits = both.moving;
+      // Did a stop make any kilometre noticeably slower in the old, elapsed-time splits?
+      stopped = both.elapsed.some((s, i) => !splits[i] || s.seconds - splits[i].seconds >= 10);
     } catch (err) {
       console.error('Splits:', err);
+      if (existing && !current) return res.status(200).json(existing);
+    }
+    // An old summary only needs rewriting if a stop skewed its splits or its next session changed.
+    if (existing && !current && !stopped && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
+      const checked = { ...existing, splits: 'moving' };
+      await redis.set(key, checked);
+      return res.status(200).json(checked);
     }
     const summary = await writeSummary({
       run: describe(run),
@@ -79,6 +92,7 @@ module.exports = async (req, res) => {
     const stored = {
       ...summary,
       next_id: nextId,
+      splits: 'moving',
       rewrites: existing ? (existing.rewrites || 0) + 1 : 0,
       created: new Date().toISOString(),
     };

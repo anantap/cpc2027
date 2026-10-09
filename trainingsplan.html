@@ -1838,6 +1838,16 @@
         };
       }
 
+      function upgradeTask(activity) {
+        var task = summaryTask(activity);
+        var render = task.render;
+        task.render = function (summary) {
+          if (summary.created !== activity._summary.created) render(summary);
+          else activity._summary = summary;
+        };
+        return task;
+      }
+
       // After a skip changes, rewrite the tips of runs whose next session is now a different one.
       refreshCoach = function () {
         if (disabled) return;
@@ -1913,7 +1923,13 @@
 
         activities.forEach(function (activity) {
           var summary = saved[activity.dataset.runId];
-          if (summary) { activity._summary = summary; renderCoach(activity, summary); return; }
+          if (summary) {
+            activity._summary = summary;
+            renderCoach(activity, summary);
+            // Written when splits still counted stops: checked once, and rewritten if a stop skewed them.
+            if (summary.splits !== 'moving') schedule(activity, upgradeTask(activity));
+            return;
+          }
           activity.appendChild(pendingBox('Coach'));
           schedule(activity, summaryTask(activity));
         });
