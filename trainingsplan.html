@@ -109,7 +109,9 @@
   .fab {
     position: fixed;
     right: 24px;
-    bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+    /* Pinned to the bottom of what's actually on screen (--screen-bottom, set from the visual
+       viewport): iOS Safari can leave bottom: fixed elements floating mid-screen after scrolling. */
+    top: calc(var(--screen-bottom, 100svh) - 54px - 32px - env(safe-area-inset-bottom, 0px));
     z-index: 30;
     display: inline-flex;
     align-items: center;
@@ -2013,6 +2015,17 @@
     }
 
     // Shown only while the week's phase is open and the week is off screen.
+    var viewport = window.visualViewport;
+    function pinFab() {
+      if (viewport) fab.style.setProperty('--screen-bottom', (viewport.offsetTop + viewport.height) + 'px');
+    }
+    if (viewport) {
+      viewport.addEventListener('resize', pinFab);
+      viewport.addEventListener('scroll', pinFab);
+      window.addEventListener('scroll', pinFab, { passive: true });
+      pinFab();
+    }
+
     function updateFab() {
       if (!fabCard) return;
       var phaseOpen = fabCard.closest('.phase-section').classList.contains('open');
