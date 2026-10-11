@@ -1489,9 +1489,25 @@
     }
 
     function applyRuns(runs) {
-      Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
+      var weeks = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan]')).map(function (card) {
         var start = weekStart(card.dataset.plan, Number(card.dataset.week));
-        if (start <= today) matchWeek(card, runsBetween(runs, start, start + 7), start);
+        return { card: card, start: start, runs: runsBetween(runs, start, start + 7) };
+      });
+      // A run on Monday that makes up for last week's open session counts for last week.
+      weeks.forEach(function (week, i) {
+        var prev = weeks[i - 1];
+        if (!prev || prev.start + 7 !== week.start) return;
+        var slots = prev.card.querySelectorAll('.runs-grid .run-item');
+        var skippedSlots = Array.prototype.filter.call(slots, function (s) { return skips.indexOf(s.dataset.id) !== -1; }).length;
+        var open = slots.length - skippedSlots - prev.runs.length;
+        while (open-- > 0 && week.runs.length && dayNumber(week.runs[0].date) === week.start) {
+          prev.runs.push(week.runs.shift());
+        }
+      });
+      weeks.forEach(function (week) {
+        week.runs.forEach(function (r) { r.phase = week.card.dataset.plan; });
+        week.card._runs = week.runs;
+        if (week.start <= today) matchWeek(week.card, week.runs, week.start);
       });
     }
 
@@ -1535,6 +1551,7 @@
         var finished = range[1] < today || section.classList.contains('completed');
         var phaseRuns = runs.filter(function (r) {
           if (key === 'c25k') return r.source === 'c25k';
+          if (r.phase) return r.phase === key;
           var d = dayNumber(r.date);
           return r.source !== 'c25k' && d >= range[0] && d <= range[1];
         });
@@ -1940,7 +1957,8 @@
         // A week gets its overview once it's over or fully settled, if it has at least one run.
         weeks.forEach(function (card, i) {
           var start = weekStart(card.dataset.plan, Number(card.dataset.week));
-          var finished = start + 7 <= today || card.classList.contains('completed');
+          // An open session can still be made up on Monday, so such a week waits until Tuesday.
+          var finished = start + 8 <= today || card.classList.contains('completed');
           if (!finished || !card.querySelector('.run-item.done')) return;
           var key = card.dataset.plan + '-w' + card.dataset.week;
           // Last week's overview goes to the top of the current week, where it's in view.
@@ -1959,6 +1977,7 @@
               var info = weekInfo(card);
               info.key = key;
               info.start = isoDay(start);
+              info.run_ids = (card._runs || []).map(function (r) { return r.id; });
               info.next = weekInfo(weeks[i + 1]);
               return info;
             },

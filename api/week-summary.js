@@ -59,7 +59,10 @@ module.exports = async (req, res) => {
 
   // Runs come from our own import, never from the request.
   const runs = (await redis.get('runs')) || [];
-  const weekRuns = between(runs, body.start, 7);
+  // The page says which runs it counted for this week (a Monday run can make up for the week
+  // before); only runs from this week or the Monday after are accepted.
+  const ids = Array.isArray(body.run_ids) ? body.run_ids : null;
+  const weekRuns = ids ? between(runs, body.start, 8).filter((r) => ids.includes(r.id)) : between(runs, body.start, 7);
   if (!weekRuns.length) return res.status(409).send('No runs in this week');
 
   if (!(await redis.set('weeksummary-lock:' + body.key, 1, { nx: true, ex: 120 }))) {
