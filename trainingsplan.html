@@ -1141,8 +1141,8 @@
   (function () {
     // Monday of week 1 of each plan; runs are matched to weeks by date.
     var PLAN_STARTS = { consol: '2026-08-17', build: '2026-11-30' };
-    // Mondays of weeks taken off (e.g. sick); later consolidation weeks shift one week.
-    var SKIPPED_WEEKS = [];
+    // Weeks taken off (from Monday), with a note; later consolidation/tussenfase weeks shift one week.
+    var SKIPPED_WEEKS = [{ start: '2026-10-12', note: 'Rustweek · shinty mcsplinty' }];
     var DAY = 86400000;
     var MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
 
@@ -1155,7 +1155,7 @@
       return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()];
     }
 
-    var skipped = SKIPPED_WEEKS.map(dayNumber);
+    var skipped = SKIPPED_WEEKS.map(function (w) { return dayNumber(w.start); });
     var today = dayNumber(new Date().toISOString().slice(0, 10));
 
     // First day of a plan week, stepping over skipped weeks (they only fall in consolidation/tussenfase).
@@ -1225,7 +1225,8 @@
       card.querySelector('.week-num').insertAdjacentElement('afterend',
         el('div', 'week-dates', formatDay(start) + ' – ' + formatDay(start + 6)));
       if (skipped.indexOf(start - 7) !== -1) {
-        var marker = el('div', 'week-card skipped', 'Overgeslagen (ziek) · ' + formatDay(start - 7) + ' – ' + formatDay(start - 1));
+        var note = SKIPPED_WEEKS[skipped.indexOf(start - 7)].note;
+        var marker = el('div', 'week-card skipped', note + ' · ' + formatDay(start - 7) + ' – ' + formatDay(start - 1));
         marker.dataset.start = String(start - 7);
         card.parentNode.insertBefore(marker, card);
       }
@@ -1493,15 +1494,18 @@
         var start = weekStart(card.dataset.plan, Number(card.dataset.week));
         return { card: card, start: start, runs: runsBetween(runs, start, start + 7) };
       });
-      // A run on Monday that makes up for last week's open session counts for last week.
-      weeks.forEach(function (week, i) {
-        var prev = weeks[i - 1];
-        if (!prev || prev.start + 7 !== week.start) return;
+      // A run on Monday that makes up for last week's open session counts for last week,
+      // also when that Monday starts a week taken off.
+      weeks.forEach(function (prev, i) {
+        var monday = prev.start + 7;
+        var next = weeks[i + 1] && weeks[i + 1].start === monday ? weeks[i + 1].runs : null;
+        if (!next && skipped.indexOf(monday) === -1) return;
+        var mondayRuns = next || runsBetween(runs, monday, monday + 1);
         var slots = prev.card.querySelectorAll('.runs-grid .run-item');
         var skippedSlots = Array.prototype.filter.call(slots, function (s) { return skips.indexOf(s.dataset.id) !== -1; }).length;
         var open = slots.length - skippedSlots - prev.runs.length;
-        while (open-- > 0 && week.runs.length && dayNumber(week.runs[0].date) === week.start) {
-          prev.runs.push(week.runs.shift());
+        while (open-- > 0 && mondayRuns.length && dayNumber(mondayRuns[0].date) === monday) {
+          prev.runs.push(mondayRuns.shift());
         }
       });
       weeks.forEach(function (week) {
