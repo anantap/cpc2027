@@ -969,7 +969,7 @@
       <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
     </button>
     <div class="phase-body">
-      <div class="note">Tot de start van de 10K-opbouw houd je de basis vast: elke week hetzelfde, niets erbij. Voelt het zwaar, loop dan de lange run ook 5 km.</div>
+      <div class="note">Tot de start van de 10K-opbouw houd je de basis vast: elke week hetzelfde, niets erbij. Voelt het zwaar, loop dan de lange run ook 5 km. Vanaf 9 november sluit je run 1 af met 4 korte versnellingen: ontspannen hard, niet sprinten, op een vlakke, zachte ondergrond. Speelt je scheenbeen op, laat ze dan weg.</div>
       <div class="weeks" id="tussenfase-weeks"></div>
     </div>
   </section>
@@ -1203,15 +1203,18 @@
     (function buildTussenfase() {
       var container = document.getElementById('tussenfase-weeks');
       var buildStart = dayNumber(PLAN_STARTS.build);
+      // From 9 November, Run 1 ends with strides (once the shin has had a few normal weeks).
+      var stridesFrom = dayNumber('2026-11-09');
       for (var week = 1; weekStart('tussen', week) < buildStart; week++) {
         var id = 'tussen-w' + week;
+        var run1 = weekStart('tussen', week) >= stridesFrom ? 'rustig + 4× 20 sec vlot versnellen' : 'rustig';
         var card = el('div', 'week-card');
         card.dataset.plan = 'tussen';
         card.dataset.week = String(week);
         card.innerHTML =
           '<div class="week-head"><div class="week-num">Week ' + week + '</div><div class="week-focus">Basis vasthouden</div></div>' +
           '<div class="runs-grid">' +
-          '<div class="run-item check-row" data-id="' + id + '-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>' +
+          '<div class="run-item check-row" data-id="' + id + '-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">' + run1 + '</div></div>' +
           '<div class="run-item check-row" data-id="' + id + '-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>' +
           '<div class="run-item check-row" data-id="' + id + '-r3"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 3 · lang</div><div class="run-dist">6 km</div><div class="run-desc">rustig</div></div>' +
           '</div>';
