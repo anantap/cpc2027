@@ -25,9 +25,13 @@
     --on-accent: #ffffff;
     --line: rgba(29, 29, 27, 0.09);
     /* Four type sizes: labels, text, titles and numbers, and the one big number. */
-    --fs-s: 13px;
+    --fs-s: 12px;
     --fs-m: 16px;
-    --fs-l: 22px;
+    --fs-l: 24px;
+    /* Line heights on the 4px grid. */
+    --lh-s: 16px;
+    --lh-m: 24px;
+    --lh-l: 32px;
     --fs-xl: clamp(64px, 20vw, 84px);
   }
 
@@ -49,8 +53,7 @@
     position: fixed;
     inset: 0;
     z-index: -1;
-    background:
-      radial-gradient(90% 55% at 10% 0%, #dde3e8 0%, rgba(221, 227, 232, 0) 70%),
+    background: radial-gradient(90% 55% at 10% 0%, #dde3e8 0%, rgba(221, 227, 232, 0) 70%),
       radial-gradient(70% 45% at 100% 55%, #f3e3d6 0%, rgba(243, 227, 214, 0) 70%),
       radial-gradient(90% 50% at 0% 100%, #e2e5db 0%, rgba(226, 229, 219, 0) 70%),
       var(--bg);
@@ -59,13 +62,13 @@
 
   .eyebrow {
     color: var(--text);
-    font-size: var(--fs-m);
+    font-size: var(--fs-m); line-height: var(--lh-m);
     font-weight: 500;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   h1 {
-    font-size: var(--fs-l);
+    font-size: var(--fs-l); line-height: var(--lh-l);
     font-weight: 500;
     margin: 0 0 8px 0;
     letter-spacing: -0.01em;
@@ -74,9 +77,9 @@
 
   /* ===== Checkbox (shared across phases & exercises) ===== */
   .checkbox {
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
     border: 1.5px solid var(--text-faint);
     flex-shrink: 0;
     cursor: pointer;
@@ -87,7 +90,7 @@
   .wrap {
     max-width: 480px;
     margin: 0 auto;
-    padding: 28px 16px 64px;
+    padding: 24px 16px 64px;
   }
 
   .check-row.checked .checkbox {
@@ -104,7 +107,7 @@
     align-items: center;
     justify-content: center;
     color: var(--on-accent);
-    font-size: var(--fs-s);
+    font-size: var(--fs-s); line-height: var(--lh-s);
     font-weight: 500;
   }
 
@@ -119,10 +122,10 @@
   .view {
     max-width: 480px;
     margin: 0 auto;
-    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px calc(36px + env(safe-area-inset-bottom, 0px));
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(32px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
 
@@ -132,19 +135,19 @@
   }
 
   .view-title {
-    margin: 14px 0 0;
+    margin: 16px 0 0;
     font-size: var(--fs-l);
     font-weight: 400;
-    line-height: 1.25;
+    line-height: var(--lh-l);
     letter-spacing: -0.015em;
   }
   .view-title span { display: block; color: var(--text-dim); }
 
-  .view-label { margin: 34px 0 2px; font-size: var(--fs-s); color: var(--text); }
+  .view-label { margin: 32px 0 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); }
 
   .glass {
     background: var(--surface);
-    border-radius: 22px;
+    border-radius: 24px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 10px 30px rgba(60, 55, 40, 0.06);
     -webkit-backdrop-filter: blur(24px) saturate(1.2);
     backdrop-filter: blur(24px) saturate(1.2);
@@ -158,20 +161,20 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 268px;
-    padding: 26px 26px 28px;
+    min-height: 272px;
+    padding: 24px 24px 24px;
   }
-  .sun-card-title { font-size: var(--fs-l); line-height: 1.25; max-width: calc(100% - 110px); }
+  .sun-card-title { font-size: var(--fs-l); line-height: var(--lh-l); max-width: calc(100% - 112px); }
   /* The day and date bottom left, across from the distance. */
   .sun-card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
-  .sun-card-date { font-size: var(--fs-l); line-height: 1.25; color: var(--text-dim); }
+  .sun-card-date { font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text-dim); }
   /* The week's progress as a sunrise: the sun fills up from below with every run done (--f, 0 to 1). */
   .sun {
     position: absolute;
-    top: 26px;
-    right: 26px;
-    width: 92px;
-    height: 92px;
+    top: 24px;
+    right: 24px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     background: radial-gradient(circle at 38% 32%, #f3f0ea, #dcd7cd);
   }
@@ -202,16 +205,16 @@
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
-  .big sup { font-size: var(--fs-m); letter-spacing: 0; vertical-align: top; margin-left: 4px; position: relative; top: -4px; }
-  .big.text { font-size: var(--fs-l); letter-spacing: -0.02em; line-height: 1; }
+  .big sup { font-size: var(--fs-m); line-height: var(--lh-m); letter-spacing: 0; vertical-align: top; margin-left: 4px; position: relative; top: -4px; }
+  .big.text { font-size: var(--fs-l); letter-spacing: -0.02em; line-height: var(--lh-l); }
 
   /* A slider-like bar: the filled part carries the label and a handle. */
   .slider {
     position: relative;
     display: flex;
     align-items: center;
-    height: 64px;
-    border-radius: 20px;
+    height: 56px;
+    border-radius: 24px;
     background: rgba(255, 255, 255, 0.38);
     overflow: hidden;
   }
@@ -219,59 +222,59 @@
     position: absolute;
     inset: 0 auto 0 0;
     /* At least room for the label; never over the value on the right. */
-    width: calc(118px + (100% - 118px - 128px) * var(--f, 0));
+    width: calc(120px + (100% - 120px - 128px) * var(--f, 0));
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 18px 0 26px;
-    border-radius: 20px;
+    padding: 0 16px 0 24px;
+    border-radius: 24px;
     background: rgba(214, 210, 199, 0.85);
-    font-size: var(--fs-m);
+    font-size: var(--fs-m); line-height: var(--lh-m);
     white-space: nowrap;
     transition: width 0.8s cubic-bezier(0.2, 0, 0, 1);
   }
-  .slider-v { margin-left: auto; padding-right: 26px; font-size: var(--fs-m); position: relative; font-variant-numeric: tabular-nums; }
+  .slider-v { margin-left: auto; padding-right: 24px; font-size: var(--fs-m); line-height: var(--lh-m); position: relative; font-variant-numeric: tabular-nums; }
   .slider.on .slider-fill { background: rgba(245, 176, 132, 0.6); }
 
   /* A list of big labels with a small value on the right. */
-  .list-card { padding: 6px 26px; }
+  .list-card { padding: 4px 24px; }
   .list-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: 12px;
-    padding: 15px 0;
+    gap: 8px;
+    padding: 16px 0;
     border-top: 1px solid var(--line);
   }
   .list-row:first-child { border-top: 0; }
-  .list-row span { font-size: var(--fs-l); letter-spacing: -0.01em; }
-  .list-row small { font-size: var(--fs-s); color: var(--text); white-space: nowrap; }
+  .list-row span { font-size: var(--fs-l); line-height: var(--lh-l); letter-spacing: -0.01em; }
+  .list-row small { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); white-space: nowrap; }
   .list-row small.dim { color: var(--text-dim); }
 
   /* This week's runs, each with its status on the right. */
-  .week-list { padding: 8px 26px; }
+  .week-list { padding: 8px 24px; }
   /* The label across the full width; the distance with the status beside it. */
-  .week-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .week-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; padding: 16px 0; border-top: 1px solid var(--line); }
   .week-row > div { display: contents; }
   .week-row .k { grid-column: 1 / -1; }
   .week-row:first-child { border-top: 0; }
-  .week-row .k { font-size: var(--fs-s); color: var(--text-dim); margin-bottom: 3px; }
-  .week-row .v { font-size: var(--fs-l); letter-spacing: -0.02em; }
-  .week-row .status { font-size: var(--fs-s); color: var(--text-dim); white-space: nowrap; }
+  .week-row .k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); margin-bottom: 4px; }
+  .week-row .v { font-size: var(--fs-l); line-height: var(--lh-l); letter-spacing: -0.02em; }
+  .week-row .status { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); white-space: nowrap; }
   .week-row.done .status, .week-row.next .status { color: var(--accent-text); }
   .week-row.skipped .v, .week-row.missed .v { color: var(--text-faint); }
 
   /* The coach's tips: a two-tone heading like the other cards, then one tip per row. */
-  .coach-card { padding: 22px 26px 8px; }
-  .coach-card .coach-k { margin: 0; font-size: var(--fs-l); line-height: 1.25; color: var(--text); }
-  .coach-card .coach-from { font-size: var(--fs-l); line-height: 1.25; color: var(--text-dim); }
-  .coach-card .coach-tips { margin-top: 14px; }
+  .coach-card { padding: 24px 24px 8px; }
+  .coach-card .coach-k { margin: 0; font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text); }
+  .coach-card .coach-from { font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text-dim); }
+  .coach-card .coach-tips { margin-top: 16px; }
   .coach-card .coach-tips li {
     margin: 0;
-    padding: 14px 0;
+    padding: 16px 0;
     border-top: 1px solid var(--line);
     font-size: var(--fs-m);
-    line-height: 1.45;
+    line-height: var(--lh-m);
     color: var(--text);
   }
   .coach-card .coach-tips li::before { content: none; }
@@ -280,22 +283,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 54px;
+    height: 56px;
     margin-top: 8px;
     border-radius: 999px;
     background: rgba(214, 210, 199, 0.75);
     color: var(--text);
-    font-size: var(--fs-m);
+    font-size: var(--fs-m); line-height: var(--lh-m);
     text-decoration: none;
   }
 
   @media (max-height: 720px) {
-    .view-label { margin-top: 18px; }
-    .sun-card { min-height: 236px; }
+    .view-label { margin-top: 16px; }
+    .sun-card { min-height: 240px; }
   }
 
   @media (max-width: 400px) {
-    .sun { width: 74px; height: 74px; }
+    .sun { width: 72px; height: 72px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -313,22 +316,21 @@
       /* On very tall screens it stops growing and sits in the middle. */
       height: min(100svh, 920px);
       margin-top: max(0px, calc((100svh - 920px) / 2));
-      padding: clamp(24px, 5svh, 56px) 40px;
+      padding: clamp(24px, 5svh, 48px) 32px;
       display: grid;
       grid-template-columns: 1.15fr 1fr 1fr;
-      grid-template-areas:
-        "title  title title"
+      grid-template-areas: "title  title title"
         "next   week  total"
         "next   week  bars"
         "next   coach coach"
         "schema coach coach";
       grid-template-rows: auto auto auto 1fr auto;
-      gap: 16px 20px;
+      gap: 16px 24px;
       /* All columns as tall as the tallest, so their bottoms line up. */
       align-items: stretch;
     }
-    #home .view-title { grid-area: title; margin: 0 0 18px; }
-    .home-group { display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+    #home .view-title { grid-area: title; margin: 0 0 16px; }
+    .home-group { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
     .home-schema { grid-area: schema; margin-top: 0; }
     .home-next { grid-area: next; }
     .home-coach { grid-area: coach; }
@@ -344,23 +346,27 @@
     /* Wide here, so the heading fits on one line and the tips sit side by side. */
     #home .coach-card .coach-k, #home .coach-card .coach-from { display: inline; }
     #home .coach-card .coach-k::after { content: " "; }
-    #home .coach-card .coach-tips { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; }
+    #home .coach-card .coach-tips { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
 
     /* Shorter laptop windows: tighten everything a little so it still fits. */
     @media (max-height: 820px) {
       #home .list-row { padding: 8px 0; }
-      #home .week-row { padding: 10px 0; }
-      #home .slider { height: 46px; }
+      #home .week-row { padding: 8px 0; }
+      #home .slider { height: 48px; }
       #home .pill-btn { height: 48px; margin-top: 0; }
-      #home .coach-card { padding: 16px 22px 4px; }
-      #home .coach-card .coach-tips li { padding: 10px 0; }
+      #home .coach-card { padding: 16px 24px 4px; }
+      #home .coach-card .coach-tips { margin-top: 8px; }
+      #home .coach-card .coach-tips li { padding: 8px 0; font-size: var(--fs-s); line-height: var(--lh-s); }
+      #home .list-row span { font-size: var(--fs-m); line-height: var(--lh-m); }
+      #home { row-gap: 8px; }
+      #home .view-title { margin-bottom: 8px; }
       #home { --fs-xl: 88px; }
       #home .sun { width: 96px; height: 96px; }
     }
     /* Each tile speaks for itself here, and without labels the columns line up at the top. */
     #home .view-label { display: none; }
     #home .sun { width: 120px; height: 120px; }
-    #home { --fs-xl: 110px; }
+    #home { --fs-xl: 112px; }
   }
 
   /* Each screen fades in when it's shown (display: none to visible restarts the animation).
@@ -387,7 +393,7 @@
     left: 50%;
     /* Pinned to the bottom of what's actually on screen (--screen-bottom, set from the visual
        viewport): iOS Safari can leave bottom: fixed elements floating mid-screen after scrolling. */
-    top: calc(var(--screen-bottom, 100svh) - 54px - 28px - env(safe-area-inset-bottom, 0px));
+    top: calc(var(--screen-bottom, 100svh) - 48px - 24px - env(safe-area-inset-bottom, 0px));
     z-index: 30;
     display: flex;
     transform: translateX(-50%);
@@ -397,12 +403,12 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    height: 54px;
-    padding: 0 22px 0 18px;
+    height: 56px;
+    padding: 0 24px 0 16px;
     border: 0;
     border-radius: 999px;
     font: inherit;
-    font-size: var(--fs-m);
+    font-size: var(--fs-m); line-height: var(--lh-m);
     font-weight: 500;
     white-space: nowrap;
     text-decoration: none;
@@ -446,7 +452,7 @@
   .fab.show {
     max-width: 200px;
     margin-left: 8px;
-    padding: 0 22px 0 18px;
+    padding: 0 24px 0 16px;
     opacity: 1;
     pointer-events: auto;
   }
@@ -470,7 +476,7 @@
     z-index: 20;
     width: 100%;
     max-width: 480px;
-    padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 10px;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 16px 8px;
     background: rgba(238, 237, 233, 0.72);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
@@ -507,20 +513,20 @@
   /* Every card in the schema: warm grey glass with a soft shadow, no outline. */
   .phase-section:not(.open), .week-card, .note, .principles {
     background: var(--surface);
-    border-radius: 22px;
+    border-radius: 24px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 10px 30px rgba(60, 55, 40, 0.06);
   }
 
   /* ===== Phases ===== */
-  .phase-section { margin-bottom: 10px; border-radius: 22px; }
+  .phase-section { margin-bottom: 8px; border-radius: 24px; }
 
   .phase-toggle {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     /* Same inset open or closed, so the title doesn't move. */
-    padding: 20px 22px;
+    padding: 24px 24px;
     background: none;
     border: 0;
     color: inherit;
@@ -529,17 +535,17 @@
     cursor: pointer;
   }
 
-  .phase-head { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .phase-head { flex: 1; display: flex; flex-direction: column; gap: 4px; }
   /* Title first, dates under it in grey. */
-  .phase-title { font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.015em; line-height: 1.25; }
-  .phase-dates { order: 1; font-size: var(--fs-m); color: var(--text-dim); }
+  .phase-title { font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.015em; line-height: var(--lh-l); }
+  .phase-dates { order: 1; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text-dim); }
 
   .phase-section.completed .phase-title { color: var(--text-dim); text-decoration: line-through; }
   .phase-section.current .phase-dates { color: var(--accent-text); }
 
   .chevron {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     flex-shrink: 0;
     fill: none;
     stroke: var(--text-dim);
@@ -551,39 +557,39 @@
 
   .phase-section.open > .phase-toggle .chevron { transform: rotate(180deg); }
 
-  .phase-body { display: none; padding-bottom: 20px; }
+  .phase-body { display: none; padding-bottom: 24px; }
   .phase-section.open .phase-body { display: block; }
-  .phase-stats { margin-bottom: 12px; }
+  .phase-stats { margin-bottom: 8px; }
 
   .note {
-    padding: 18px 22px;
+    padding: 16px 24px;
     font-size: var(--fs-m);
     color: var(--text-dim);
-    line-height: 1.5;
-    margin-bottom: 12px;
+    line-height: var(--lh-m);
+    margin-bottom: 8px;
   }
 
   /* ===== Weeks ===== */
-  .weeks { display: flex; flex-direction: column; gap: 10px; }
+  .weeks { display: flex; flex-direction: column; gap: 8px; }
 
-  .week-card { padding: 20px 18px; }
-  .week-card.collapsed { padding-bottom: 20px; }
+  .week-card { padding: 24px 16px; }
+  .week-card.collapsed { padding-bottom: 24px; }
 
   /* "Week 3" dark with its focus in grey, like "Hoi Ananta.", then the dates. */
   .week-head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    column-gap: 10px;
+    column-gap: 8px;
     padding: 0 4px;
     cursor: pointer;
     user-select: none;
   }
-  .week-num { font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.015em; white-space: nowrap; }
+  .week-num { font-size: var(--fs-l); line-height: var(--lh-l); font-weight: 400; letter-spacing: -0.015em; white-space: nowrap; }
   .week-head .chevron { order: 1; margin-left: auto; width: 20px; height: 20px; }
-  .week-focus { order: 2; flex-basis: 100%; font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.015em; line-height: 1.25; color: var(--text-dim); }
-  .week-dates { order: 3; flex-basis: 100%; margin-top: 6px; font-size: var(--fs-s); color: var(--text-dim); }
-  .week-total { order: 4; flex-basis: 100%; margin-top: 2px; font-size: var(--fs-s); color: var(--text-dim); }
+  .week-focus { order: 2; flex-basis: 100%; font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.015em; line-height: var(--lh-l); color: var(--text-dim); }
+  .week-dates { order: 3; flex-basis: 100%; margin-top: 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
+  .week-total { order: 4; flex-basis: 100%; margin-top: 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
   .week-total strong { font-weight: 400; color: var(--text); }
 
   .week-card:not(.collapsed) .week-head .chevron { transform: rotate(180deg); }
@@ -595,14 +601,14 @@
   .week-card.completed .week-total strong { color: var(--text-faint); }
   .week-card.completed .week-focus { text-decoration: line-through; }
 
-  .week-card.skipped { padding: 18px 22px; color: var(--text-dim); font-size: var(--fs-m); }
+  .week-card.skipped { padding: 16px 24px; color: var(--text-dim); font-size: var(--fs-m); line-height: var(--lh-m); }
 
   .week-body { padding-top: 16px; }
   .week-card.collapsed .week-body { display: none; }
 
-  .week-slider { height: 52px; margin-bottom: 10px; border-radius: 16px; }
-  .week-slider .slider-fill { border-radius: 16px; padding-left: 18px; font-size: var(--fs-m); }
-  .week-slider .slider-v { padding-right: 18px; font-size: var(--fs-m); }
+  .week-slider { height: 48px; margin-bottom: 8px; border-radius: 16px; }
+  .week-slider .slider-fill { border-radius: 16px; padding-left: 16px; font-size: var(--fs-m); line-height: var(--lh-m); }
+  .week-slider .slider-v { padding-right: 16px; font-size: var(--fs-m); line-height: var(--lh-m); }
 
   /* ===== Runs: a small label, the distance large and light, the status as quiet text ===== */
   .runs-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -612,9 +618,9 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas: "label label" "dist status" "desc desc" "tag tag" "act act";
-    column-gap: 12px;
+    column-gap: 8px;
     align-items: center;
-    padding: 16px 18px;
+    padding: 16px 16px;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.42);
     cursor: default;
@@ -632,23 +638,23 @@
   .run-item .checkbox { display: none; }
 
   .run-plan { display: contents; }
-  .run-label { grid-area: label; font-size: var(--fs-s); color: var(--text-dim); line-height: 1.35; margin-bottom: 3px; }
-  .run-dist { grid-area: dist; font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--text); }
-  .run-desc { grid-area: desc; margin-top: 3px; font-size: var(--fs-s); color: var(--text-dim); line-height: 1.35; }
+  .run-label { grid-area: label; font-size: var(--fs-s); color: var(--text-dim); line-height: var(--lh-s); margin-bottom: 4px; }
+  .run-dist { grid-area: dist; font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.02em; line-height: var(--lh-l); color: var(--text); }
+  .run-desc { grid-area: desc; margin-top: 4px; font-size: var(--fs-s); color: var(--text-dim); line-height: var(--lh-s); }
   .run-plan .interval-tag,
   .run-plan .tempo-tag,
   .run-plan .race-tag {
     grid-area: tag;
     justify-self: start;
     margin: 8px 0 0;
-    padding: 2px 9px;
+    padding: 4px 8px;
     border-radius: 999px;
     background: rgba(29, 29, 27, 0.06);
-    font-size: var(--fs-s);
+    font-size: var(--fs-s); line-height: var(--lh-s);
     color: var(--text);
   }
 
-  .run-status { grid-area: status; font-size: var(--fs-s); color: var(--accent-text); white-space: nowrap; justify-self: end; }
+  .run-status { grid-area: status; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--accent-text); white-space: nowrap; justify-self: end; }
   .run-item.planned .run-status,
   .run-item.missed .run-status,
   .run-item.skipped .run-status { display: none; }
@@ -666,9 +672,9 @@
     justify-self: end;
     display: inline-flex;
     align-items: center;
-    height: 28px;
+    height: 32px;
     color: var(--text-dim);
-    font-size: var(--fs-s);
+    font-size: var(--fs-s); line-height: var(--lh-s);
     white-space: nowrap;
     overflow: hidden;
     cursor: pointer;
@@ -679,9 +685,9 @@
 
   .skip-x {
     display: none;
-    width: 22px;
-    height: 22px;
-    margin-left: 6px;
+    width: 24px;
+    height: 24px;
+    margin-left: 4px;
     padding: 0;
     border: 0;
     border-radius: 50%;
@@ -704,40 +710,40 @@
   /* A finished run, in the style of the next-run card: label over value. */
   .activity {
     grid-area: act;
-    margin-top: 14px;
-    padding-top: 14px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px solid rgba(239, 125, 60, 0.25);
   }
-  .act-date { font-size: var(--fs-s); color: var(--text-dim); }
-  .act-name { font-size: var(--fs-m); font-weight: 500; margin: 2px 0 12px; }
+  .act-date { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
+  .act-name { font-size: var(--fs-m); line-height: var(--lh-m); font-weight: 500; margin: 4px 0 8px; }
   .act-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .act-stat .k { font-size: var(--fs-s); color: var(--text-dim); margin-bottom: 4px; }
-  .act-stat .v { font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.01em; white-space: nowrap; }
+  .act-stat .k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); margin-bottom: 4px; }
+  .act-stat .v { font-size: var(--fs-l); line-height: var(--lh-l); font-weight: 400; letter-spacing: -0.01em; white-space: nowrap; }
 
   /* ===== Coach, under a run and as a week overview ===== */
   .coach {
-    margin-top: 14px;
-    padding-top: 14px;
+    margin-top: 16px;
+    padding-top: 16px;
     border-top: 1px solid rgba(239, 125, 60, 0.25);
     animation: coach-in 0.3s ease both;
   }
-  .coach-k { font-size: var(--fs-s); color: var(--accent-text); margin-bottom: 4px; }
-  .coach-text { margin: 0; font-size: var(--fs-m); line-height: 1.45; color: var(--text); }
-  .coach-sub { margin-top: 12px; }
+  .coach-k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--accent-text); margin-bottom: 4px; }
+  .coach-text { margin: 0; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text); }
+  .coach-sub { margin-top: 8px; }
 
-  .week-coach { margin: 0 0 10px; padding: 16px 18px; background: var(--accent-soft); border-radius: 16px; border: 0; }
-  .week-body > .week-coach:last-child { margin: 10px 0 0; }
+  .week-coach { margin: 0 0 8px; padding: 16px 16px; background: var(--accent-soft); border-radius: 16px; border: 0; }
+  .week-body > .week-coach:last-child { margin: 8px 0 0; }
 
   .coach-tips { margin: 8px 0 0; padding: 0; list-style: none; }
-  .coach-tips li { position: relative; padding-left: 20px; margin-top: 6px; font-size: var(--fs-m); line-height: 1.45; color: var(--text); }
+  .coach-tips li { position: relative; padding-left: 24px; margin-top: 4px; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text); }
   .coach-tips li::before { content: "→"; position: absolute; left: 0; color: var(--accent-text); }
 
   .coach.updating .coach-tips { opacity: 0.4; transition: opacity 0.25s ease; }
   .coach.updating .coach-tips::after {
     content: "Tips worden bijgewerkt…";
     display: block;
-    margin-top: 6px;
-    font-size: var(--fs-s);
+    margin-top: 4px;
+    font-size: var(--fs-s); line-height: var(--lh-s);
     font-style: italic;
     color: var(--text-dim);
   }
@@ -747,9 +753,9 @@
   @keyframes coach-pulse { 50% { opacity: 0.45; } }
 
   /* ===== Rules of thumb, as a list card ===== */
-  .section-label { margin: 34px 0 10px; font-size: var(--fs-s); color: var(--text); }
-  .principles { margin: 0; padding: 6px 22px; list-style: none; }
-  .principles li { padding: 14px 0; border-top: 1px solid var(--line); font-size: var(--fs-m); line-height: 1.5; color: var(--text-dim); }
+  .section-label { margin: 32px 0 8px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); }
+  .principles { margin: 0; padding: 4px 24px; list-style: none; }
+  .principles li { padding: 16px 0; border-top: 1px solid var(--line); font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text-dim); }
   .principles li:first-child { border-top: 0; }
   .principles strong { color: var(--text); font-weight: 500; }
 
@@ -769,7 +775,7 @@
   <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
 
   <div class="home-group home-next">
-  <a class="glass sun-card" href="#schema" style="margin-top: 30px">
+  <a class="glass sun-card" href="#schema" style="margin-top: 32px">
     <div class="sun-card-title" id="home-when">–</div>
     <span class="sun" role="img"></span>
     <div class="sun-card-foot">
