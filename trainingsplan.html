@@ -820,7 +820,7 @@
 
   <div class="home-group home-coach">
   <div class="glass coach-card" id="home-coach" hidden>
-    <div class="coach-k">Tip van de coach</div>
+    <div class="coach-k">Tips van je coach</div>
     <div class="coach-from" id="home-coach-from"></div>
     <ul class="coach-tips" id="home-coach-tips"></ul>
   </div>
@@ -2289,7 +2289,7 @@
       var summary = activity._summary;
       var list = document.getElementById('home-coach-tips');
       list.innerHTML = '';
-      document.getElementById('home-coach-from').textContent = 'na je vorige run';
+      document.getElementById('home-coach-from').textContent = 'voor je volgende run';
       if (summary && summary.tips) {
         summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
       } else {
