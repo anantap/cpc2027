@@ -1233,12 +1233,15 @@
       var stridesFrom = dayNumber('2026-11-09');
       for (var week = 1; weekStart('tussen', week) < buildStart; week++) {
         var id = 'tussen-w' + week;
-        var run1 = weekStart('tussen', week) >= stridesFrom ? 'rustig + 4× 20 sec vlot versnellen' : 'rustig';
+        var strides = weekStart('tussen', week) >= stridesFrom;
+        var run1 = strides ? 'rustig + 4× 20 sec vlot versnellen' : 'rustig';
+        // What changes from week to week: picking up after the rest week, then rhythm, then strides.
+        var focus = strides ? 'Met korte versnellingen' : week === 1 ? 'Rustig weer oppakken' : 'Ritme vasthouden';
         var card = el('div', 'week-card');
         card.dataset.plan = 'tussen';
         card.dataset.week = String(week);
         card.innerHTML =
-          '<div class="week-head"><div class="week-num">Week ' + week + '</div><div class="week-focus">Basis vasthouden</div></div>' +
+          '<div class="week-head"><div class="week-num">Week ' + week + '</div><div class="week-focus">' + focus + '</div></div>' +
           '<div class="runs-grid">' +
           '<div class="run-item check-row" data-id="' + id + '-r1"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 1</div><div class="run-dist">5 km</div><div class="run-desc">' + run1 + '</div></div>' +
           '<div class="run-item check-row" data-id="' + id + '-r2"><div class="checkbox" role="checkbox" aria-checked="false"></div><div class="run-label">Run 2</div><div class="run-dist">5 km</div><div class="run-desc">rustig</div></div>' +
