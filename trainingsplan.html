@@ -356,7 +356,10 @@
       #home .pill-btn { height: 48px; margin-top: 0; }
       #home .coach-card { padding: 16px 24px 4px; }
       #home .coach-card .coach-tips { margin-top: 8px; }
-      #home .coach-card .coach-tips li { padding: 8px 0; font-size: var(--fs-s); line-height: var(--lh-s); }
+      #home .coach-card .coach-tips li { padding: 8px 0; }
+      /* The greeting on one line, to leave room for the tips at full size. */
+      #home .view-title span { display: inline; }
+      #home .view-title span::before { content: " "; }
       #home .list-row span { font-size: var(--fs-m); line-height: var(--lh-m); }
       #home { row-gap: 8px; }
       #home .view-title { margin-bottom: 8px; }
