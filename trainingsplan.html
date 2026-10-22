@@ -662,7 +662,7 @@
   .runs-grid .run-item.planned,
   .runs-grid .run-item.missed,
   .runs-grid .run-item.skipped { grid-template-columns: minmax(0, 1fr) 112px; }
-  .runs-grid .run-item.done { background: var(--accent-soft); }
+  .runs-grid .run-item.done { background: rgba(255, 255, 255, 0.42); }
   .runs-grid .run-item.missed,
   .runs-grid .run-item.skipped { background: rgba(255, 255, 255, 0.2); }
 
@@ -744,7 +744,7 @@
     grid-area: act;
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid rgba(239, 125, 60, 0.25);
+    border-top: 1px solid var(--line);
   }
   .act-date { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
   .act-name { font-size: var(--fs-m); line-height: var(--lh-m); font-weight: 500; margin: 4px 0 8px; }
@@ -756,14 +756,14 @@
   .coach {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid rgba(239, 125, 60, 0.25);
+    border-top: 1px solid var(--line);
     animation: coach-in 0.3s ease both;
   }
   .coach-k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--accent-text); margin-bottom: 4px; }
   .coach-text { margin: 0; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text); }
   .coach-sub { margin-top: 8px; }
 
-  .week-coach { margin: 0 0 8px; padding: 16px 16px; background: var(--accent-soft); border-radius: 16px; border: 0; }
+  .week-coach { margin: 0 0 8px; padding: 16px 16px; background: rgba(255, 255, 255, 0.42); border-radius: 16px; border: 0; }
   .week-body > .week-coach:last-child { margin: 8px 0 0; }
 
   .coach-tips { margin: 8px 0 0; padding: 0; list-style: none; }
