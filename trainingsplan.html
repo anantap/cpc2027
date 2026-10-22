@@ -79,7 +79,7 @@
   }
 
   .wrap {
-    max-width: 720px;
+    max-width: 480px;
     margin: 0 auto;
     padding: 28px 16px 64px;
   }
@@ -107,7 +107,7 @@
 
   .phase-stats { margin-bottom: 16px; }
 
-  /* ===== Start screen and run screen: soft glass cards on the mist ===== */
+  /* ===== Start screen: soft glass cards on the mist ===== */
   [hidden] { display: none !important; }
 
   .view {
@@ -123,7 +123,7 @@
   .top .back-link { display: inline-block; margin: -6px 0 6px; }
 
   /* Inter Tight runs tight at small sizes. */
-  .stat .k, .act-stat .k, .kv .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .week-row .k, .week-row .status, .view-label {
+  .stat .k, .act-stat .k, .kv .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .view-label {
     letter-spacing: 0.01em;
   }
 
@@ -246,34 +246,6 @@
   .list-row small { font-size: 13px; color: var(--text); white-space: nowrap; }
   .list-row small.dim { color: var(--text-dim); }
 
-  /* This week's runs, each with its status on the right. */
-  .week-list { padding: 8px 26px; }
-  .week-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
-  .week-row:first-child { border-top: 0; }
-  .week-row .k { font-size: 13px; color: var(--text-dim); margin-bottom: 3px; }
-  .week-row .v { font-size: 26px; letter-spacing: -0.02em; }
-  .week-row .status { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
-  .week-row.done .status, .week-row.next .status { color: var(--accent-text); }
-  .week-row.skipped .v, .week-row.missed .v { color: var(--text-faint); }
-
-  .coach-card { padding: 20px 26px 22px; }
-  .coach-card .coach-k { margin: 0; font-size: 13px; color: var(--accent-text); }
-  .coach-card .coach-from { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
-  .coach-card .coach-tips li { font-size: 15px; color: var(--text); line-height: 1.45; margin-top: 8px; }
-
-  .pill-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 54px;
-    margin-top: 8px;
-    border-radius: 999px;
-    background: rgba(214, 210, 199, 0.75);
-    color: var(--text);
-    font-size: 15px;
-    text-decoration: none;
-  }
-
   @media (max-height: 720px) {
     .view-label { margin-top: 18px; }
     .sun-card { min-height: 236px; }
@@ -285,22 +257,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .slider-fill, .sun::before, .sun::after { transition: none; }
-  }
-
-  /* On the next run in the plan: the way to the run screen. */
-  .dash-link {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 12px;
-    height: 44px;
-    border-radius: 999px;
-    background: var(--text);
-    color: #fff;
-    font-size: 14px;
-    text-decoration: none;
   }
 
   /* ===== Floating "back to my week" button ===== */
@@ -367,7 +323,7 @@
     left: 50%;
     z-index: 20;
     width: 100%;
-    max-width: 720px;
+    max-width: 480px;
     padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 10px;
     background: rgba(238, 237, 233, 0.72);
     -webkit-backdrop-filter: blur(20px);
@@ -386,6 +342,9 @@
 
 
   .topbar .eyebrow {
+    /* The same height with or without a label, so scroll offsets stay right. */
+    min-height: 1.3em;
+    line-height: 1.3;
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -593,10 +552,8 @@
   .runs-grid .run-item.missed,
   .runs-grid .run-item.skipped { grid-template-columns: 22px minmax(0, 1fr) 122px; }
 
-  @media (max-width: 600px) {
-    .week-card { padding-left: 12px; padding-right: 12px; }
-    .runs-grid .run-item { padding: 12px 10px; column-gap: 10px; }
-  }
+  .week-card { padding-left: 12px; padding-right: 12px; }
+  .runs-grid .run-item { padding: 12px 10px; column-gap: 10px; }
 
   .skip-ctl {
     grid-column: 3;
@@ -820,12 +777,12 @@
     white-space: nowrap;
   }
 
-  @media (max-width: 600px) {
-    .week-head { flex-wrap: wrap; row-gap: 2px; }
-    .week-focus { order: 1; flex-basis: 100%; }
-    .week-head .chevron { margin-left: auto; }
-    .week-total { order: 2; flex-basis: 100%; margin-left: 0; }
-  }
+  .week-head { flex-wrap: wrap; row-gap: 2px; }
+  .week-focus { order: 1; flex-basis: 100%; }
+  .week-head .chevron { margin-left: auto; }
+  .week-total { order: 2; flex-basis: 100%; margin-left: 0; }
+  .week-card.collapsed .week-head { margin-bottom: 0; }
+  .week-card.collapsed { padding-bottom: 14px; }
 
   .week-card.skipped {
     border-left-color: var(--line);
@@ -1012,7 +969,7 @@
 <section class="view" id="home" aria-label="Overzicht">
   <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
 
-  <a class="glass sun-card" href="#run" style="margin-top: 30px">
+  <a class="glass sun-card" href="#schema" style="margin-top: 30px">
     <div class="sun-card-title" id="home-when">–</div>
     <span class="sun" role="img"></span>
     <div class="sun-card-foot">
@@ -1029,36 +986,8 @@
     <div class="list-row"><span>Totaal</span><small id="home-km">–</small></div>
     <div class="list-row"><span>Gem. tempo</span><small id="home-avg">–</small></div>
     <div class="list-row"><span>Snelste tempo</span><small id="home-best">–</small></div>
+    <div class="list-row"><span>Langste run</span><small id="home-long">–</small></div>
   </div>
-  <a class="pill-btn" href="#schema">Bekijk het schema</a>
-</section>
-
-<section class="view" id="dash" aria-label="Volgende run" hidden>
-  <a class="back-link" href="#">Terug</a>
-  <h1 class="view-title">Volgende run<span id="run-when">–</span></h1>
-
-  <div class="glass sun-card" style="margin-top: 26px">
-    <div class="sun-card-title" id="run-desc">–</div>
-    <span class="sun" role="img"></span>
-    <div class="sun-card-foot">
-      <div class="kv"><div class="k">Fase</div><div class="v" id="run-phase">–</div></div>
-      <div class="kv"><div class="k">Week</div><div class="v" id="run-week">–</div></div>
-      <div class="big" id="run-dist">–</div>
-    </div>
-  </div>
-  <div class="slider" id="run-pace-bar"><div class="slider-fill"><span>Recent tempo</span></div><span class="slider-v" id="run-pace">–</span></div>
-  <div class="slider" id="run-long-bar"><div class="slider-fill"><span>Langste run</span></div><span class="slider-v" id="run-long">–</span></div>
-  <div class="slider" id="run-runs-bar"><div class="slider-fill"><span>Runs gelopen</span></div><span class="slider-v" id="run-runs">–</span></div>
-
-  <div class="view-label">Deze week:</div>
-  <div class="glass week-list" id="run-list"></div>
-
-  <div class="glass coach-card" id="dash-coach" hidden>
-    <div class="coach-k">Tip van de coach</div>
-    <div class="coach-from" id="dash-coach-from"></div>
-    <ul class="coach-tips" id="dash-coach-tips"></ul>
-  </div>
-  <a class="pill-btn" href="#schema">Bekijk het schema</a>
 </section>
 
 <main class="wrap" id="plan" hidden>
@@ -1561,7 +1490,7 @@
         morph();
         markCompletedPhases();
         refreshCoach();
-        if (dashRuns) { renderDash(dashRuns); renderHome(dashRuns); }
+        if (homeRuns) renderHome(homeRuns);
         fetch('/api/skips', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1901,7 +1830,6 @@
       });
       // Coach boxes above the runs change the layout, so scroll once they're in place.
       coachReady.then(function () {
-        renderDash(runs);
         renderHome(runs);
         ready = true;
         showView();
@@ -1986,13 +1914,7 @@
       summary.tips.forEach(function (tip) {
         box.querySelector('.coach-tips').appendChild(el('li', 'coach-tip')).textContent = tip;
       });
-      onCoach(activity, summary);
     }
-
-    // Set by the dashboard: called whenever a run's coach summary is shown or updated.
-    var onCoach = function () {};
-    // Set by setupCoach: writes a run's missing summary now, even when it isn't on screen.
-    var coachNow = function () {};
 
     // `from` is set when last week's overview is shown at the top of the current week.
     function renderWeekCoach(box, summary, from) {
@@ -2163,14 +2085,6 @@
         if (observer) observer.observe(target); else queue.push(task);
       }
 
-      coachNow = function (target) {
-        if (!observer || !target._coachTask) return;
-        observer.unobserve(target);
-        queue.push(target._coachTask);
-        target._coachTask = null;
-        pump();
-      };
-
       function pendingBox(label) {
         return el('div', 'coach pending', '<div class="coach-k">' + label + '</div><p class="coach-text">Samenvatting wordt geschreven…</p>');
       }
@@ -2239,18 +2153,20 @@
     }
 
     function scrollToTrainingWeek(delay) {
-      var card = trainingWeek();
+      // Land on your next run; without one, on the latest run in the week you're training in.
+      var next = nextSlot();
+      var card = next ? next.closest('.week-card') : trainingWeek();
       if (!card) return;
       var section = card.closest('.phase-section');
       if (!section.classList.contains('open')) section._setOpen(true);
       setWeekOpen(card, true);
-      // Land on your latest run in that week, so it and the sessions after it are in view.
       var done = card.querySelectorAll('.run-item.done');
-      var target = done.length ? done[done.length - 1] : card;
+      var target = next || (done.length ? done[done.length - 1] : card);
       setTimeout(function () {
         var top = target.getBoundingClientRect().top + window.pageYOffset - pinnedHeaderHeight() - 12;
         window.scrollTo({ top: top, behavior: reduceMotion ? 'auto' : 'smooth' });
-      }, delay === undefined ? 250 : delay);
+      // Wait for the phase and week to finish opening (260ms) before measuring.
+      }, delay === undefined ? 300 : delay);
       setupFab(card);
     }
 
@@ -2293,7 +2209,7 @@
       fab.classList.toggle('down', box.top >= window.innerHeight - 80);
     }
 
-    // ===== Start screen and run screen =====
+    // ===== Start screen =====
     var LONG_DAYS = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
     var TRAINING_START = dayNumber('2026-06-09');
 
@@ -2362,7 +2278,7 @@
       };
     }
 
-    // Both suns show how much of this week's runs are done.
+    // The sun shows how much of this week's runs are done.
     function setSun(card) {
       var w = weekNumbers(card);
       Array.prototype.forEach.call(document.querySelectorAll('.sun'), function (sun) {
@@ -2385,9 +2301,10 @@
       return 'Je ligt mooi op schema voor de CPC.';
     }
 
-    var dashRuns = null;
+    var homeRuns = null;
 
     function renderHome(runs) {
+      homeRuns = runs;
       setText('home-status', homeStatus());
       var next = nextSlot();
       if (next) {
@@ -2416,126 +2333,27 @@
         setText('home-km', t.km + ' km');
         setText('home-avg', t.avg.replace('<small> /km</small>', ' /km'));
         setText('home-best', t.best.replace('<small> /km</small>', ' /km'));
+        setText('home-long', formatKm(runs.reduce(function (m, r) { return Math.max(m, r.distance_km); }, 0)) + ' km');
       }
     }
 
-    function renderDash(runs) {
-      dashRuns = runs;
-      var planRuns = runs.filter(function (r) { return r.source !== 'c25k'; });
-      var next = nextSlot();
-      var oldLink = document.querySelector('.dash-link');
-      if (oldLink) oldLink.remove();
-
-      if (next) {
-        next.appendChild(el('a', 'dash-link', 'Bekijk run <span aria-hidden="true">→</span>')).href = '#run';
-        var card = next.closest('.week-card');
-        var day = Math.max(slotDay(next), today);
-        var date = LONG_DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day);
-        setText('run-when', day === today ? 'Vandaag, ' + date : day === today + 1 ? 'Morgen, ' + date : capital(date) + ', over ' + (day - today) + ' dagen');
-        setText('run-desc', capital(text(next, '.run-desc') || 'rustig'));
-        setText('run-phase', text(card.closest('.phase-section'), '.phase-title').split(/ — |:/)[0]);
-        setText('run-week', text(card, '.week-num').replace('Week ', '') + ' · ' + plainLabel(next).replace(' · lang', ''));
-        setBig('run-dist', next);
-        renderWeekList(card, next);
-        setSun(card);
-      } else {
-        setText('run-when', 'Het schema zit erop');
-        setText('run-desc', 'Geen geplande runs meer');
-        setText('run-dist', '');
-        setText('run-list', '');
-      }
-
-      var recent = planRuns.slice(-3);
-      var paced = runs.filter(function (r) { return r.distance_km >= 1; }).map(function (r) { return r.moving_time_s / r.distance_km; });
-      if (recent.length) {
-        var pace = recent.reduce(function (s, r) { return s + r.moving_time_s; }, 0) / recent.reduce(function (s, r) { return s + r.distance_km; }, 0);
-        var fast = Math.min.apply(null, paced);
-        var slow = Math.max.apply(null, paced);
-        setSlider('run-pace', slow > fast ? (slow - pace) / (slow - fast) : 0.5, formatPaceSec(pace).replace('<small> /km</small>', ' /km'));
-      }
-      var longest = runs.reduce(function (m, r) { return Math.max(m, r.distance_km); }, 0);
-      setSlider('run-long', longest / 10, longest ? formatKm(longest) + ' / 10 km' : '–');
-      var slots = document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
-      var doneSlots = document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.done').length;
-      setSlider('run-runs', doneSlots / slots.length, doneSlots + ' / ' + slots.length);
-
-      dashCoach();
-    }
-
-    // The week of the next run: every session with its status.
-    function renderWeekList(card, next) {
-      var list = document.getElementById('run-list');
-      list.innerHTML = '';
-      Array.prototype.forEach.call(slotsOf(card), function (item) {
-        var done = item.classList.contains('done');
-        var activity = item.querySelector('.activity');
-        var day = activity ? dayNumber(activity._run.date) : slotDay(item);
-        var state = done ? 'done' : item.classList.contains('skipped') ? 'skipped' : item === next ? 'next'
-          : item.classList.contains('missed') ? 'missed' : 'planned';
-        var row = el('div', 'week-row ' + state,
-          '<div><div class="k"></div><div class="v"></div></div><span class="status"></span>');
-        row.querySelector('.k').textContent = plainLabel(item) + ' · ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day);
-        row.querySelector('.v').textContent = done ? formatKm(activity._run.distance_km) + ' km' : text(item, '.run-dist');
-        row.querySelector('.status').textContent = {
-          done: 'Gedaan ✓', skipped: 'Overgeslagen', next: 'Volgende', missed: 'Niet gelopen', planned: 'Gepland',
-        }[state];
-        list.appendChild(row);
-      });
-    }
-
-    // The tips the coach wrote after your latest run.
-    function latestActivity() {
-      var list = document.querySelectorAll('.activity[data-run-id]:not(.no-coach)');
-      var latest = null;
-      Array.prototype.forEach.call(list, function (a) {
-        if (!latest || a._run.start > latest._run.start) latest = a;
-      });
-      return latest;
-    }
-
-    function dashCoach() {
-      var activity = latestActivity();
-      var box = document.getElementById('dash-coach');
-      if (!activity) { box.hidden = true; return; }
-      var summary = activity._summary;
-      var list = document.getElementById('dash-coach-tips');
-      list.innerHTML = '';
-      var run = activity._run;
-      document.getElementById('dash-coach-from').textContent =
-        'Na je run van ' + LONG_DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
-      if (summary && summary.tips) {
-        summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
-      } else {
-        list.appendChild(el('li', 'coach-tip')).textContent = 'Wordt geschreven…';
-        coachNow(activity);
-      }
-      box.hidden = false;
-    }
-
-    onCoach = function (activity) {
-      if (activity === latestActivity()) dashCoach();
-    };
-
-    // ===== Three views: the start screen, the next run at #run, and the plan at #schema =====
-    var dash = document.getElementById('dash');
+    // ===== Two views: the start screen, and the plan at #schema =====
     var home = document.getElementById('home');
     var planView = document.getElementById('plan');
-    var planShown = false;
     var ready = false;
 
+    // Opening the plan always lands on your next run.
     function showView() {
-      var view = location.hash === '#schema' ? 'plan' : location.hash === '#run' ? 'run' : 'home';
-      home.hidden = view !== 'home';
-      dash.hidden = view !== 'run';
-      planView.hidden = view !== 'plan';
-      if (view !== 'plan') {
+      var plan = location.hash === '#schema';
+      home.hidden = plan;
+      planView.hidden = !plan;
+      if (!plan) {
         window.scrollTo(0, 0);
         fab.classList.remove('show');
         return;
       }
       updateHeader();
-      if (!ready) return;
-      if (!planShown) { planShown = true; scrollToTrainingWeek(); } else updateFab();
+      if (ready) scrollToTrainingWeek();
     }
 
     window.addEventListener('hashchange', showView);
