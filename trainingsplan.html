@@ -2226,9 +2226,7 @@
       var summary = activity._summary;
       var list = document.getElementById('home-coach-tips');
       list.innerHTML = '';
-      var run = activity._run;
-      document.getElementById('home-coach-from').textContent =
-        'Na je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
+      document.getElementById('home-coach-from').textContent = 'Na je vorige run';
       if (summary && summary.tips) {
         summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
       } else {
