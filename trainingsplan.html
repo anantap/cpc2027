@@ -90,7 +90,7 @@
   .wrap {
     max-width: 480px;
     margin: 0 auto;
-    padding: 24px 16px 64px;
+    padding: 24px 8px 64px;
   }
 
   .check-row.checked .checkbox {
@@ -122,7 +122,7 @@
   .view {
     max-width: 480px;
     margin: 0 auto;
-    padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(32px + env(safe-area-inset-bottom, 0px));
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 8px calc(32px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -829,7 +829,6 @@
     <div class="dots" id="home-runs"></div>
   </div>
   </div>
-  <a class="pill-btn home-schema" href="#schema">Bekijk het schema <span aria-hidden="true">&nbsp;→</span></a>
 
   <div class="home-group home-bars">
   <div class="glass dots-card field-card">
@@ -845,6 +844,7 @@
   </div>
   </div>
 
+  <a class="pill-btn home-schema" href="#schema">Bekijk het schema <span aria-hidden="true">&nbsp;→</span></a>
 </section>
 
 <main class="wrap" id="plan" hidden>
