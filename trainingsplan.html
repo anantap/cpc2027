@@ -28,8 +28,9 @@
 
   * { box-sizing: border-box; }
 
+  html { background: var(--bg); }
+
   html, body {
-    background: var(--bg);
     color: var(--text);
     margin: 0;
     padding: 0;
@@ -281,6 +282,37 @@
 
   @media (prefers-reduced-motion: reduce) {
     .slider-fill, .sun::before, .sun::after { transition: none; }
+  }
+
+  /* On a phone the groups are invisible and everything stacks. On a wide screen the start
+     screen becomes a dashboard: the next run large on the left, the rest in columns beside it. */
+  .home-group { display: contents; }
+
+  @media (min-width: 1000px) {
+    #home {
+      max-width: 1200px;
+      padding: 56px 40px;
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1fr;
+      grid-template-areas:
+        "title title title"
+        "next  week  total"
+        "next  week  coach";
+      grid-template-rows: auto auto 1fr;
+      gap: 16px 20px;
+      align-items: start;
+    }
+    #home .view-title { grid-area: title; margin: 0 0 18px; font-size: 34px; }
+    .home-group { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .home-next { grid-area: next; }
+    .home-coach { grid-area: coach; }
+    .home-week { grid-area: week; }
+    .home-total { grid-area: total; }
+    #home .sun-card { margin-top: 0 !important; min-height: 420px; }
+    /* Each tile speaks for itself here, and without labels the columns line up at the top. */
+    #home .view-label { display: none; }
+    #home .sun { width: 120px; height: 120px; }
+    #home .big { font-size: 110px; }
   }
 
   /* Each screen fades in when it's shown (display: none to visible restarts the animation).
@@ -688,6 +720,7 @@
 <section class="view" id="home" aria-label="Overzicht">
   <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
 
+  <div class="home-group home-next">
   <a class="glass sun-card" href="#schema" style="margin-top: 30px">
     <div class="sun-card-title" id="home-when">–</div>
     <span class="sun" role="img"></span>
@@ -696,24 +729,32 @@
       <div class="big" id="home-dist">–</div>
     </div>
   </a>
+  </div>
+
+  <div class="home-group home-coach">
   <div class="glass coach-card" id="home-coach" hidden>
     <div class="coach-k">Tip van de coach</div>
     <div class="coach-from" id="home-coach-from"></div>
     <ul class="coach-tips" id="home-coach-tips"></ul>
   </div>
   <a class="pill-btn" href="#schema">Bekijk het schema <span aria-hidden="true">&nbsp;→</span></a>
+  </div>
 
+  <div class="home-group home-week">
   <div class="view-label">Deze week:</div>
   <div class="glass week-list" id="home-runs"></div>
   <div class="slider" id="home-week-bar"><div class="slider-fill"><span>Kilometers</span></div><span class="slider-v" id="home-week">–</span></div>
   <div class="slider" id="home-cpc-bar"><div class="slider-fill"><span>Tot de CPC</span></div><span class="slider-v" id="home-cpc">–</span></div>
+  </div>
 
+  <div class="home-group home-total">
   <div class="view-label">Tot nu toe:</div>
   <div class="glass list-card">
     <div class="list-row"><span>Totaal</span><small id="home-km">–</small></div>
     <div class="list-row"><span>Gem. tempo</span><small id="home-avg">–</small></div>
     <div class="list-row"><span>Snelste tempo</span><small id="home-best">–</small></div>
     <div class="list-row"><span>Langste run</span><small id="home-long">–</small></div>
+  </div>
   </div>
 </section>
 
