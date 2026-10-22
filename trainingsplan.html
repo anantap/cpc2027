@@ -1440,8 +1440,8 @@
       var card = el('div', 'activity',
         '<div class="act-date"></div><div class="act-name"></div><div class="act-stats">' +
         stat('Afstand', pxKm(run.distance_km.toFixed(2).replace('.', ',')) + ' km') +
-        stat('Tempo', formatPace(run)) +
-        stat('Tijd', formatDuration(run.moving_time_s)) +
+        stat('Tempo', pxKm(formatPace(run).replace(' /km', '')) + ' /km') +
+        stat('Tijd', pxKm(formatDuration(run.moving_time_s))) +
         '</div>');
       card.querySelector('.act-date').innerHTML = formatRunDate(run);
       card.querySelector('.act-name').textContent = run.name || 'Run';
