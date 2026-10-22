@@ -300,7 +300,8 @@
         "next  week  coach";
       grid-template-rows: auto auto 1fr;
       gap: 16px 20px;
-      align-items: start;
+      /* All columns as tall as the tallest, so their bottoms line up. */
+      align-items: stretch;
     }
     #home .view-title { grid-area: title; margin: 0 0 18px; font-size: 34px; }
     .home-group { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -308,7 +309,11 @@
     .home-coach { grid-area: coach; }
     .home-week { grid-area: week; }
     .home-total { grid-area: total; }
-    #home .sun-card { margin-top: 0 !important; min-height: 420px; }
+    #home .sun-card { margin-top: 0 !important; min-height: 420px; flex: 1; }
+    /* One tile per column takes up the slack: the sun card, this week's runs, the coach tip. */
+    #home .week-list { flex: 1; display: flex; flex-direction: column; }
+    #home .week-row { flex: 1; }
+    #home .coach-card { flex: 1; }
     /* Each tile speaks for itself here, and without labels the columns line up at the top. */
     #home .view-label { display: none; }
     #home .sun { width: 120px; height: 120px; }
