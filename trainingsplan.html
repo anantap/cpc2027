@@ -344,7 +344,8 @@
     /* Long tips scroll inside the card rather than pushing the page past one screen. */
     #home .coach-card { flex: 1; min-height: 0; overflow-y: auto; }
     /* Wide here, so the heading fits on one line and the tips sit side by side. */
-    #home .coach-card .coach-k, #home .coach-card .coach-from { display: inline; }
+    /* One line in the same size as the tips, so the heading doesn't shout over them. */
+    #home .coach-card .coach-k, #home .coach-card .coach-from { display: inline; font-size: var(--fs-m); line-height: var(--lh-m); }
     #home .coach-card .coach-k::after { content: " "; }
     #home .coach-card .coach-tips { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; }
 
