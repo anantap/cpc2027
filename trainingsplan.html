@@ -759,7 +759,7 @@
     border-top: 1px solid var(--line);
     animation: coach-in 0.3s ease both;
   }
-  .coach-k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--accent-text); margin-bottom: 4px; }
+  .coach-k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); margin-bottom: 4px; }
   .coach-text { margin: 0; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text); }
   .coach-sub { margin-top: 8px; }
 
@@ -767,8 +767,11 @@
   .week-body > .week-coach:last-child { margin: 8px 0 0; }
 
   .coach-tips { margin: 8px 0 0; padding: 0; list-style: none; }
-  .coach-tips li { position: relative; padding-left: 24px; margin-top: 4px; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text); }
-  .coach-tips li::before { content: "→"; position: absolute; left: 0; color: var(--accent-text); }
+  .coach-tips li { position: relative; margin-top: 8px; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text); }
+  /* Your latest run carries the living blob from the start screen. */
+  .runs-grid .run-item.latest { position: relative; overflow: hidden; }
+  .runs-grid .run-item.latest > :not(.blob) { position: relative; }
+  .run-item.latest .blob { top: -64px; right: -96px; width: 240px; height: 240px; opacity: 0.75; }
 
   .coach.updating .coach-tips { opacity: 0.4; transition: opacity 0.25s ease; }
   .coach.updating .coach-tips::after {
@@ -2256,6 +2259,13 @@
 
     function homeCoach() {
       var activity = latestActivity();
+      var old = document.querySelector('.run-item.latest');
+      if (old) { old.classList.remove('latest'); old.querySelector(':scope > .blob').remove(); }
+      if (activity) {
+        var item = activity.closest('.run-item');
+        item.classList.add('latest');
+        item.insertBefore(el('span', 'blob'), item.firstChild).setAttribute('aria-hidden', 'true');
+      }
       var box = document.getElementById('home-coach');
       if (!activity) { box.hidden = true; return; }
       var summary = activity._summary;
