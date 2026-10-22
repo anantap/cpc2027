@@ -123,7 +123,7 @@
   .top .back-link { display: inline-block; margin: -6px 0 6px; }
 
   /* Inter Tight runs tight at small sizes. */
-  .act-stat .k, .kv .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .view-label {
+  .act-stat .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .view-label {
     letter-spacing: 0.01em;
   }
 
@@ -157,7 +157,7 @@
     min-height: 268px;
     padding: 26px 26px 28px;
   }
-  .sun-card-title { font-size: 21px; line-height: 1.25; margin-top: 28px; }
+  .sun-card-title { font-size: 21px; line-height: 1.25; max-width: calc(100% - 110px); }
   .sun-card-title span { display: block; color: var(--text-dim); }
   /* The week's progress as a sunrise: the sun fills up from below with every run done (--f, 0 to 1). */
   .sun {
@@ -188,10 +188,8 @@
     transition: clip-path 0.9s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .sun-card-kvs { display: flex; gap: 22px; margin-top: 16px; }
-  .kv .k { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
-  .kv .v { font-size: 14px; white-space: nowrap; }
   .big {
+    align-self: flex-end;
     font-size: clamp(64px, 20vw, 84px);
     font-weight: 400;
     line-height: 0.8;
@@ -663,15 +661,9 @@
   <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
 
   <a class="glass sun-card" href="#schema" style="margin-top: 30px">
-    <div>
-      <div class="big" id="home-dist">–</div>
-      <div class="sun-card-kvs">
-        <div class="kv"><div class="k">Sessie</div><div class="v" id="home-session">–</div></div>
-        <div class="kv"><div class="k">Soort</div><div class="v" id="home-kind">–</div></div>
-      </div>
-    </div>
-    <span class="sun" role="img"></span>
     <div class="sun-card-title" id="home-when">–</div>
+    <span class="sun" role="img"></span>
+    <div class="big" id="home-dist">–</div>
   </a>
   <div class="glass coach-card" id="home-coach" hidden>
     <div class="coach-k">Tip van de coach</div>
@@ -2033,19 +2025,18 @@
       if (next) {
         var card = next.closest('.week-card');
         var day = Math.max(slotDay(next), today);
-        setText('home-when', 'Je volgende run is ' + (day <= today + 1 ? whenText(day).toLowerCase() : LONG_DAYS[new Date(day * DAY).getUTCDay()]) +
-          '<span>' + LONG_DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + '</span>');
+        // "morgen" then "vrijdag 23 oktober"; further out "zondag" then "25 oktober".
+        var weekday = LONG_DAYS[new Date(day * DAY).getUTCDay()];
+        var soon = day <= today + 1;
+        setText('home-when', 'Je volgende run is ' + (soon ? whenText(day).toLowerCase() : weekday) +
+          '<span>' + (soon ? weekday + ' ' : '') + formatDay(day) + '</span>');
         setSun(card);
-        setText('home-session', plainLabel(next));
-        setText('home-kind', capital(text(next, '.run-desc') || 'rustig').split(' + ')[0]);
         setBig('home-dist', next);
         renderWeekList(card, next);
         var w = weekNumbers(card);
         setSlider('home-week', w.planned ? w.km / w.planned : 0, formatKm(w.km) + ' / ' + formatKm(w.planned) + ' km');
       } else {
         setText('home-when', 'Het schema zit erop');
-        setText('home-session', '–');
-        setText('home-kind', '–');
         setText('home-dist', '');
         setSlider('home-week', 1, '–');
         setText('home-runs', '');
