@@ -119,8 +119,6 @@
     gap: 10px;
   }
 
-  .back-link { color: var(--text); font-size: 15px; text-decoration: none; padding: 10px 0; align-self: flex-start; }
-  .top .back-link { display: inline-block; margin: -6px 0 6px; }
 
   /* Inter Tight runs tight at small sizes. */
   .act-stat .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .view-label {
@@ -303,55 +301,84 @@
     .view, #plan { animation: none; }
   }
 
-  /* ===== Floating "back to my week" button ===== */
-  .fab {
+  /* ===== Bottom of the schema: "Terug", with "Deze week" sliding out beside it when that week is out of view ===== */
+  .dock {
     position: fixed;
-    right: 24px;
+    left: 50%;
     /* Pinned to the bottom of what's actually on screen (--screen-bottom, set from the visual
        viewport): iOS Safari can leave bottom: fixed elements floating mid-screen after scrolling. */
-    top: calc(var(--screen-bottom, 100svh) - 54px - 32px - env(safe-area-inset-bottom, 0px));
+    top: calc(var(--screen-bottom, 100svh) - 54px - 28px - env(safe-area-inset-bottom, 0px));
     z-index: 30;
+    display: flex;
+    transform: translateX(-50%);
+  }
+
+  .dock-btn {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     height: 54px;
-    padding: 0 24px 0 20px;
+    padding: 0 22px 0 18px;
     border: 0;
     border-radius: 999px;
-    background: var(--text);
-    color: #fff;
+    font: inherit;
     font-size: 15px;
     font-weight: 500;
-    box-shadow: 0 8px 24px rgba(60, 55, 40, 0.22);
+    white-space: nowrap;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(60, 55, 40, 0.18);
     cursor: pointer;
-    opacity: 0;
-    transform: translateY(12px) scale(0.96);
-    pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
-  .fab.show {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
-
-  .fab svg {
-    width: 21px;
-    height: 21px;
+  .dock-btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
     fill: none;
     stroke: currentColor;
-    stroke-width: 2.2;
+    stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: transform 0.2s ease;
   }
 
+  .dock-back {
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    color: var(--text);
+  }
+
+  /* Folded away to nothing until the week you're in scrolls out of view. */
+  .fab {
+    max-width: 0;
+    margin-left: 0;
+    padding-left: 0;
+    padding-right: 0;
+    overflow: hidden;
+    background: var(--text);
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: max-width 0.3s ease, margin-left 0.3s ease, padding 0.3s ease, opacity 0.2s ease;
+  }
+
+  .fab.show {
+    max-width: 200px;
+    margin-left: 8px;
+    padding: 0 22px 0 18px;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   .fab.down svg { transform: rotate(180deg); }
 
   @media (prefers-reduced-motion: reduce) {
-    .fab, .fab svg { transition: none; }
+    .fab, .dock-btn svg { transition: none; }
   }
+
+  /* Room at the bottom of the plan, so the dock never covers the last card. */
+  #plan { padding-bottom: 120px; }
 
   /* ===== Schema: the same glass cards, two-tone headings and quiet type as the start screen ===== */
 
@@ -674,7 +701,7 @@
     <div class="coach-from" id="home-coach-from"></div>
     <ul class="coach-tips" id="home-coach-tips"></ul>
   </div>
-  <a class="pill-btn" href="#schema">Bekijk het schema</a>
+  <a class="pill-btn" href="#schema">Bekijk het schema <span aria-hidden="true">&nbsp;→</span></a>
 
   <div class="view-label">Deze week:</div>
   <div class="glass week-list" id="home-runs"></div>
@@ -694,7 +721,6 @@
   <div class="topbar" id="topbar" aria-hidden="true"><div class="eyebrow"></div></div>
   <header class="top" id="top">
     <div class="top-intro">
-      <a class="back-link" href="#">Terug</a>
       <h1>Trainingsplan</h1>
     </div>
   </header>
@@ -984,12 +1010,15 @@
     <li>Flexibel: lukt een week niet, herhaal 'm — er is ruim tijd tot de CPC.</li>
     <li>Pijn: stijf is oké; scherpe pijn = rust nemen, niet doorlopen.</li>
   </ul>
+  <nav class="dock" id="dock" aria-label="Schema">
+    <a class="dock-btn dock-back" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Terug</a>
+    <button class="dock-btn fab" id="fab" type="button" aria-label="Naar je huidige week">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      <span class="fab-label">Deze week</span>
+    </button>
+  </nav>
 </main>
 
-<button class="fab" id="fab" type="button" aria-label="Naar je huidige week">
-  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-  <span class="fab-label"></span>
-</button>
 
 <script>
   (function () {
@@ -1897,7 +1926,6 @@
     function setupFab(card) {
       if (fabCard) return;
       fabCard = card;
-      fab.querySelector('.fab-label').textContent = 'Deze week';
       fab.addEventListener('click', function () { scrollToTrainingWeek(0); });
       window.addEventListener('scroll', updateFab, { passive: true });
       window.addEventListener('resize', updateFab);
@@ -1911,7 +1939,7 @@
     // Shown only while the week's phase is open and the week is off screen.
     var viewport = window.visualViewport;
     function pinFab() {
-      if (viewport) fab.style.setProperty('--screen-bottom', (viewport.offsetTop + viewport.height) + 'px');
+      if (viewport) document.getElementById('dock').style.setProperty('--screen-bottom', (viewport.offsetTop + viewport.height) + 'px');
     }
     if (viewport) {
       viewport.addEventListener('resize', pinFab);
