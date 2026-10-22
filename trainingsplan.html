@@ -837,7 +837,6 @@
   <div class="glass dots-card field-card">
     <div class="dots-head"><div class="dots-title" id="home-cpc">–</div><div class="dots-note" id="home-status"></div></div>
     <div class="dot-field" id="home-field" role="img"></div>
-    <div class="field-label">Tot nu toe:</div>
     <div class="field-list">
       <div class="list-row"><span>Totaal</span><small id="home-km">–</small></div>
       <div class="list-row"><span>Gem. tempo</span><small id="home-avg">–</small></div>
@@ -2285,7 +2284,7 @@
       var summary = activity._summary;
       var list = document.getElementById('home-coach-tips');
       list.innerHTML = '';
-      document.getElementById('home-coach-from').textContent = 'Na je vorige run';
+      document.getElementById('home-coach-from').textContent = 'na je vorige run';
       if (summary && summary.tips) {
         summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
       } else {
