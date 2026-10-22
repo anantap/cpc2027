@@ -252,17 +252,42 @@
   .list-row small.dim { color: var(--text-dim); }
 
   /* This week's runs, each with its status on the right. */
-  .week-list { padding: 8px 24px; }
-  /* The label across the full width; the distance with the status beside it. */
-  .week-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; padding: 16px 0; border-top: 1px solid var(--line); }
-  .week-row > div { display: contents; }
-  .week-row .k { grid-column: 1 / -1; }
-  .week-row:first-child { border-top: 0; }
-  .week-row .k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); margin-bottom: 4px; }
-  .week-row .v { font-size: var(--fs-l); line-height: var(--lh-l); letter-spacing: -0.02em; }
-  .week-row .status { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); white-space: nowrap; }
-  .week-row.done .status, .week-row.next .status { color: var(--accent-text); }
-  .week-row.skipped .v, .week-row.missed .v { color: var(--text-faint); }
+  /* This week's runs as three suns in a row: full and glowing once run, a warm ring for the
+     next one, pale for the rest. The distance sits inside, the day and status underneath. */
+  .week-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 24px 16px; }
+  .week-dot { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+  .week-dot .orb {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    margin-bottom: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #f3f0ea, #dcd7cd);
+    font-size: var(--fs-l);
+    line-height: var(--lh-l);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .week-dot .orb small { font-size: var(--fs-s); line-height: var(--lh-s); margin-left: 2px; align-self: flex-start; margin-top: 24px; }
+  .week-dot.done .orb {
+    background: radial-gradient(circle at 38% 32%, #ffd8b4, #f5a06a 50%, var(--accent) 100%);
+    box-shadow: 0 0 32px rgba(239, 125, 60, 0.35);
+  }
+  .week-dot.next .orb { box-shadow: inset 0 0 0 2px var(--accent); }
+  .week-dot.skipped .orb, .week-dot.missed .orb { color: var(--text-faint); background: rgba(255, 255, 255, 0.35); }
+  .week-dot.skipped .orb { text-decoration: line-through; }
+  .week-dot .k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); }
+  .week-dot .d { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
+  .week-dot .status { margin-top: 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
+  .week-dot.done .status, .week-dot.next .status { color: var(--accent-text); }
+
+  @media (max-width: 400px) {
+    .week-dot .orb { width: 72px; height: 72px; }
+    .week-dot .orb small { margin-top: 16px; }
+  }
 
   /* The coach's tips: a two-tone heading like the other cards, then one tip per row. */
   .coach-card { padding: 24px 24px 8px; }
@@ -339,8 +364,7 @@
     .home-total { grid-area: total; }
     #home .sun-card { margin-top: 0 !important; min-height: 0; flex: 1; }
     /* One tile per column takes up the slack: the sun card, this week's runs, the coach tip. */
-    #home .week-list { flex: 1; display: flex; flex-direction: column; }
-    #home .week-row { flex: 1; }
+    #home .week-list { flex: 1; align-content: center; }
     /* Long tips scroll inside the card rather than pushing the page past one screen. */
     #home .coach-card { flex: 1; min-height: 0; overflow-y: auto; }
     /* Wide here, so the heading fits on one line and the tips sit side by side. */
@@ -352,7 +376,8 @@
     /* Shorter laptop windows: tighten everything a little so it still fits. */
     @media (max-height: 820px) {
       #home .list-row { padding: 8px 0; }
-      #home .week-row { padding: 8px 0; }
+      #home .week-dot .orb { width: 72px; height: 72px; margin-bottom: 8px; }
+      #home .week-dot .orb small { margin-top: 16px; }
       #home .slider { height: 48px; }
       #home .pill-btn { height: 48px; margin-top: 0; }
       #home .coach-card { padding: 16px 24px 4px; }
@@ -2188,7 +2213,7 @@
       }
     }
 
-    // The week of the next run: every session with its status.
+    // The week of the next run: one sun per session, with its day and status.
     function renderWeekList(card, next) {
       var list = document.getElementById('home-runs');
       list.innerHTML = '';
@@ -2198,14 +2223,19 @@
         var day = activity ? dayNumber(activity._run.date) : slotDay(item);
         var state = done ? 'done' : item.classList.contains('skipped') ? 'skipped' : item === next ? 'next'
           : item.classList.contains('missed') ? 'missed' : 'planned';
-        var row = el('div', 'week-row ' + state,
-          '<div><div class="k"></div><div class="v"></div></div><span class="status"></span>');
-        row.querySelector('.k').textContent = plainLabel(item) + ' · ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day);
-        row.querySelector('.v').textContent = done ? formatKm(activity._run.distance_km) + ' km' : text(item, '.run-dist');
-        row.querySelector('.status').textContent = {
+        var km = done ? activity._run.distance_km : plannedKm(item);
+        var dot = el('div', 'week-dot ' + state,
+          '<div class="orb"></div><div class="k"></div><div class="d"></div><div class="status"></div>');
+        dot.querySelector('.orb').innerHTML = km
+          ? (done ? formatKm(km) : String(km).replace('.', ',')) + '<small>km</small>'
+          : text(item, '.run-dist');
+        dot.querySelector('.k').textContent = plainLabel(item).replace(' · lang', '');
+        dot.querySelector('.d').textContent = DAYS[new Date(day * DAY).getUTCDay()];
+        dot.querySelector('.status').textContent = {
           done: 'Gedaan ✓', skipped: 'Overgeslagen', next: 'Volgende', missed: 'Niet gelopen', planned: 'Gepland',
         }[state];
-        list.appendChild(row);
+        dot.setAttribute('aria-label', plainLabel(item) + ', ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + ': ' + dot.querySelector('.status').textContent);
+        list.appendChild(dot);
       });
     }
 
