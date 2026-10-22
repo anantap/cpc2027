@@ -252,8 +252,8 @@
   .list-row small.dim { color: var(--text-dim); }
 
   /* This week's runs, each with its status on the right. */
-  /* This week's runs as three suns in a row: full and glowing once run, a warm ring for the
-     next one, pale for the rest. The distance sits inside, the day and status underneath. */
+  /* This week's runs as three flat circles: orange once run, light orange for the next one,
+     pale grey for the rest. Run number above, distance inside, weekday underneath. */
   .week-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 24px 16px; }
   .week-dot { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
   .week-dot .orb {
@@ -263,26 +263,23 @@
     justify-content: center;
     width: 88px;
     height: 88px;
-    margin-bottom: 16px;
+    margin: 8px 0;
     border-radius: 50%;
-    background: radial-gradient(circle at 38% 32%, #f3f0ea, #dcd7cd);
+    background: #dedad1;
     font-size: var(--fs-l);
     line-height: var(--lh-l);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
   }
   .week-dot .orb small { font-size: var(--fs-s); line-height: var(--lh-s); margin-left: 2px; align-self: flex-start; margin-top: 24px; }
-  .week-dot.done .orb {
-    background: radial-gradient(circle at 38% 32%, #ffd8b4, #f5a06a 50%, var(--accent) 100%);
-    box-shadow: 0 0 32px rgba(239, 125, 60, 0.35);
-  }
-  .week-dot.next .orb { box-shadow: inset 0 0 0 2px var(--accent); }
-  .week-dot.skipped .orb, .week-dot.missed .orb { color: var(--text-faint); background: rgba(255, 255, 255, 0.35); }
+  .week-dot.done .orb { background: var(--accent); color: #fff; }
+  .week-dot.next .orb { background: #f7c4a2; }
+  .week-dot.skipped .orb, .week-dot.missed .orb { color: var(--text-faint); }
   .week-dot.skipped .orb { text-decoration: line-through; }
   .week-dot .k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); }
   .week-dot .d { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
-  .week-dot .status { margin-top: 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
-  .week-dot.done .status, .week-dot.next .status { color: var(--accent-text); }
+  /* Only skipped and missed runs need a word; the colour says the rest. */
+  .week-dot .status { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-faint); }
 
   @media (max-width: 400px) {
     .week-dot .orb { width: 72px; height: 72px; }
@@ -376,7 +373,7 @@
     /* Shorter laptop windows: tighten everything a little so it still fits. */
     @media (max-height: 820px) {
       #home .list-row { padding: 8px 0; }
-      #home .week-dot .orb { width: 72px; height: 72px; margin-bottom: 8px; }
+      #home .week-dot .orb { width: 72px; height: 72px; }
       #home .week-dot .orb small { margin-top: 16px; }
       #home .slider { height: 48px; }
       #home .pill-btn { height: 48px; margin-top: 0; }
@@ -2225,16 +2222,15 @@
           : item.classList.contains('missed') ? 'missed' : 'planned';
         var km = done ? activity._run.distance_km : plannedKm(item);
         var dot = el('div', 'week-dot ' + state,
-          '<div class="orb"></div><div class="k"></div><div class="d"></div><div class="status"></div>');
+          '<div class="k"></div><div class="orb"></div><div class="d"></div><div class="status"></div>');
         dot.querySelector('.orb').innerHTML = km
           ? (done ? formatKm(km) : String(km).replace('.', ',')) + '<small>km</small>'
           : text(item, '.run-dist');
         dot.querySelector('.k').textContent = plainLabel(item).replace(' · lang', '');
         dot.querySelector('.d').textContent = DAYS[new Date(day * DAY).getUTCDay()];
-        dot.querySelector('.status').textContent = {
-          done: 'Gedaan ✓', skipped: 'Overgeslagen', next: 'Volgende', missed: 'Niet gelopen', planned: 'Gepland',
-        }[state];
-        dot.setAttribute('aria-label', plainLabel(item) + ', ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + ': ' + dot.querySelector('.status').textContent);
+        dot.querySelector('.status').textContent = { skipped: 'Overgeslagen', missed: 'Niet gelopen' }[state] || '';
+        dot.setAttribute('aria-label', plainLabel(item) + ', ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + ': ' +
+          { done: 'gedaan', skipped: 'overgeslagen', next: 'volgende', missed: 'niet gelopen', planned: 'gepland' }[state]);
         list.appendChild(dot);
       });
     }
