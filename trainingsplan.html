@@ -157,7 +157,7 @@
     min-height: 268px;
     padding: 26px 26px 28px;
   }
-  .sun-card-title { font-size: 21px; line-height: 1.25; max-width: calc(100% - 110px); }
+  .sun-card-title { font-size: 21px; line-height: 1.25; margin-top: 28px; }
   .sun-card-title span { display: block; color: var(--text-dim); }
   /* The week's progress as a sunrise: the sun fills up from below with every run done (--f, 0 to 1). */
   .sun {
@@ -188,11 +188,10 @@
     transition: clip-path 0.9s cubic-bezier(0.2, 0, 0, 1);
   }
 
-  .sun-card-foot { display: flex; align-items: flex-end; gap: 22px; }
+  .sun-card-kvs { display: flex; gap: 22px; margin-top: 16px; }
   .kv .k { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
   .kv .v { font-size: 14px; white-space: nowrap; }
   .big {
-    margin-left: auto;
     font-size: clamp(64px, 20vw, 84px);
     font-weight: 400;
     line-height: 0.8;
@@ -272,6 +271,24 @@
 
   @media (prefers-reduced-motion: reduce) {
     .slider-fill, .sun::before, .sun::after { transition: none; }
+  }
+
+  /* Each screen fades in when it's shown (display: none to visible restarts the animation).
+     On load the page waits for your runs, so it never shows placeholders. */
+  .view { animation: view-in 0.4s ease both; }
+  /* The plan only fades: a moving page would throw off the scroll to your next run. */
+  #plan { animation: fade-in 0.4s ease both; }
+  body.loading .view, body.loading #plan { opacity: 0; animation: none; }
+
+  @keyframes fade-in { from { opacity: 0; } }
+
+  @keyframes view-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .view, #plan { animation: none; }
   }
 
   /* ===== Floating "back to my week" button ===== */
@@ -980,18 +997,20 @@
 
 </style>
 </head>
-<body>
+<body class="loading">
 <section class="view" id="home" aria-label="Overzicht">
   <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
 
   <a class="glass sun-card" href="#schema" style="margin-top: 30px">
-    <div class="sun-card-title" id="home-when">–</div>
-    <span class="sun" role="img"></span>
-    <div class="sun-card-foot">
-      <div class="kv"><div class="k">Sessie</div><div class="v" id="home-session">–</div></div>
-      <div class="kv"><div class="k">Soort</div><div class="v" id="home-kind">–</div></div>
+    <div>
       <div class="big" id="home-dist">–</div>
+      <div class="sun-card-kvs">
+        <div class="kv"><div class="k">Sessie</div><div class="v" id="home-session">–</div></div>
+        <div class="kv"><div class="k">Soort</div><div class="v" id="home-kind">–</div></div>
+      </div>
     </div>
+    <span class="sun" role="img"></span>
+    <div class="sun-card-title" id="home-when">–</div>
   </a>
   <div class="glass coach-card" id="home-coach" hidden>
     <div class="coach-k">Tip van de coach</div>
@@ -1855,6 +1874,7 @@
       coachReady.then(function () {
         renderHome(runs);
         ready = true;
+        document.body.classList.remove('loading');
         showView();
       });
     });
@@ -2451,6 +2471,8 @@
     }
 
     window.addEventListener('hashchange', showView);
+    // Show the page anyway if the runs don't come in.
+    setTimeout(function () { document.body.classList.remove('loading'); }, 2500);
     showView();
 
   })();
