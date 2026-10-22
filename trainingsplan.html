@@ -103,7 +103,7 @@
   }
 
   /* Numbers line up in columns. */
-  .run-dist, .act-stat .v, .stat .v, .week-total { font-variant-numeric: tabular-nums; }
+  .run-dist, .act-stat .v, .week-total, .slider-v { font-variant-numeric: tabular-nums; }
 
   .phase-stats { margin-bottom: 16px; }
 
@@ -123,7 +123,7 @@
   .top .back-link { display: inline-block; margin: -6px 0 6px; }
 
   /* Inter Tight runs tight at small sizes. */
-  .stat .k, .act-stat .k, .kv .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .view-label {
+  .act-stat .k, .kv .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .view-label {
     letter-spacing: 0.01em;
   }
 
@@ -354,12 +354,7 @@
     .fab, .fab svg { transition: none; }
   }
 
-  /* ===== Totals ===== */
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
+  /* ===== Schema: the same glass cards, two-tone headings and quiet type as the start screen ===== */
 
   /* Appears once a phase title has scrolled away, and shows that phase's name. */
   .topbar {
@@ -381,11 +376,6 @@
   }
   .topbar.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 
-  @media (prefers-reduced-motion: reduce) {
-    .topbar { transition: none; }
-  }
-
-
   .topbar .eyebrow {
     /* The same height with or without a label, so scroll offsets stay right. */
     min-height: 1.3em;
@@ -395,11 +385,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  .top {
-    margin-bottom: 28px;
-  }
-
   .topbar .eyebrow.swap { animation: label-in 0.25s ease; }
 
   @keyframes label-in {
@@ -408,42 +393,20 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .topbar .eyebrow.swap { animation: none; }
+    .topbar, .topbar .eyebrow.swap { transition: none; animation: none; }
   }
 
-  .stat {
+  .top { margin-bottom: 24px; }
+
+  /* Every card in the schema: warm grey glass with a soft shadow, no outline. */
+  .phase-section:not(.open), .week-card, .note, .principles {
     background: var(--surface);
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 22px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 10px 30px rgba(60, 55, 40, 0.06);
   }
 
-  .stat .k {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-  }
-
-  .stat .v {
-    font-size: 20px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .stat .v small {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-dim);
-  }
-
-  /* ===== Collapsible phases ===== */
-  /* A closed phase is a card like the rest; an open one shows its weeks as cards. */
-  .phase-section {
-    margin-bottom: 10px;
-    border-radius: 20px;
-    transition: background-color 0.2s ease;
-  }
-
-  .phase-section:not(.open) { background: var(--bg-alt); }
+  /* ===== Phases ===== */
+  .phase-section { margin-bottom: 10px; border-radius: 22px; }
 
   .phase-toggle {
     width: 100%;
@@ -451,7 +414,7 @@
     align-items: center;
     gap: 12px;
     /* Same inset open or closed, so the title doesn't move. */
-    padding: 18px 20px;
+    padding: 20px 22px;
     background: none;
     border: 0;
     color: inherit;
@@ -460,12 +423,13 @@
     cursor: pointer;
   }
 
-  .phase-head {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
+  .phase-head { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  /* Title first, dates under it in grey. */
+  .phase-title { font-size: 22px; font-weight: 400; letter-spacing: -0.015em; line-height: 1.25; }
+  .phase-dates { order: 1; font-size: 15px; color: var(--text-dim); }
+
+  .phase-section.completed .phase-title { color: var(--text-dim); text-decoration: line-through; }
+  .phase-section.current .phase-dates { color: var(--accent-text); }
 
   .chevron {
     width: 22px;
@@ -473,7 +437,7 @@
     flex-shrink: 0;
     fill: none;
     stroke: var(--text-dim);
-    stroke-width: 2;
+    stroke-width: 1.8;
     stroke-linecap: round;
     stroke-linejoin: round;
     transition: transform 0.2s ease;
@@ -481,531 +445,215 @@
 
   .phase-section.open > .phase-toggle .chevron { transform: rotate(180deg); }
 
-  .phase-body {
-    display: none;
-    padding-bottom: 20px;
-  }
-
+  .phase-body { display: none; padding-bottom: 20px; }
   .phase-section.open .phase-body { display: block; }
-
-  .phase-section.completed .phase-title {
-    color: var(--text-dim);
-    text-decoration: line-through;
-  }
-
-  .phase-section.current .phase-dates { color: var(--accent-text); }
-
-  /* ===== Run sessions: done / planned / missed ===== */
-  .runs-grid .run-item {
-    display: grid;
-    grid-template-columns: 22px 1fr auto;
-    column-gap: 12px;
-    align-items: center;
-    padding: 12px;
-    background: var(--surface);
-    border-radius: 14px;
-    cursor: default;
-  }
-
-  .run-plan { min-width: 0; }
-  .run-plan .run-label { margin-bottom: 1px; }
-
-  .run-label .run-desc,
-  .run-label .run-sep {
-    display: inline;
-    font-size: 12px;
-    letter-spacing: normal;
-    text-transform: none;
-    line-height: 1.3;
-  }
-  .run-plan .interval-tag,
-  .run-plan .tempo-tag,
-  .run-plan .race-tag {
-    display: table;
-    margin: 6px 0 0;
-    padding: 1px 6px;
-    border: 1px solid var(--text-faint);
-    border-radius: 4px;
-  }
-
-  .run-status {
-    font-size: 10.5px;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    color: var(--text-dim);
-    white-space: nowrap;
-  }
-
-  .runs-grid .run-item.done {
-    background: var(--accent-soft);
-  }
-
-  .run-item.done .run-status {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-
-  .check-row.checked.run-item .run-dist {
-    color: var(--text);
-    text-decoration: none;
-  }
-
-  .runs-grid .run-item.missed {
-    background: transparent;
-  }
-
-  .run-item.missed .run-dist,
-  .run-item.missed .run-desc,
-  .run-item.missed .run-label { color: var(--text-faint); }
-  .run-item.missed .checkbox { border-style: dashed; }
-
-  .runs-grid .run-item.skipped {
-    background: transparent;
-  }
-
-  .run-item.skipped .run-dist,
-  .run-item.skipped .run-desc,
-  .run-item.skipped .run-label { color: var(--text-faint); }
-  .run-item.skipped .run-dist { text-decoration: line-through; }
-
-  .run-item.skipped .checkbox::after {
-    content: "–";
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-dim);
-    font-weight: 500;
-  }
-
-  .run-item.skipped .checkbox { position: relative; }
-
-  /* Sessions without a run: one pill in the corner, "Overslaan" or "Overgeslagen ×". */
-  .run-item.planned .run-status,
-  .run-item.missed .run-status,
-  .run-item.skipped .run-status { display: none; }
-
-  .missed-note { display: none; }
-  .run-item.past .missed-note { display: inline; }
-
-  /* A fixed slot for the pill, so the text never re-wraps when it widens. */
-  .runs-grid .run-item.planned,
-  .runs-grid .run-item.missed,
-  .runs-grid .run-item.skipped { grid-template-columns: 22px minmax(0, 1fr) 122px; }
-
-  .week-card { padding-left: 12px; padding-right: 12px; }
-  .runs-grid .run-item { padding: 12px 10px; column-gap: 10px; }
-
-  .skip-ctl {
-    grid-column: 3;
-    grid-row: 1;
-    justify-self: end;
-    display: inline-flex;
-    align-items: center;
-    height: 28px;
-    padding: 0 12px;
-    box-sizing: border-box;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    color: var(--text-dim);
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    cursor: pointer;
-    transition: width 0.25s ease, color 0.2s ease, border-color 0.2s ease;
-  }
-
-  .skip-ctl:hover:not(.is-skipped) { color: var(--text); border-color: var(--text-faint); }
-
-  .skip-ctl.is-skipped {
-    padding: 0 4px 0 10px;
-    cursor: default;
-  }
-
-  .skip-x {
-    display: none;
-    width: 20px;
-    height: 20px;
-    margin-left: 5px;
-    padding: 0;
-    border: 0;
-    border-radius: 50%;
-    background: var(--line);
-    color: var(--text-dim);
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .skip-x svg {
-    width: 10px;
-    height: 10px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-  }
-
-  .skip-x:hover { color: var(--text); }
-
-  .skip-ctl.is-skipped .skip-x {
-    display: inline-flex;
-    animation: skip-x-in 0.2s ease 0.12s both;
-  }
-
-  @keyframes skip-x-in {
-    from { opacity: 0; transform: scale(0.6); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .skip-ctl { transition: none; }
-    .skip-ctl.is-skipped .skip-x { animation: none; }
-  }
-
-  .activity {
-    grid-column: 1 / -1;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(239, 125, 60, 0.35);
-  }
-
-  .act-date {
-    font-size: 11.5px;
-    color: var(--text-dim);
-  }
-
-  .act-name {
-    font-size: 13.5px;
-    font-weight: 600;
-    margin: 1px 0 8px;
-  }
-
-  .act-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-
-  .act-stat .k {
-    font-size: 10px;
-    color: var(--text-dim);
-  }
-
-  .act-stat .v {
-    font-size: 17px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  /* ===== Coach summary under a run ===== */
-  .coach {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px dashed rgba(239, 125, 60, 0.35);
-    animation: coach-in 0.3s ease both;
-  }
-
-  .coach-k {
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--accent-text);
-    margin-bottom: 4px;
-  }
-
-  .coach-text {
-    margin: 0;
-    font-size: 13.5px;
-    line-height: 1.45;
-    color: var(--text);
-  }
-
-  .coach-sub { margin-top: 10px; }
-
-  .week-coach {
-    margin: 0 0 12px;
-  }
-
-  .week-body > .week-coach:last-child { margin: 12px 0 0; }
-
-  .week-coach {
-    padding: 12px;
-    background: var(--accent-soft);
-    border-radius: 14px;
-  }
-
-  .coach-tips {
-    margin: 8px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .coach-tips li {
-    position: relative;
-    padding-left: 18px;
-    margin-top: 4px;
-    font-size: 13px;
-    line-height: 1.4;
-    color: var(--text-dim);
-  }
-
-  .coach-tips li::before {
-    content: "→";
-    position: absolute;
-    left: 0;
-    color: var(--accent-text);
-  }
-
-  .coach.updating .coach-tips {
-    opacity: 0.4;
-    transition: opacity 0.25s ease;
-  }
-
-  .coach.updating .coach-tips::after {
-    content: "Tips worden bijgewerkt…";
-    display: block;
-    margin-top: 6px;
-    font-size: 12px;
-    font-style: italic;
-    color: var(--text-dim);
-  }
-
-  .coach.pending .coach-text {
-    color: var(--text-dim);
-    font-style: italic;
-    animation: coach-pulse 1.4s ease-in-out infinite;
-  }
-
-  @keyframes coach-in { from { opacity: 0; } to { opacity: 1; } }
-  @keyframes coach-pulse { 50% { opacity: 0.45; } }
-
-  @media (prefers-reduced-motion: reduce) {
-    .coach, .coach.pending .coach-text { animation: none; }
-  }
-
-  .week-total {
-    margin-left: auto;
-    font-size: 12px;
-    color: var(--text-dim);
-    white-space: nowrap;
-  }
-
-  .week-total strong { color: var(--text); }
-
-  .week-progress {
-    height: 4px;
-    border-radius: 2px;
-    background: var(--line);
-    margin: -2px 0 0;
-    overflow: hidden;
-  }
-
-  .week-progress div {
-    height: 100%;
-    background: var(--accent);
-  }
-
-  /* The week you're in: its week number in the accent colour. */
-  .week-card.current .week-num { color: var(--accent-text); }
-
-  .extra-runs { margin-top: 8px; }
-
-  .week-dates {
-    font-size: 11.5px;
-    color: var(--text-dim);
-    white-space: nowrap;
-  }
-
-  .week-head { flex-wrap: wrap; row-gap: 2px; }
-  .week-focus { order: 1; flex-basis: 100%; }
-  .week-head .chevron { margin-left: auto; }
-  .week-total { order: 2; flex-basis: 100%; margin-left: 0; }
-  .week-card.collapsed .week-head { margin-bottom: 0; }
-  .week-card.collapsed { padding-bottom: 14px; }
-
-  .week-card.skipped {
-    border-left-color: var(--line);
-    color: var(--text-dim);
-    font-size: 13px;
-  }
-
-  /* ===== Page 1: Phases ===== */
-  .phase-dates {
-    color: var(--text-dim);
-    font-size: 11px;
-    font-weight: 500;
-  }
-
-  .phase-title {
-    font-size: 19px;
-    font-weight: 500;
-  }
-
-  .section-label {
-    color: var(--text-dim);
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin: 32px 0 14px 0;
-  }
-
-
-  .principles {
-    margin: 0;
-    padding-left: 0;
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .principles li {
-    font-size: 14px;
+  .phase-stats { margin-bottom: 12px; }
+
+  .note {
+    padding: 18px 22px;
+    font-size: 15px;
     color: var(--text-dim);
     line-height: 1.5;
-    padding-left: 18px;
-    position: relative;
+    margin-bottom: 12px;
   }
 
-  .principles li::before {
-    content: "—";
-    color: var(--text-faint);
-    position: absolute;
-    left: 0;
-  }
+  /* ===== Weeks ===== */
+  .weeks { display: flex; flex-direction: column; gap: 10px; }
 
-  .principles strong {
-    color: var(--text);
-    font-weight: 600;
-  }
+  .week-card { padding: 20px 18px; }
+  .week-card.collapsed { padding-bottom: 20px; }
 
-  /* ===== Page 2: Consolidation schedule ===== */
-  .weeks {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .week-card {
-    background: var(--bg-alt);
-    border-radius: 20px;
-    padding: 14px 14px 16px;
-  }
-
+  /* "Week 3" dark with its focus in grey, like "Hoi Ananta.", then the dates. */
   .week-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 10px;
+    padding: 0 4px;
     cursor: pointer;
     user-select: none;
   }
-
-  .week-head .chevron {
-    width: 20px;
-    height: 20px;
-    align-self: center;
-  }
+  .week-num { font-size: 21px; font-weight: 400; letter-spacing: -0.015em; white-space: nowrap; }
+  .week-head .chevron { order: 1; margin-left: auto; width: 20px; height: 20px; }
+  .week-focus { order: 2; flex-basis: 100%; font-size: 21px; font-weight: 400; letter-spacing: -0.015em; line-height: 1.25; color: var(--text-dim); }
+  .week-dates { order: 3; flex-basis: 100%; margin-top: 6px; font-size: 13px; color: var(--text-dim); }
+  .week-total { order: 4; flex-basis: 100%; margin-top: 2px; font-size: 13px; color: var(--text-dim); }
+  .week-total strong { font-weight: 400; color: var(--text); }
 
   .week-card:not(.collapsed) .week-head .chevron { transform: rotate(180deg); }
-
-  .week-body { padding-top: 12px; }
-  .week-card.collapsed .week-body { display: none; }
-
-  /* State changes fade rather than jump. */
-  .runs-grid .run-item {
-    transition: background-color 0.25s ease, border-color 0.25s ease;
-  }
-
-  .run-label, .run-dist, .run-desc, .week-num, .week-focus, .week-total, .phase-title, .phase-dates {
-    transition: color 0.25s ease;
-  }
-
-  .week-progress div { transition: width 0.4s ease, background-color 0.25s ease; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .runs-grid .run-item, .run-label, .run-dist, .run-desc, .week-num, .week-focus,
-    .week-total, .phase-title, .phase-dates, .week-progress div, .chevron { transition: none; }
-  }
+  .week-card.current .week-num { color: var(--accent-text); }
 
   .week-card.completed .week-num,
   .week-card.completed .week-focus,
   .week-card.completed .week-total,
   .week-card.completed .week-total strong { color: var(--text-faint); }
   .week-card.completed .week-focus { text-decoration: line-through; }
-  .week-card.completed .week-progress div { background: var(--text-faint); }
 
+  .week-card.skipped { padding: 18px 22px; color: var(--text-dim); font-size: 15px; }
 
-  .week-head {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 10px;
+  .week-body { padding-top: 16px; }
+  .week-card.collapsed .week-body { display: none; }
+
+  .week-slider { height: 52px; margin-bottom: 10px; border-radius: 16px; }
+  .week-slider .slider-fill { border-radius: 16px; padding-left: 18px; font-size: 14px; }
+  .week-slider .slider-v { padding-right: 18px; font-size: 14px; }
+
+  /* ===== Runs: a small label, the distance large and light, the status as quiet text ===== */
+  .runs-grid { display: flex; flex-direction: column; gap: 8px; }
+  .extra-runs { margin-top: 8px; }
+
+  .runs-grid .run-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "label label" "dist status" "desc desc" "tag tag" "act act";
+    column-gap: 12px;
+    align-items: center;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.42);
+    cursor: default;
+    transition: background-color 0.25s ease;
   }
+  /* A fixed slot for the status, so the text never re-wraps when it changes. */
+  .runs-grid .run-item.planned,
+  .runs-grid .run-item.missed,
+  .runs-grid .run-item.skipped { grid-template-columns: minmax(0, 1fr) 112px; }
+  .runs-grid .run-item.done { background: var(--accent-soft); }
+  .runs-grid .run-item.missed,
+  .runs-grid .run-item.skipped { background: rgba(255, 255, 255, 0.2); }
 
-  .week-num {
-    color: var(--text);
+  /* Done shows in the status; the box is no longer needed. */
+  .run-item .checkbox { display: none; }
+
+  .run-plan { display: contents; }
+  .run-label { grid-area: label; font-size: 13px; color: var(--text-dim); line-height: 1.35; margin-bottom: 3px; }
+  .run-dist { grid-area: dist; font-size: 26px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--text); }
+  .run-desc { grid-area: desc; margin-top: 3px; font-size: 14px; color: var(--text-dim); line-height: 1.35; }
+  .run-plan .interval-tag,
+  .run-plan .tempo-tag,
+  .run-plan .race-tag {
+    grid-area: tag;
+    justify-self: start;
+    margin: 8px 0 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(29, 29, 27, 0.06);
     font-size: 12px;
-    font-weight: 500;
+    color: var(--text);
+  }
+
+  .run-status { grid-area: status; font-size: 13px; color: var(--accent-text); white-space: nowrap; justify-self: end; }
+  .run-item.planned .run-status,
+  .run-item.missed .run-status,
+  .run-item.skipped .run-status { display: none; }
+
+  .run-item.missed .run-dist, .run-item.missed .run-label, .run-item.missed .run-desc,
+  .run-item.skipped .run-dist, .run-item.skipped .run-label, .run-item.skipped .run-desc { color: var(--text-faint); }
+  .run-item.skipped .run-dist { text-decoration: line-through; }
+
+  .missed-note { display: none; }
+  .run-item.past .missed-note { display: inline; }
+
+  /* "Overslaan" as a quiet text link; once skipped, "Overgeslagen" with a small ×. */
+  .skip-ctl {
+    grid-area: status;
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    color: var(--text-dim);
+    font-size: 13px;
     white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    transition: width 0.25s ease, color 0.2s ease;
   }
+  .skip-ctl:hover:not(.is-skipped) { color: var(--text); }
+  .skip-ctl.is-skipped { cursor: default; }
 
-  .week-focus {
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  .runs-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .run-label {
-    font-size: 10.5px;
+  .skip-x {
+    display: none;
+    width: 22px;
+    height: 22px;
+    margin-left: 6px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(29, 29, 27, 0.07);
     color: var(--text-dim);
-    margin-bottom: 2px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .skip-x svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .skip-x:hover { color: var(--text); }
+  .skip-ctl.is-skipped .skip-x { display: inline-flex; animation: skip-x-in 0.2s ease 0.12s both; }
+
+  @keyframes skip-x-in {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
   }
 
-  .run-dist {
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
+  /* A finished run, in the style of the next-run card: label over value. */
+  .activity {
+    grid-area: act;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(239, 125, 60, 0.25);
   }
+  .act-date { font-size: 13px; color: var(--text-dim); }
+  .act-name { font-size: 16px; font-weight: 500; margin: 2px 0 12px; }
+  .act-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .act-stat .k { font-size: 13px; color: var(--text-dim); margin-bottom: 4px; }
+  .act-stat .v { font-size: 20px; font-weight: 400; letter-spacing: -0.01em; white-space: nowrap; }
 
-  .run-desc {
-    font-size: 12.5px;
-    color: var(--text-dim);
-    line-height: 1.3;
+  /* ===== Coach, under a run and as a week overview ===== */
+  .coach {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(239, 125, 60, 0.25);
+    animation: coach-in 0.3s ease both;
   }
+  .coach-k { font-size: 13px; color: var(--accent-text); margin-bottom: 4px; }
+  .coach-text { margin: 0; font-size: 15px; line-height: 1.45; color: var(--text); }
+  .coach-sub { margin-top: 12px; }
 
-  .run-item {
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid transparent;
-  }
+  .week-coach { margin: 0 0 10px; padding: 16px 18px; background: var(--accent-soft); border-radius: 16px; border: 0; }
+  .week-body > .week-coach:last-child { margin: 10px 0 0; }
 
+  .coach-tips { margin: 8px 0 0; padding: 0; list-style: none; }
+  .coach-tips li { position: relative; padding-left: 20px; margin-top: 6px; font-size: 14px; line-height: 1.45; color: var(--text); }
+  .coach-tips li::before { content: "→"; position: absolute; left: 0; color: var(--accent-text); }
 
-  .interval-tag,
-  .race-tag,
-  .tempo-tag {
+  .coach.updating .coach-tips { opacity: 0.4; transition: opacity 0.25s ease; }
+  .coach.updating .coach-tips::after {
+    content: "Tips worden bijgewerkt…";
     display: block;
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--text);
-    margin-top: 4px;
-  }
-
-  .note {
-    background: var(--bg-alt);
-    border-radius: 10px;
-    padding: 16px 20px;
-    font-size: 14px;
+    margin-top: 6px;
+    font-size: 13px;
+    font-style: italic;
     color: var(--text-dim);
-    line-height: 1.5;
-    margin-bottom: 16px;
+  }
+  .coach.pending .coach-text { color: var(--text-dim); font-style: italic; animation: coach-pulse 1.4s ease-in-out infinite; }
+
+  @keyframes coach-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes coach-pulse { 50% { opacity: 0.45; } }
+
+  /* ===== Rules of thumb, as a list card ===== */
+  .section-label { margin: 34px 0 10px; font-size: 13px; color: var(--text); }
+  .principles { margin: 0; padding: 6px 22px; list-style: none; }
+  .principles li { padding: 14px 0; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.5; color: var(--text-dim); }
+  .principles li:first-child { border-top: 0; }
+  .principles strong { color: var(--text); font-weight: 500; }
+
+  /* State changes fade rather than jump. */
+  .run-label, .run-dist, .week-num, .week-focus, .phase-title, .phase-dates { transition: color 0.25s ease; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .runs-grid .run-item, .run-label, .run-dist, .week-num, .week-focus, .phase-title, .phase-dates, .chevron,
+    .skip-ctl { transition: none; }
+    .skip-ctl.is-skipped .skip-x, .coach, .coach.pending .coach-text { animation: none; }
   }
 
 </style>
@@ -1402,6 +1050,8 @@
       };
     }
 
+    function capital(text) { return text.replace(/^./, function (c) { return c.toUpperCase(); }); }
+
     function el(tag, className, html) {
       var node = document.createElement(tag);
       node.className = className;
@@ -1473,24 +1123,27 @@
     });
 
     var DAYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+    // Usual run days, counted from Monday: Run 1 on Wednesday, Run 2 on Friday, Run 3 on Sunday.
+    var RUN_DAYS = [2, 4, 6];
 
     // Run sessions are ticked from Suunto data.
     var runRows = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan] .run-item'));
 
-    // Lay each run session out as: checkbox · planned run · status chip (activity card goes below).
+    function runDate(day) {
+      return el('span', 'run-date', ' · ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day));
+    }
+
+    // Lay each run session out as: planned run · status (activity card goes below).
     runRows.forEach(function (item) {
+      var card = item.closest('.week-card');
+      var index = Array.prototype.indexOf.call(card.querySelectorAll('.run-item'), item);
+      item.querySelector('.run-label').appendChild(runDate(weekStart(card.dataset.plan, Number(card.dataset.week)) + RUN_DAYS[index]));
       var plan = el('div', 'run-plan');
       Array.prototype.slice.call(item.children).forEach(function (child) {
         if (!child.classList.contains('checkbox')) plan.appendChild(child);
       });
-      // The note moves up behind the run number: "RUN 2 • 4× kort versnellen".
       var desc = plan.querySelector('.run-desc');
-      if (desc) {
-        desc.textContent = desc.textContent.replace(/^\+\s*/, '');
-        var label = plan.querySelector('.run-label');
-        label.appendChild(el('span', 'run-sep', ' • '));
-        label.appendChild(desc);
-      }
+      if (desc) desc.textContent = capital(desc.textContent.replace(/^\+\s*/, ''));
       item.appendChild(plan);
       item.appendChild(el('div', 'run-status', 'Gepland'));
       item.classList.add('planned');
@@ -1514,9 +1167,7 @@
         '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>');
       var label = ctl.querySelector('.skip-label');
       var runLabel = item.querySelector('.run-label');
-      var sep = runLabel.querySelector('.run-sep');
-      var note = el('span', 'missed-note', ' · niet gelopen');
-      if (sep) runLabel.insertBefore(note, sep); else runLabel.appendChild(note);
+      runLabel.appendChild(el('span', 'missed-note', ' · niet gelopen'));
       // Past sessions keep "niet gelopen" when skipped too, so the label never re-wraps.
       item.classList.toggle('past', weekOver);
 
@@ -1625,8 +1276,6 @@
       return card;
     }
 
-    // Usual run days, counted from Monday: Run 1 on Wednesday, Run 2 on Friday, Run 3 on Sunday.
-    var RUN_DAYS = [2, 4, 6];
 
     // Pair runs with sessions in date order, matching as many as possible and keeping each run
     // as close to its session's usual day as it can. Returns the run (or undefined) per session.
@@ -1661,7 +1310,9 @@
         var run = bySlot[i];
         setChecked(item, !!run);
         if (run) {
-          setStatus(item, 'done', 'Gedaan');
+          setStatus(item, 'done', 'Gedaan ✓');
+          // The date it was actually run on.
+          item.querySelector('.run-date').replaceWith(runDate(dayNumber(run.date)));
           item.appendChild(activityCard(run));
         } else {
           addSkipButton(item, weekOver);
@@ -1682,19 +1333,20 @@
         card.querySelector('.week-body').appendChild(grid);
       }
 
-      var done = Math.min(weekRuns.length, items.length);
-      var progress = el('div', 'week-progress', '<div></div>');
-      progress.firstChild.style.width = Math.round((done / items.length) * 100) + '%';
-      card.querySelector('.week-head').insertAdjacentElement('afterend', progress);
       if (!weekOver) {
         card.classList.add('current');
       }
 
+      // The week's kilometres as a bar, like on the start screen.
+      var done = Math.min(weekRuns.length, items.length);
       var km = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
-      var time = weekRuns.reduce(function (sum, r) { return sum + r.moving_time_s; }, 0);
       var planned = items.reduce(function (sum, i) { return sum + plannedKm(i); }, 0);
-      card.querySelector('.week-head').appendChild(el('div', 'week-total',
-        '<strong>' + done + '/' + items.length + '</strong> runs · ' + formatKm(km) + ' / ' + formatKm(planned) + ' km' + (time ? ' · ' + formatDuration(time) : '')));
+      var bar = el('div', 'slider week-slider',
+        '<div class="slider-fill"><span>' + done + ' van ' + items.length + ' runs</span></div>' +
+        '<span class="slider-v">' + formatKm(km) + ' / ' + formatKm(planned) + ' km</span>');
+      bar.querySelector('.slider-fill').style.setProperty('--f', planned ? Math.min(1, km / planned) : 0);
+      var body = card.querySelector('.week-body');
+      body.insertBefore(bar, body.firstChild);
     }
 
     function runsBetween(runs, start, end) {
@@ -1770,10 +1422,11 @@
         if (old) old.remove();
         if (!finished || !phaseRuns.length) return;
         var t = totals(phaseRuns);
-        var box = el('div', 'stats phase-stats',
-          '<div class="stat"><div class="k">Totaal km</div><div class="v">' + t.km + '</div></div>' +
-          '<div class="stat"><div class="k">Gem. tempo</div><div class="v">' + t.avg + '</div></div>' +
-          '<div class="stat"><div class="k">Snelste tempo</div><div class="v">' + t.best + '</div></div>');
+        var row = function (label, value) {
+          return '<div class="list-row"><span>' + label + '</span><small>' + value.replace('<small> /km</small>', ' /km') + '</small></div>';
+        };
+        var box = el('div', 'glass list-card phase-stats',
+          row('Totaal', t.km + ' km') + row('Gem. tempo', t.avg) + row('Snelste tempo', t.best));
         var body = section.querySelector('.phase-body');
         body.insertBefore(box, body.firstChild);
       });
@@ -1953,7 +1606,7 @@
       var card = item.closest('.week-card');
       var phase = item.closest('.phase-section');
       var label = item.querySelector('.run-label').cloneNode(true);
-      Array.prototype.forEach.call(label.querySelectorAll('.run-sep, .run-desc, .missed-note'), function (n) { n.remove(); });
+      Array.prototype.forEach.call(label.querySelectorAll('.run-date, .run-desc, .missed-note'), function (n) { n.remove(); });
       return {
         id: item.dataset.id,
         label: label.textContent.replace(/\s+/g, ' ').trim(),
@@ -2290,7 +1943,6 @@
       document.getElementById(id + '-bar').querySelector('.slider-fill').style.setProperty('--f', f);
       setText(id, value);
     }
-    function capital(text) { return text.replace(/^./, function (c) { return c.toUpperCase(); }); }
 
     function slotDay(item) {
       var card = item.closest('.week-card');
@@ -2317,7 +1969,7 @@
 
     function plainLabel(item) {
       var label = item.querySelector('.run-label').cloneNode(true);
-      Array.prototype.forEach.call(label.querySelectorAll('.run-sep, .run-desc, .missed-note'), function (n) { n.remove(); });
+      Array.prototype.forEach.call(label.querySelectorAll('.run-date, .run-desc, .missed-note'), function (n) { n.remove(); });
       return label.textContent.trim();
     }
 
