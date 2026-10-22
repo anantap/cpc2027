@@ -1157,7 +1157,10 @@
     // Monday of week 1 of each plan; runs are matched to weeks by date.
     var PLAN_STARTS = { consol: '2026-08-17', build: '2026-11-30' };
     // Weeks taken off (from Monday), with a note; later consolidation/tussenfase weeks shift one week.
-    var SKIPPED_WEEKS = [{ start: '2026-10-12', note: 'Rustweek · shinty mcsplinty' }];
+    var SKIPPED_WEEKS = [
+      { start: '2026-10-12', note: 'Rustweek · shinty mcsplinty' },
+      { start: '2026-11-23', note: 'Rustweek · fris de opbouw in' },
+    ];
     var DAY = 86400000;
     var MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
 
@@ -1248,7 +1251,9 @@
         var note = SKIPPED_WEEKS[skipped.indexOf(start - 7)].note;
         var marker = el('div', 'week-card skipped', note + ' · ' + formatDay(start - 7) + ' – ' + formatDay(start - 1));
         marker.dataset.start = String(start - 7);
-        card.parentNode.insertBefore(marker, card);
+        // A rest week right before the build-up closes the Tussenfase rather than opening the build-up.
+        if (card.dataset.plan === 'build' && Number(card.dataset.week) === 1) document.getElementById('tussenfase-weeks').appendChild(marker);
+        else card.parentNode.insertBefore(marker, card);
       }
     });
 
