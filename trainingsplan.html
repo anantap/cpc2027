@@ -224,7 +224,8 @@
      an open ring for a session skipped or missed. */
   .dots-card { padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .field-card { display: block; }
-  .field-list { margin-top: 16px; border-top: 1px solid var(--line); }
+  .field-label { margin-top: 24px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); }
+  .field-list { margin-top: 8px; border-top: 1px solid var(--line); }
   .field-list .list-row:first-child { border-top: 0; }
   .dots-head { margin-bottom: 16px; }
   .dots-title { font-size: var(--fs-l); line-height: var(--lh-l); }
@@ -831,10 +832,10 @@
   <a class="pill-btn home-schema" href="#schema">Bekijk het schema <span aria-hidden="true">&nbsp;→</span></a>
 
   <div class="home-group home-bars">
-  <div class="view-label">Tot nu toe:</div>
   <div class="glass dots-card field-card">
     <div class="dots-head"><div class="dots-title" id="home-cpc">–</div><div class="dots-note" id="home-status"></div></div>
     <div class="dot-field" id="home-field" role="img"></div>
+    <div class="field-label">Tot nu toe:</div>
     <div class="field-list">
       <div class="list-row"><span>Totaal</span><small id="home-km">–</small></div>
       <div class="list-row"><span>Gem. tempo</span><small id="home-avg">–</small></div>
