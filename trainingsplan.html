@@ -251,6 +251,10 @@
     font-variant-numeric: tabular-nums;
   }
   .big sup { font-size: var(--fs-m); line-height: var(--lh-m); letter-spacing: 0; vertical-align: top; margin-left: 4px; position: relative; top: -4px; }
+  /* Units as superscript after a number, like the km on the start screen. */
+  sup.u { font-size: max(0.55em, 10px); line-height: 1; letter-spacing: 0; vertical-align: top; margin-left: 2px; position: relative; top: 0.1em; }
+  .run-dist.km { font-size: var(--fs-xl); line-height: 0.8; letter-spacing: -0.045em; margin: 16px 0 8px; }
+  .run-dist.km sup.u { font-size: var(--fs-m); line-height: var(--lh-m); margin-left: 4px; top: -4px; }
   .big.text { font-size: var(--fs-l); letter-spacing: -0.02em; line-height: var(--lh-l); }
 
   /* A slider-like bar: the filled part carries the label and a handle. */
@@ -1424,7 +1428,10 @@
 
     // "5 km" → the 5 in Geist Pixel.
     function pxDistances(node) {
-      node.innerHTML = node.innerHTML.replace(/(\d+(?:,\d+)?)(\s*km)/g, '<span class="px">$1</span>$2');
+      var html = node.innerHTML.replace(/^(\d+(?:,\d+)?)\s*km$/, '<span class="px">$1</span><sup class="u">km</sup>');
+      // A plain distance is shown as large as on the start screen; intervals ("5× 400 m") stay text size.
+      node.classList.toggle('km', html !== node.innerHTML);
+      node.innerHTML = html;
     }
 
     function plannedKm(item) {
@@ -1439,8 +1446,8 @@
     function activityCard(run) {
       var card = el('div', 'activity',
         '<div class="act-date"></div><div class="act-name"></div><div class="act-stats">' +
-        stat('Afstand', pxKm(run.distance_km.toFixed(2).replace('.', ',')) + ' km') +
-        stat('Tempo', pxKm(formatPace(run).replace(' /km', '')) + ' /km') +
+        stat('Afstand', pxKm(run.distance_km.toFixed(2).replace('.', ',')) + '<sup class="u">km</sup>') +
+        stat('Tempo', pxKm(formatPace(run).replace(' /km', '')) + '<sup class="u">/km</sup>') +
         stat('Tijd', pxKm(formatDuration(run.moving_time_s))) +
         '</div>');
       card.querySelector('.act-date').innerHTML = formatRunDate(run);
@@ -1560,7 +1567,7 @@
 
     function formatPaceSec(secPerKm) {
       secPerKm = Math.round(secPerKm);
-      return Math.floor(secPerKm / 60) + ':' + pad(secPerKm % 60) + '<small> /km</small>';
+      return Math.floor(secPerKm / 60) + ':' + pad(secPerKm % 60) + '<sup class="u">/km</sup>';
     }
 
     // Totals over every run so far; fastest pace ignores very short runs.
@@ -1593,10 +1600,10 @@
         if (!finished || !phaseRuns.length) return;
         var t = totals(phaseRuns);
         var row = function (label, value) {
-          return '<div class="list-row"><span>' + label + '</span><small>' + value.replace('<small> /km</small>', ' /km') + '</small></div>';
+          return '<div class="list-row"><span>' + label + '</span><small>' + value + '</small></div>';
         };
         var box = el('div', 'glass list-card phase-stats',
-          row('Totaal', t.km + ' km') + row('Gem. tempo', t.avg) + row('Snelste tempo', t.best));
+          row('Totaal', t.km + '<sup class="u">km</sup>') + row('Gem. tempo', t.avg) + row('Snelste tempo', t.best));
         var body = section.querySelector('.phase-body');
         body.insertBefore(box, body.firstChild);
       });
@@ -2233,10 +2240,10 @@
 
       if (runs.length) {
         var t = totals(runs);
-        setText('home-km', t.km + ' km');
-        setText('home-avg', t.avg.replace('<small> /km</small>', ' /km'));
-        setText('home-best', t.best.replace('<small> /km</small>', ' /km'));
-        setText('home-long', formatKm(runs.reduce(function (m, r) { return Math.max(m, r.distance_km); }, 0)) + ' km');
+        setText('home-km', t.km + '<sup class="u">km</sup>');
+        setText('home-avg', t.avg);
+        setText('home-best', t.best);
+        setText('home-long', formatKm(runs.reduce(function (m, r) { return Math.max(m, r.distance_km); }, 0)) + '<sup class="u">km</sup>');
       }
     }
 
