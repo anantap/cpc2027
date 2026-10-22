@@ -246,6 +246,21 @@
   .list-row small { font-size: 13px; color: var(--text); white-space: nowrap; }
   .list-row small.dim { color: var(--text-dim); }
 
+  /* This week's runs, each with its status on the right. */
+  .week-list { padding: 8px 26px; }
+  .week-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .week-row:first-child { border-top: 0; }
+  .week-row .k { font-size: 13px; color: var(--text-dim); margin-bottom: 3px; }
+  .week-row .v { font-size: 26px; letter-spacing: -0.02em; }
+  .week-row .status { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
+  .week-row.done .status, .week-row.next .status { color: var(--accent-text); }
+  .week-row.skipped .v, .week-row.missed .v { color: var(--text-faint); }
+
+  .coach-card { padding: 20px 26px 22px; }
+  .coach-card .coach-k { margin: 0; font-size: 13px; color: var(--accent-text); }
+  .coach-card .coach-from { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .coach-card .coach-tips li { font-size: 15px; color: var(--text); line-height: 1.45; margin-top: 8px; }
+
   @media (max-height: 720px) {
     .view-label { margin-top: 18px; }
     .sun-card { min-height: 236px; }
@@ -978,7 +993,15 @@
       <div class="big" id="home-dist">–</div>
     </div>
   </a>
-  <div class="slider" id="home-week-bar"><div class="slider-fill"><span>Deze week</span></div><span class="slider-v" id="home-week">–</span></div>
+  <div class="glass coach-card" id="home-coach" hidden>
+    <div class="coach-k">Tip van de coach</div>
+    <div class="coach-from" id="home-coach-from"></div>
+    <ul class="coach-tips" id="home-coach-tips"></ul>
+  </div>
+
+  <div class="view-label">Deze week:</div>
+  <div class="glass week-list" id="home-runs"></div>
+  <div class="slider" id="home-week-bar"><div class="slider-fill"><span>Kilometers</span></div><span class="slider-v" id="home-week">–</span></div>
   <div class="slider" id="home-cpc-bar"><div class="slider-fill"><span>Tot de CPC</span></div><span class="slider-v" id="home-cpc">–</span></div>
 
   <div class="view-label">Tot nu toe:</div>
@@ -1914,7 +1937,13 @@
       summary.tips.forEach(function (tip) {
         box.querySelector('.coach-tips').appendChild(el('li', 'coach-tip')).textContent = tip;
       });
+      onCoach(activity, summary);
     }
+
+    // Set by the start screen: called whenever a run's coach summary is shown or updated.
+    var onCoach = function () {};
+    // Set by setupCoach: writes a run's missing summary now, even when it isn't on screen.
+    var coachNow = function () {};
 
     // `from` is set when last week's overview is shown at the top of the current week.
     function renderWeekCoach(box, summary, from) {
@@ -2084,6 +2113,14 @@
         target._coachTask = task;
         if (observer) observer.observe(target); else queue.push(task);
       }
+
+      coachNow = function (target) {
+        if (!observer || !target._coachTask) return;
+        observer.unobserve(target);
+        queue.push(target._coachTask);
+        target._coachTask = null;
+        pump();
+      };
 
       function pendingBox(label) {
         return el('div', 'coach pending', '<div class="coach-k">' + label + '</div><p class="coach-text">Samenvatting wordt geschreven…</p>');
@@ -2316,6 +2353,7 @@
         setText('home-session', plainLabel(next));
         setText('home-kind', capital(text(next, '.run-desc') || 'rustig').split(' + ')[0]);
         setBig('home-dist', next);
+        renderWeekList(card, next);
         var w = weekNumbers(card);
         setSlider('home-week', w.planned ? w.km / w.planned : 0, formatKm(w.km) + ' / ' + formatKm(w.planned) + ' km');
       } else {
@@ -2324,7 +2362,9 @@
         setText('home-kind', '–');
         setText('home-dist', '');
         setSlider('home-week', 1, '–');
+        setText('home-runs', '');
       }
+      homeCoach();
       var days = CPC_DAY - today;
       setSlider('home-cpc', (today - TRAINING_START) / (CPC_DAY - TRAINING_START), days > 0 ? days + ' dagen' : 'Gelopen');
 
@@ -2336,6 +2376,60 @@
         setText('home-long', formatKm(runs.reduce(function (m, r) { return Math.max(m, r.distance_km); }, 0)) + ' km');
       }
     }
+
+    // The week of the next run: every session with its status.
+    function renderWeekList(card, next) {
+      var list = document.getElementById('home-runs');
+      list.innerHTML = '';
+      Array.prototype.forEach.call(slotsOf(card), function (item) {
+        var done = item.classList.contains('done');
+        var activity = item.querySelector('.activity');
+        var day = activity ? dayNumber(activity._run.date) : slotDay(item);
+        var state = done ? 'done' : item.classList.contains('skipped') ? 'skipped' : item === next ? 'next'
+          : item.classList.contains('missed') ? 'missed' : 'planned';
+        var row = el('div', 'week-row ' + state,
+          '<div><div class="k"></div><div class="v"></div></div><span class="status"></span>');
+        row.querySelector('.k').textContent = plainLabel(item) + ' · ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day);
+        row.querySelector('.v').textContent = done ? formatKm(activity._run.distance_km) + ' km' : text(item, '.run-dist');
+        row.querySelector('.status').textContent = {
+          done: 'Gedaan ✓', skipped: 'Overgeslagen', next: 'Volgende', missed: 'Niet gelopen', planned: 'Gepland',
+        }[state];
+        list.appendChild(row);
+      });
+    }
+
+    // The tips the coach wrote after your latest run.
+    function latestActivity() {
+      var list = document.querySelectorAll('.activity[data-run-id]:not(.no-coach)');
+      var latest = null;
+      Array.prototype.forEach.call(list, function (a) {
+        if (!latest || a._run.start > latest._run.start) latest = a;
+      });
+      return latest;
+    }
+
+    function homeCoach() {
+      var activity = latestActivity();
+      var box = document.getElementById('home-coach');
+      if (!activity) { box.hidden = true; return; }
+      var summary = activity._summary;
+      var list = document.getElementById('home-coach-tips');
+      list.innerHTML = '';
+      var run = activity._run;
+      document.getElementById('home-coach-from').textContent =
+        'Na je run van ' + LONG_DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
+      if (summary && summary.tips) {
+        summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
+      } else {
+        list.appendChild(el('li', 'coach-tip')).textContent = 'Wordt geschreven…';
+        coachNow(activity);
+      }
+      box.hidden = false;
+    }
+
+    onCoach = function (activity) {
+      if (activity === latestActivity()) homeCoach();
+    };
 
     // ===== Two views: the start screen, and the plan at #schema =====
     var home = document.getElementById('home');
