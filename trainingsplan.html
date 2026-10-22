@@ -7,22 +7,24 @@
 <title>Naar de CPC 10K — maart 2027</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,400..800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&display=swap">
 <style>
   :root {
-    color-scheme: dark;
-    --bg: #0f0f0f;
-    --bg-alt: #171717;
-    --surface: #1f1f1f;
-    --text: #ededed;
-    --text-dim: #8f8f8f;
-    --text-faint: #5c5c5c;
-    --accent: #62466b;
-    --accent-soft: rgba(98, 70, 107, 0.22);
-    /* lighter tint of the accent for small text on the dark background */
-    --accent-text: #b39bbd;
+    color-scheme: light;
+    --bg: #eeede9;
+    --bg-alt: rgba(255, 255, 255, 0.42);
+    /* warm grey glass, as on the cards */
+    --surface: rgba(223, 220, 211, 0.55);
+    --text: #1d1d1b;
+    --text-dim: #85827a;
+    --text-faint: #b4b1a9;
+    --accent: #ef7d3c;
+    --accent-soft: rgba(239, 125, 60, 0.12);
+    /* darker shade of the accent for small text on the light background */
+    --accent-text: #c25e27;
     --on-accent: #ffffff;
-    --line: #2a2a2a;
+    --line: rgba(29, 29, 27, 0.09);
+    --glass-edge: rgba(255, 255, 255, 0.55);
   }
 
   * { box-sizing: border-box; }
@@ -32,23 +34,34 @@
     color: var(--text);
     margin: 0;
     padding: 0;
-    font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+  }
+
+  /* Soft mist behind everything: cool grey at the top, a hint of sunset peach on the side. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(90% 55% at 10% 0%, #dde3e8 0%, rgba(221, 227, 232, 0) 70%),
+      radial-gradient(70% 45% at 100% 55%, #f3e3d6 0%, rgba(243, 227, 214, 0) 70%),
+      radial-gradient(90% 50% at 0% 100%, #e2e5db 0%, rgba(226, 229, 219, 0) 70%),
+      var(--bg);
   }
 
 
   .eyebrow {
-    color: var(--accent-text);
-    font-size: 13px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 600;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
     margin-bottom: 10px;
   }
 
   h1 {
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 500;
     margin: 0 0 8px 0;
     letter-spacing: -0.01em;
   }
@@ -65,7 +78,7 @@
     width: 22px;
     height: 22px;
     border-radius: 6px;
-    border: 1.5px solid var(--line);
+    border: 1.5px solid var(--text-faint);
     flex-shrink: 0;
     cursor: pointer;
     position: relative;
@@ -93,256 +106,223 @@
     justify-content: center;
     color: var(--on-accent);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 500;
   }
 
-  /* Wide display type for titles, dates and numbers. */
-  h1, .phase-dates, .phase-title, .week-num, .week-dates, .week-focus,
-  .run-dist, .act-name, .act-stat .v, .stat .v, .coach-k {
-    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-stretch: 125%;
-  }
+  /* Numbers line up in columns. */
+  .run-dist, .act-stat .v, .stat .v, .week-total { font-variant-numeric: tabular-nums; }
 
   .phase-stats { margin-bottom: 16px; }
 
-  /* ===== Dashboard: the next run ===== */
+  /* ===== Start screen and run screen: soft glass cards on the mist ===== */
   [hidden] { display: none !important; }
 
-  .dash {
-    --sky-1: #2b2238;
-    --sky-2: #62466b;
-    --sky-3: #a98bbf;
-    --sky-4: #e9a07e;
-    --sky-5: #f2733a;
-    max-width: 560px;
+  .view {
+    max-width: 480px;
     margin: 0 auto;
-    min-height: 100svh;
+    padding: calc(24px + env(safe-area-inset-top, 0px)) 20px calc(36px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
-    background: var(--bg-alt);
-  }
-
-  .dash-sky {
-    position: relative;
-    height: 40svh;
-    min-height: 220px;
-    max-height: 380px;
-    background:
-      radial-gradient(120% 70% at 50% 108%, rgba(255, 196, 120, 0.85), rgba(242, 115, 58, 0) 60%),
-      linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 34%, var(--sky-3) 60%, var(--sky-4) 84%, var(--sky-5) 100%);
-    overflow: hidden;
-  }
-
-  /* Film grain over the gradient. */
-  .dash-sky::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    mix-blend-mode: soft-light;
-    opacity: 0.7;
-    pointer-events: none;
-  }
-
-  .dash-dots {
-    position: absolute;
-    top: calc(28px + env(safe-area-inset-top, 0px));
-    left: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    z-index: 1;
-  }
-
-  .dash-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1.5px solid rgba(255, 255, 255, 0.7);
-  }
-  .dash-dot.done { background: rgba(255, 255, 255, 0.9); border-color: transparent; }
-  .dash-dot.skipped { border-color: rgba(255, 255, 255, 0.3); }
-  .dash-dot.next { background: var(--sky-5); border-color: transparent; box-shadow: 0 0 0 4px rgba(242, 115, 58, 0.25); }
-
-  .dash-head .dash-dot { width: 7px; height: 7px; border-width: 1px; border-color: var(--text-faint); }
-  .dash-head .dash-dot.done { background: var(--sky-3); }
-  .dash-head .dash-dot.skipped { border-color: var(--line); }
-  .dash-head .dash-dot.next { background: var(--sky-5); box-shadow: none; }
-
-  .dash-panel {
-    flex: 1;
-    padding: 24px 24px calc(28px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .dash-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .dash-k, .dash-date, .dash-sub, .dash-tile .k, .dash-progress .k {
-    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-stretch: 125%;
-    text-transform: uppercase;
-  }
-
-  .dash-k {
-    display: flex;
-    align-items: center;
     gap: 10px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-  }
-  .dash-k .dots { display: inline-flex; gap: 5px; }
-
-  .dash-sub {
-    margin-top: 5px;
-    font-size: 9.5px;
-    letter-spacing: 0.12em;
-    color: var(--text-dim);
   }
 
-  .dash-date {
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-  }
+  .view-top { display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
 
-  .dash-big {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    margin: 18px 0 26px;
-  }
+  /* The mark: two dots and the sun. */
+  .mark { display: inline-flex; align-items: center; gap: 4px; }
+  .mark i { width: 8px; height: 8px; border-radius: 50%; background: var(--text); }
+  .mark i:first-child { align-self: flex-start; margin-top: 3px; }
+  .mark b { width: 22px; height: 22px; border-radius: 50%; border: 5px solid var(--text); margin-left: 2px; }
 
-  .dash-num {
-    font-size: clamp(60px, 19vw, 84px);
-    font-weight: 400;
-    line-height: 0.9;
-    letter-spacing: -0.03em;
-  }
-  .dash-num small {
-    font-size: 0.32em;
-    font-weight: 400;
-    letter-spacing: 0;
-    color: var(--text-faint);
-    margin-left: 6px;
-  }
-  .dash-desc {
-    margin-top: 10px;
-    font-size: 15px;
-    color: var(--text-dim);
-  }
-
-  .dash-rays { width: 92px; height: 46px; flex-shrink: 0; stroke: var(--text); stroke-width: 1.6; stroke-linecap: round; fill: none; }
-
-  .dash-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 24px;
-    row-gap: 22px;
-  }
-
-  .dash-tile { display: flex; justify-content: space-between; align-items: stretch; gap: 12px; min-width: 0; }
-  .dash-tile .k { font-size: 10.5px; letter-spacing: 0.12em; color: var(--text); line-height: 1.35; }
-  .dash-tile .v { margin-top: 8px; font-size: 24px; letter-spacing: -0.01em; white-space: nowrap; }
-  .dash-tile .v small { font-size: 0.6em; color: var(--text-dim); }
-  .dash-tile .s { margin-top: 3px; font-size: 12px; color: var(--text-dim); }
-
-  /* Small vertical scale with a marker, like a thermometer. */
-  .dash-bar {
-    position: relative;
-    width: 6px;
-    flex-shrink: 0;
-    margin: 4px 6px 2px;
-    border-radius: 3px;
-    background: linear-gradient(180deg, var(--sky-5), var(--sky-3) 60%, #6f86c8);
-  }
-  .dash-bar i {
-    position: absolute;
-    left: -6px;
-    right: -6px;
-    height: 2px;
-    background: var(--text);
-    transform: translateY(-50%);
-    transition: top 0.6s cubic-bezier(0.2, 0, 0, 1);
-  }
-
-  .dash-coach {
-    margin-top: 28px;
-    padding: 16px 18px;
-    border-radius: 16px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-  }
-  .dash-coach .coach-k { margin: 0; }
-  .dash-coach .dash-coach-from { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-  .dash-coach .coach-tips { margin-top: 10px; }
-  .dash-coach .coach-tips li { font-size: 14px; color: var(--text); }
-
-  .dash-progress { margin-top: 28px; }
-  .dash-progress .k { font-size: 10.5px; letter-spacing: 0.12em; margin-bottom: 10px; }
-  .dash-track {
-    position: relative;
-    height: 60px;
-    border-radius: 14px;
-    background: var(--surface);
-    overflow: hidden;
-  }
-  .dash-fill {
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 0;
-    border-radius: 14px;
-    background: linear-gradient(90deg, #f4c98f, var(--sky-4) 45%, var(--sky-3));
-    transition: width 0.9s cubic-bezier(0.2, 0, 0, 1);
-  }
-  .dash-pct {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 30px;
-    color: #1a1420;
-    mix-blend-mode: normal;
-  }
-  .dash-pct small { font-size: 0.45em; opacity: 0.6; }
-  .dash-pct.outside { color: var(--text); }
-
-  .dash-cta {
-    display: flex;
+  .round-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin-top: 24px;
-    height: 54px;
-    border-radius: 999px;
-    background: var(--accent);
-    color: var(--on-accent);
-    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-stretch: 125%;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    background: rgba(29, 29, 27, 0.07);
+    color: var(--text);
+  }
+  .round-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  .back-link { color: var(--text); font-size: 15px; text-decoration: none; padding: 10px 0; align-self: flex-start; }
+  .top .back-link { display: inline-block; margin: -6px 0 6px; }
+
+  /* Inter Tight runs tight at small sizes. */
+  .stat .k, .act-stat .k, .kv .k, .run-label, .run-status, .skip-ctl, .week-dates, .phase-dates, .act-date, .switch-row .k, .view-label {
+    letter-spacing: 0.01em;
+  }
+
+  .view-title {
+    margin: 14px 0 0;
+    font-size: 27px;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+  }
+  .view-title span { display: block; color: var(--text-dim); }
+
+  .view-label { margin: 34px 0 2px; font-size: 13px; color: var(--text); }
+
+  .glass {
+    background: var(--surface);
+    border: 1px solid var(--glass-edge);
+    border-radius: 22px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 10px 30px rgba(60, 55, 40, 0.06);
+    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    backdrop-filter: blur(24px) saturate(1.2);
+    color: var(--text);
     text-decoration: none;
   }
 
-  .dash-empty { color: var(--text-dim); font-size: 15px; margin: 18px 0 0; }
+  /* The big card: a title, the sun, and a number. */
+  .sun-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 268px;
+    padding: 26px 26px 28px;
+  }
+  .sun-card-title { font-size: 21px; line-height: 1.25; max-width: calc(100% - 110px); }
+  .sun {
+    position: absolute;
+    top: 26px;
+    right: 26px;
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, #ffd8b4, #f5a06a 50%, var(--accent) 100%);
+    box-shadow: 0 0 46px rgba(239, 125, 60, 0.35);
+  }
+  .sun.dim { background: radial-gradient(circle at 38% 32%, #f1eee8, #dcd7cd); box-shadow: none; }
 
-  @media (min-width: 600px) {
-    .dash { min-height: 0; margin: 32px auto; border-radius: 28px; overflow: hidden; border: 1px solid var(--line); }
+  .sun-card-foot { display: flex; align-items: flex-end; gap: 22px; }
+  .kv .k { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .kv .v { font-size: 14px; white-space: nowrap; }
+  .big {
+    margin-left: auto;
+    font-size: clamp(64px, 20vw, 84px);
+    font-weight: 400;
+    line-height: 0.8;
+    letter-spacing: -0.045em;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .big sup { font-size: 15px; letter-spacing: 0; vertical-align: top; margin-left: 4px; position: relative; top: -4px; }
+  .big.text { font-size: 30px; letter-spacing: -0.02em; line-height: 1; }
+
+  /* A slider-like bar: the filled part carries the label and a handle. */
+  .slider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 64px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.38);
+    border: 1px solid var(--glass-edge);
+    overflow: hidden;
+  }
+  .slider-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    /* At least room for the label; never over the value on the right. */
+    width: calc(118px + (100% - 118px - 128px) * var(--f, 0));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px 0 26px;
+    border-radius: 20px;
+    background: rgba(214, 210, 199, 0.85);
+    box-shadow: 4px 0 18px rgba(60, 55, 40, 0.08);
+    font-size: 15px;
+    white-space: nowrap;
+    transition: width 0.8s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .slider-fill i { width: 3px; height: 30px; border-radius: 2px; background: var(--text); flex-shrink: 0; margin-left: 12px; }
+  .slider-v { margin-left: auto; padding-right: 26px; font-size: 15px; position: relative; font-variant-numeric: tabular-nums; }
+  .slider.on .slider-fill { background: rgba(245, 176, 132, 0.6); }
+
+  /* A list of big labels with a small value on the right. */
+  .list-card { padding: 6px 26px; }
+  .list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    padding: 15px 0;
+    border-top: 1px solid var(--line);
+  }
+  .list-row:first-child { border-top: 0; }
+  .list-row span { font-size: 22px; letter-spacing: -0.01em; }
+  .list-row small { font-size: 13px; color: var(--text); white-space: nowrap; }
+  .list-row small.dim { color: var(--text-dim); }
+
+  /* This week's runs, with a switch that shows whether each one is done. */
+  .switch-card { padding: 8px 26px; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .switch-row:first-child { border-top: 0; }
+  .switch-row .k { font-size: 13px; color: var(--text-dim); margin-bottom: 3px; }
+  .switch-row .v { font-size: 26px; letter-spacing: -0.02em; }
+  .switch-row.next .k { color: var(--accent-text); }
+  .switch {
+    position: relative;
+    width: 60px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: inset 0 1px 3px rgba(60, 55, 40, 0.12);
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #3d3b38;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+  }
+  .switch.on { background: var(--accent); }
+  .switch.on::after { transform: translateX(26px); background: #fff; }
+  .switch.off::after { background: var(--text-faint); }
+
+  .coach-card { padding: 20px 26px 22px; }
+  .coach-card .coach-k { margin: 0; font-size: 13px; color: var(--accent-text); }
+  .coach-card .coach-from { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .coach-card .coach-tips li { font-size: 15px; color: var(--text); line-height: 1.45; margin-top: 8px; }
+
+  .pill-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 54px;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: rgba(214, 210, 199, 0.75);
+    border: 1px solid var(--glass-edge);
+    color: var(--text);
+    font-size: 15px;
+    text-decoration: none;
+  }
+
+  @media (max-height: 720px) {
+    .view-label { margin-top: 18px; }
+    .sun-card { min-height: 236px; }
+  }
+
+  @media (max-width: 400px) {
+    .sun { width: 74px; height: 74px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .dash-bar i, .dash-fill { transition: none; }
+    .slider-fill, .switch::after { transition: none; }
   }
 
-  /* On the next run in the plan: the way back to the dashboard. */
+  /* On the next run in the plan: the way to the run screen. */
   .dash-link {
     grid-column: 1 / -1;
     display: flex;
@@ -350,201 +330,12 @@
     justify-content: center;
     gap: 6px;
     margin-top: 12px;
-    height: 42px;
-    border-radius: 999px;
-    background: var(--accent);
-    color: var(--on-accent);
-    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-stretch: 125%;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    text-decoration: none;
-  }
-
-  /* ===== Start screen: light cards on the dark page ===== */
-  .home {
-    --ink: #141414;
-    --ink-dim: #6b6b6b;
-    --paper: #f1f0ee;
-    --peach: #f6caa6;
-    --lavender: #cdbde0;
-    max-width: 560px;
-    margin: 0 auto;
-    padding: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(96px + env(safe-area-inset-bottom, 0px));
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    color: var(--ink);
-  }
-
-  .home-card {
-    display: block;
-    border-radius: 30px;
-    padding: 22px;
-    color: var(--ink);
-    text-decoration: none;
-  }
-
-  .home-hero { background: var(--paper); padding-bottom: 18px; }
-
-  .home-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: clamp(24px, 6svh, 64px); }
-  .home-mark { display: flex; gap: 4px; }
-  .home-mark i { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); }
-  .home-mark i:nth-child(2) { background: #f2733a; }
-  .home-mark i:nth-child(3) { background: #a98bbf; }
-
-  .home-round {
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .home-round svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .home-round.dark { background: var(--ink); color: #fff; }
-
-  .home-label { font-size: 14px; font-weight: 500; margin-bottom: 10px; }
-
-  .home-title {
-    margin: 0;
-    font-family: inherit;
-    font-stretch: 100%;
-    font-size: clamp(32px, 9.4vw, 44px);
-    font-weight: 400;
-    line-height: 1.08;
-    letter-spacing: -0.025em;
-  }
-  .home-title b { font-weight: 700; }
-  .home-sun {
-    display: inline-block;
-    width: 0.78em;
-    height: 0.78em;
-    border-radius: 50%;
-    vertical-align: -0.06em;
-    margin-right: 0.12em;
-    background: radial-gradient(circle at 50% 110%, #ffc478, #f2733a 35%, #a98bbf 70%, #62466b);
-  }
-
-  .home-chips { display: flex; gap: 6px; margin-top: 24px; align-items: center; }
-  .home-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 42px;
-    padding: 0 14px;
-    border-radius: 999px;
-    background: #fff;
-    font-size: 13px;
-    white-space: nowrap;
-    min-width: 0;
-  }
-  .home-chip b { font-weight: 600; }
-  .home-chip svg { width: 14px; height: 14px; flex-shrink: 0; fill: none; stroke: #f2733a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .home-chips .home-round { margin-left: auto; }
-
-  .home-next {
-    background: var(--peach);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 18px 18px 18px 22px;
-  }
-  .home-next-text { flex: 1; min-width: 0; font-size: 16px; font-weight: 600; line-height: 1.3; }
-  .home-next-text span { color: rgba(20, 20, 20, 0.45); font-weight: 600; }
-  .home-dots {
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    border: 1.5px dashed rgba(20, 20, 20, 0.35);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-  }
-  .home-dots .dash-dot { width: 6px; height: 6px; border: 1px solid var(--ink); }
-  .home-dots .dash-dot.done { background: var(--ink); }
-  .home-dots .dash-dot.skipped { border-color: rgba(20, 20, 20, 0.3); }
-  .home-dots .dash-dot.next { background: #f2733a; border-color: #f2733a; box-shadow: none; }
-
-  .home-progress { background: var(--lavender); padding: 18px 22px 22px 18px; }
-  .home-progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-  .home-progress-top .home-round { width: 34px; height: 34px; }
-  .home-progress-top .home-round svg { width: 15px; height: 15px; }
-
-  .home-seg {
-    display: inline-flex;
-    padding: 3px;
-    border-radius: 999px;
-    background: var(--ink);
-  }
-  .home-seg button {
-    border: 0;
-    height: 30px;
-    padding: 0 14px;
-    border-radius: 999px;
-    background: transparent;
-    color: #cdbde0;
-    font: inherit;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .home-seg button.on { background: var(--lavender); color: var(--ink); font-weight: 600; }
-
-  .home-progress-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; padding-left: 4px; }
-  .home-progress-row .k { font-size: 14px; margin-bottom: 4px; }
-  .home-progress-row .v { font-size: 22px; font-weight: 600; line-height: 1.15; letter-spacing: -0.01em; }
-  .home-pct { font-size: clamp(56px, 17vw, 72px); font-weight: 300; line-height: 0.85; letter-spacing: -0.04em; white-space: nowrap; }
-
-  .home-nav {
-    position: fixed;
-    left: 50%;
-    bottom: 0;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 560px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
-    background: var(--bg);
-    z-index: 25;
-  }
-  .home-nav a {
-    width: 76px;
     height: 44px;
     border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    background: var(--text);
     color: #fff;
-  }
-  .home-nav a.on { background: #fff; color: var(--ink); }
-  .home-nav svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-  /* Shorter phones: keep all three cards on screen. */
-  @media (max-height: 720px) {
-    .home-top { margin-bottom: 14px; }
-    .home-title { font-size: clamp(30px, 8.4vw, 36px); }
-    .home-chips { margin-top: 18px; }
-    .home-pct { font-size: 52px; }
-    .home-progress-row .v { font-size: 19px; }
-  }
-
-  /* Back from the run screen to the start screen. */
-  .dash-back {
-    position: absolute;
-    top: calc(18px + env(safe-area-inset-top, 0px));
-    right: 18px;
-    z-index: 1;
-    background: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    text-decoration: none;
   }
 
   /* ===== Floating "back to my week" button ===== */
@@ -562,15 +353,11 @@
     padding: 0 24px 0 20px;
     border: 0;
     border-radius: 999px;
-    background: var(--accent);
-    color: var(--on-accent);
-    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-stretch: 125%;
+    background: var(--text);
+    color: #fff;
     font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(60, 55, 40, 0.22);
     cursor: pointer;
     opacity: 0;
     transform: translateY(12px) scale(0.96);
@@ -616,7 +403,9 @@
     z-index: 20;
     margin: 0 -16px;
     padding: 12px 16px 10px;
-    background: var(--bg);
+    background: rgba(238, 237, 233, 0.72);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     border-bottom: 1px solid transparent;
     transition: border-color 0.25s ease;
   }
@@ -656,14 +445,12 @@
   .stat .k {
     font-size: 10px;
     color: var(--text-dim);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     margin-bottom: 4px;
   }
 
   .stat .v {
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 500;
     white-space: nowrap;
   }
 
@@ -739,8 +526,8 @@
     align-items: center;
     padding: 12px;
     background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 10px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 14px;
     cursor: default;
   }
 
@@ -767,9 +554,7 @@
 
   .run-status {
     font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-weight: 500;
     padding: 3px 8px;
     border-radius: 999px;
     border: 1px solid var(--line);
@@ -821,7 +606,7 @@
     align-items: center;
     justify-content: center;
     color: var(--text-dim);
-    font-weight: 700;
+    font-weight: 500;
   }
 
   .run-item.skipped .checkbox { position: relative; }
@@ -917,7 +702,7 @@
     grid-column: 1 / -1;
     margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px solid rgba(98, 70, 107, 0.6);
+    border-top: 1px solid rgba(239, 125, 60, 0.35);
   }
 
   .act-date {
@@ -940,13 +725,11 @@
   .act-stat .k {
     font-size: 10px;
     color: var(--text-dim);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
   }
 
   .act-stat .v {
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 500;
     white-space: nowrap;
   }
 
@@ -954,15 +737,13 @@
   .coach {
     margin-top: 12px;
     padding-top: 10px;
-    border-top: 1px dashed rgba(98, 70, 107, 0.6);
+    border-top: 1px dashed rgba(239, 125, 60, 0.35);
     animation: coach-in 0.3s ease both;
   }
 
   .coach-k {
     font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-weight: 500;
     color: var(--accent-text);
     margin-bottom: 4px;
   }
@@ -984,7 +765,7 @@
 
   .week-coach {
     padding: 12px;
-    border: 1px dashed rgba(98, 70, 107, 0.6);
+    border: 1px dashed rgba(239, 125, 60, 0.35);
     border-radius: 10px;
   }
 
@@ -1087,21 +868,18 @@
   .phase-dates {
     color: var(--text-dim);
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    font-weight: 500;
   }
 
   .phase-title {
     font-size: 19px;
-    font-weight: 700;
+    font-weight: 500;
   }
 
   .section-label {
     color: var(--text-dim);
     font-size: 13px;
     letter-spacing: 0.1em;
-    text-transform: uppercase;
     font-weight: 600;
     margin: 32px 0 14px 0;
   }
@@ -1145,8 +923,8 @@
 
   .week-card {
     background: var(--bg-alt);
-    border: 1px solid var(--line);
-    border-radius: 12px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 20px;
     padding: 14px 14px 16px;
   }
 
@@ -1203,9 +981,7 @@
   .week-num {
     color: var(--text);
     font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-weight: 500;
     white-space: nowrap;
   }
 
@@ -1223,14 +999,12 @@
   .run-label {
     font-size: 10.5px;
     color: var(--text-dim);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     margin-bottom: 2px;
   }
 
   .run-dist {
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--text);
   }
 
@@ -1252,10 +1026,8 @@
   .tempo-tag {
     display: block;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--text);
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
     margin-top: 4px;
   }
 
@@ -1273,89 +1045,71 @@
 </style>
 </head>
 <body>
-<section class="home" id="home" aria-label="Overzicht">
-  <div class="home-card home-hero">
-    <div class="home-top">
-      <span class="home-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-      <a class="home-round" href="#schema" aria-label="Bekijk het schema"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></a>
-    </div>
-    <div class="home-label">Naar de CPC 10K</div>
-    <h1 class="home-title" id="home-title">Hoi 👋 Ananta</h1>
-    <div class="home-chips">
-      <span class="home-chip"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Totaal: <b id="home-km">–</b></span>
-      <span class="home-chip">🏆 Snelste: <b id="home-best">–</b></span>
-      <a class="home-round" href="#schema" aria-label="Bekijk het schema"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>
-    </div>
+<section class="view" id="home" aria-label="Overzicht">
+  <div class="view-top">
+    <span class="mark" aria-hidden="true"><i></i><i></i><b></b></span>
+    <a class="round-btn" href="#schema" aria-label="Bekijk het schema"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></a>
   </div>
-  <a class="home-card home-next" href="#run">
-    <div class="home-next-text" id="home-next">Volgende run</div>
-    <span class="home-dots" id="home-dots" aria-hidden="true"></span>
-    <span class="home-round dark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+  <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
+
+  <div class="view-label">Je volgende run:</div>
+  <a class="glass sun-card" href="#run">
+    <div class="sun-card-title" id="home-when">–</div>
+    <span class="sun" aria-hidden="true"></span>
+    <div class="sun-card-foot">
+      <div class="kv"><div class="k">Sessie</div><div class="v" id="home-session">–</div></div>
+      <div class="kv"><div class="k">Soort</div><div class="v" id="home-kind">–</div></div>
+      <div class="big" id="home-dist">–</div>
+    </div>
   </a>
-  <div class="home-card home-progress">
-    <div class="home-progress-top">
-      <span class="home-round" aria-hidden="true"><svg style="stroke:#141414" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg></span>
-      <div class="home-seg" role="group" aria-label="Voortgang">
-        <button type="button" data-mode="week" class="on">Deze week</button><button type="button" data-mode="cpc">Tot de CPC</button>
-      </div>
-    </div>
-    <div class="home-progress-row">
-      <div><div class="k">Je voortgang</div><div class="v" id="home-mood">–</div></div>
-      <div class="home-pct" id="home-pct">–</div>
-    </div>
+  <div class="slider" id="home-week-bar"><div class="slider-fill"><span>Deze week</span><i></i></div><span class="slider-v" id="home-week">–</span></div>
+  <div class="slider" id="home-cpc-bar"><div class="slider-fill"><span>Tot de CPC</span><i></i></div><span class="slider-v" id="home-cpc">–</span></div>
+
+  <div class="view-label">Tot nu toe:</div>
+  <div class="glass list-card">
+    <div class="list-row"><span>Totaal</span><small id="home-km">–</small></div>
+    <div class="list-row"><span>Gem. tempo</span><small id="home-avg">–</small></div>
+    <div class="list-row"><span>Snelste tempo</span><small id="home-best">–</small></div>
   </div>
-  <nav class="home-nav" aria-label="Navigatie">
-    <a href="#run" aria-label="Volgende run"><svg viewBox="0 0 24 24"><path d="M5 18a7 7 0 0 1 14 0M12 5v3M5.6 9.6l2 2M18.4 9.6l-2 2M3 18h18"/></svg></a>
-    <a href="#" class="on" aria-label="Overzicht"><svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="17" cy="12" r="2.2"/></svg></a>
-    <a href="#schema" aria-label="Schema"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></a>
-  </nav>
+  <a class="pill-btn" href="#schema">Bekijk het schema</a>
 </section>
 
-<section class="dash" id="dash" hidden aria-label="Volgende run">
-  <div class="dash-sky"><div class="dash-dots" id="dash-dots" aria-hidden="true"></div><a class="home-round dash-back" href="#" aria-label="Terug naar het overzicht"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></a></div>
-  <div class="dash-panel">
-    <div class="dash-head">
-      <div>
-        <div class="dash-k">Volgende run <span class="dots" id="dash-head-dots" aria-hidden="true"></span></div>
-        <div class="dash-sub" id="dash-sub">Schema wordt geladen</div>
-      </div>
-      <div class="dash-date" id="dash-date"></div>
-    </div>
-    <div class="dash-big">
-      <div>
-        <div class="dash-num" id="dash-num">–</div>
-        <div class="dash-desc" id="dash-desc"></div>
-      </div>
-      <svg class="dash-rays" viewBox="0 0 92 46" aria-hidden="true">
-        <path d="M14 40a32 32 0 0 1 64 0"/>
-        <path d="M46 4v10M24 10l5 8.5M68 10l-5 8.5M8 24l8.5 5M84 24l-8.5 5M2 40h8M82 40h8M18 44h56"/>
-      </svg>
-    </div>
-    <div class="dash-grid">
-      <div class="dash-tile"><div><div class="k">Wanneer</div><div class="v" id="dash-when">–</div><div class="s" id="dash-when-s"></div></div></div>
-      <div class="dash-tile"><div><div class="k">Tot de CPC</div><div class="v" id="dash-cpc">–</div><div class="s">14 maart 2027</div></div></div>
-      <div class="dash-tile"><div><div class="k">Recent tempo</div><div class="v" id="dash-pace">–</div><div class="s">laatste 3 runs</div></div><div class="dash-bar" title="Ten opzichte van je snelste en traagste run"><i id="dash-pace-bar"></i></div></div>
-      <div class="dash-tile"><div><div class="k">Deze week</div><div class="v" id="dash-week">–</div><div class="s" id="dash-week-s"></div></div><div class="dash-bar"><i id="dash-week-bar"></i></div></div>
-      <div class="dash-tile"><div><div class="k">Langste run</div><div class="v" id="dash-long">–</div><div class="s">op weg naar 10 km</div></div><div class="dash-bar"><i id="dash-long-bar"></i></div></div>
-      <div class="dash-tile"><div><div class="k">Runs gelopen</div><div class="v" id="dash-runs">–</div><div class="s">van het schema</div></div><div class="dash-bar"><i id="dash-runs-bar"></i></div></div>
-    </div>
-    <div class="dash-coach" id="dash-coach" hidden>
-      <div class="coach-k">Tip van de coach</div>
-      <div class="dash-coach-from" id="dash-coach-from"></div>
-      <ul class="coach-tips" id="dash-coach-tips"></ul>
-    </div>
-    <div class="dash-progress">
-      <div class="k">Op weg naar de CPC</div>
-      <div class="dash-track"><div class="dash-fill" id="dash-fill"></div><div class="dash-pct" id="dash-pct">–</div></div>
-    </div>
-    <a class="dash-cta" href="#schema">Bekijk het schema <span aria-hidden="true">→</span></a>
+<section class="view" id="dash" aria-label="Volgende run" hidden>
+  <div class="view-top">
+    <span class="mark" aria-hidden="true"><i></i><i></i><b></b></span>
   </div>
+  <a class="back-link" href="#">Terug</a>
+  <h1 class="view-title">Volgende run<span id="run-when">–</span></h1>
+
+  <div class="glass sun-card" style="margin-top: 26px">
+    <div class="sun-card-title" id="run-desc">–</div>
+    <span class="sun" aria-hidden="true"></span>
+    <div class="sun-card-foot">
+      <div class="kv"><div class="k">Fase</div><div class="v" id="run-phase">–</div></div>
+      <div class="kv"><div class="k">Week</div><div class="v" id="run-week">–</div></div>
+      <div class="big" id="run-dist">–</div>
+    </div>
+  </div>
+  <div class="slider" id="run-pace-bar"><div class="slider-fill"><span>Recent tempo</span><i></i></div><span class="slider-v" id="run-pace">–</span></div>
+  <div class="slider" id="run-long-bar"><div class="slider-fill"><span>Langste run</span><i></i></div><span class="slider-v" id="run-long">–</span></div>
+  <div class="slider" id="run-runs-bar"><div class="slider-fill"><span>Runs gelopen</span><i></i></div><span class="slider-v" id="run-runs">–</span></div>
+
+  <div class="view-label">Deze week:</div>
+  <div class="glass switch-card" id="run-list"></div>
+
+  <div class="glass coach-card" id="dash-coach" hidden>
+    <div class="coach-k">Tip van de coach</div>
+    <div class="coach-from" id="dash-coach-from"></div>
+    <ul class="coach-tips" id="dash-coach-tips"></ul>
+  </div>
+  <a class="pill-btn" href="#schema">Bekijk het schema</a>
 </section>
 
 <main class="wrap" id="plan" hidden>
   <div class="topbar" id="topbar"><div class="eyebrow">Trainingsplan</div></div>
   <header class="top" id="top">
     <div class="top-intro">
+      <a class="back-link" href="#">Terug</a>
       <h1>Naar de CPC 10K — maart 2027</h1>
       <p class="subtitle">Doel: de 10&nbsp;km van de CPC Loop in Den Haag, half maart 2027. Runs komen automatisch binnen vanuit Suunto.</p>
     </div>
@@ -2604,21 +2358,26 @@
       fab.classList.toggle('down', box.top >= window.innerHeight - 80);
     }
 
-    // ===== Dashboard: the next planned run, with the plan one tap away =====
+    // ===== Start screen and run screen =====
     var LONG_DAYS = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
     var TRAINING_START = dayNumber('2026-06-09');
 
     function setText(id, value) { document.getElementById(id).innerHTML = value; }
-    // Marker on a vertical scale: 1 is the top.
-    function setBar(id, fraction) {
+    function setSlider(id, fraction, value) {
       var f = Math.max(0, Math.min(1, isFinite(fraction) ? fraction : 0));
-      document.getElementById(id).style.top = ((1 - f) * 100) + '%';
+      document.getElementById(id + '-bar').querySelector('.slider-fill').style.setProperty('--f', f);
+      setText(id, value);
     }
+    function capital(text) { return text.replace(/^./, function (c) { return c.toUpperCase(); }); }
 
     function slotDay(item) {
       var card = item.closest('.week-card');
       var index = Array.prototype.indexOf.call(card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item'), item);
       return weekStart(card.dataset.plan, Number(card.dataset.week)) + RUN_DAYS[index];
+    }
+
+    function slotsOf(card) {
+      return card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item');
     }
 
     // The first session that's neither done nor skipped, in a week that isn't over yet.
@@ -2634,88 +2393,148 @@
       return null;
     }
 
-    function dots(card, next) {
-      return Array.prototype.map.call(card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item'), function (item) {
-        var state = item === next ? 'next' : item.classList.contains('done') ? 'done' : item.classList.contains('skipped') ? 'skipped' : '';
-        return '<span class="dash-dot ' + state + '"></span>';
-      }).join('');
+    function plainLabel(item) {
+      var label = item.querySelector('.run-label').cloneNode(true);
+      Array.prototype.forEach.call(label.querySelectorAll('.run-sep, .run-desc, .missed-note'), function (n) { n.remove(); });
+      return label.textContent.trim();
+    }
+
+    function whenText(day) {
+      return day === today ? 'Vandaag' : day === today + 1 ? 'Morgen' : capital(LONG_DAYS[new Date(day * DAY).getUTCDay()]);
+    }
+
+    function bigDistance(item) {
+      var dist = text(item, '.run-dist');
+      var km = /^([\d,.]+)\s*km$/.exec(dist);
+      return km ? km[1] + '<sup>km</sup>' : null;
+    }
+
+    function setBig(id, item) {
+      var big = bigDistance(item);
+      var node = document.getElementById(id);
+      node.classList.toggle('text', !big);
+      node.innerHTML = big || text(item, '.run-dist');
+    }
+
+    function weekNumbers(card) {
+      var items = slotsOf(card);
+      var runs = card._runs || [];
+      return {
+        km: runs.reduce(function (s, r) { return s + r.distance_km; }, 0),
+        planned: Array.prototype.reduce.call(items, function (s, i) { return s + plannedKm(i); }, 0),
+        done: Math.min(runs.length, items.length),
+        total: items.length,
+      };
+    }
+
+    // One sentence on where you stand, from the plan.
+    function homeStatus() {
+      if (CPC_DAY === today) return 'Vandaag is het CPC-dag. Geniet ervan!';
+      if (CPC_DAY < today) return 'Je hebt de CPC gelopen. Wat een prestatie!';
+      if (skipped.some(function (d) { return today >= d && today < d + 7; })) return 'Geniet van je rustweek, je pakt het zo weer op.';
+      // Sessions missed in the past two weeks (not done, not skipped).
+      var missed = Array.prototype.filter.call(document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.missed'), function (item) {
+        return slotDay(item) >= today - 14;
+      }).length;
+      if (missed >= 2) return 'Pak de draad rustig weer op, de CPC loopt niet weg.';
+      if (missed === 1) return 'Je ligt bijna op schema voor de CPC.';
+      return 'Je ligt mooi op schema voor de CPC.';
     }
 
     var dashRuns = null;
+
+    function renderHome(runs) {
+      setText('home-status', homeStatus());
+      var next = nextSlot();
+      if (next) {
+        var card = next.closest('.week-card');
+        var day = Math.max(slotDay(next), today);
+        setText('home-when', whenText(day) + '<br>' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day));
+        setText('home-session', plainLabel(next));
+        setText('home-kind', capital(text(next, '.run-desc') || 'rustig').split(' + ')[0]);
+        setBig('home-dist', next);
+        var w = weekNumbers(card);
+        setSlider('home-week', w.planned ? w.km / w.planned : 0, formatKm(w.km) + ' / ' + formatKm(w.planned) + ' km');
+      } else {
+        setText('home-when', 'Het schema zit erop');
+        setText('home-session', '–');
+        setText('home-kind', '–');
+        setText('home-dist', '');
+        setSlider('home-week', 1, '–');
+      }
+      var days = CPC_DAY - today;
+      setSlider('home-cpc', (today - TRAINING_START) / (CPC_DAY - TRAINING_START), days > 0 ? days + ' dagen' : 'Gelopen');
+
+      if (runs.length) {
+        var t = totals(runs);
+        setText('home-km', t.km + ' km');
+        setText('home-avg', t.avg.replace('<small> /km</small>', ' /km'));
+        setText('home-best', t.best.replace('<small> /km</small>', ' /km'));
+      }
+    }
+
     function renderDash(runs) {
       dashRuns = runs;
       var planRuns = runs.filter(function (r) { return r.source !== 'c25k'; });
       var next = nextSlot();
-
       var oldLink = document.querySelector('.dash-link');
       if (oldLink) oldLink.remove();
+
       if (next) {
         next.appendChild(el('a', 'dash-link', 'Bekijk run <span aria-hidden="true">→</span>')).href = '#run';
         var card = next.closest('.week-card');
         var day = Math.max(slotDay(next), today);
-        var label = next.querySelector('.run-label').cloneNode(true);
-        Array.prototype.forEach.call(label.querySelectorAll('.run-sep, .run-desc, .missed-note'), function (n) { n.remove(); });
-        // Short phase name: "Tussenfase — basis vasthouden" becomes "Tussenfase".
-        var phase = text(card.closest('.phase-section'), '.phase-title').split(/ — |:/)[0];
-        setText('dash-sub', [phase, text(card, '.week-num'), label.textContent.trim()].join(' · '));
-        setText('dash-date', DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day));
-        var dist = text(next, '.run-dist');
-        var km = /^([\d,.]+)\s*km$/.exec(dist);
-        setText('dash-num', km ? km[1] + '<small>km</small>' : dist);
-        document.getElementById('dash-desc').textContent = text(next, '.run-desc');
-        setText('dash-when', day === today ? 'Vandaag' : day === today + 1 ? 'Morgen' : LONG_DAYS[new Date(day * DAY).getUTCDay()].replace(/^./, function (c) { return c.toUpperCase(); }));
-        setText('dash-when-s', day === today ? (slotDay(next) < today ? 'kan nog deze week' : 'staat gepland')
-          : day === today + 1 ? LONG_DAYS[new Date(day * DAY).getUTCDay()] : 'over ' + (day - today) + ' dagen');
-        var dotsHtml = dots(card, next);
-        setText('dash-dots', dotsHtml);
-        setText('dash-head-dots', dotsHtml);
-
-        var weekRuns = card._runs || [];
-        var weekKm = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
-        var items = card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item');
-        var planned = Array.prototype.reduce.call(items, function (sum, i) { return sum + plannedKm(i); }, 0);
-        setText('dash-week', formatKm(weekKm) + '<small> / ' + formatKm(planned) + ' km</small>');
-        setText('dash-week-s', Math.min(weekRuns.length, items.length) + ' van ' + items.length + ' runs');
-        setBar('dash-week-bar', planned ? weekKm / planned : 0);
+        var date = LONG_DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day);
+        setText('run-when', day === today ? 'Vandaag, ' + date : day === today + 1 ? 'Morgen, ' + date : capital(date) + ', over ' + (day - today) + ' dagen');
+        setText('run-desc', capital(text(next, '.run-desc') || 'rustig'));
+        setText('run-phase', text(card.closest('.phase-section'), '.phase-title').split(/ — |:/)[0]);
+        setText('run-week', text(card, '.week-num').replace('Week ', '') + ' · ' + plainLabel(next).replace(' · lang', ''));
+        setBig('run-dist', next);
+        renderWeekList(card, next);
       } else {
-        setText('dash-sub', 'Het schema zit erop');
-        setText('dash-num', 'CPC');
-        document.getElementById('dash-desc').textContent = 'Geen geplande runs meer.';
-        setText('dash-when', '–');
-        setText('dash-week', '–');
-        setBar('dash-week-bar', 0);
+        setText('run-when', 'Het schema zit erop');
+        setText('run-desc', 'Geen geplande runs meer');
+        setText('run-dist', '');
+        setText('run-list', '');
       }
-
-      var days = CPC_DAY - today;
-      setText('dash-cpc', days > 0 ? days + '<small> dagen</small>' : days === 0 ? 'Vandaag' : 'Gelopen');
 
       var recent = planRuns.slice(-3);
       var paced = runs.filter(function (r) { return r.distance_km >= 1; }).map(function (r) { return r.moving_time_s / r.distance_km; });
       if (recent.length) {
         var pace = recent.reduce(function (s, r) { return s + r.moving_time_s; }, 0) / recent.reduce(function (s, r) { return s + r.distance_km; }, 0);
-        setText('dash-pace', formatPaceSec(pace));
         var fast = Math.min.apply(null, paced);
         var slow = Math.max.apply(null, paced);
-        setBar('dash-pace-bar', slow > fast ? (slow - pace) / (slow - fast) : 0.5);
+        setSlider('run-pace', slow > fast ? (slow - pace) / (slow - fast) : 0.5, formatPaceSec(pace).replace('<small> /km</small>', ' /km'));
       }
-
       var longest = runs.reduce(function (m, r) { return Math.max(m, r.distance_km); }, 0);
-      setText('dash-long', longest ? formatKm(longest) + '<small> km</small>' : '–');
-      setBar('dash-long-bar', longest / 10);
-
+      setSlider('run-long', longest / 10, longest ? formatKm(longest) + ' / 10 km' : '–');
       var slots = document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
       var doneSlots = document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.done').length;
-      setText('dash-runs', doneSlots + '<small> / ' + slots.length + '</small>');
-      setBar('dash-runs-bar', doneSlots / slots.length);
-
-      // How far along the road from the first Couch to 5K run to race day.
-      var pct = Math.round(Math.max(0, Math.min(1, (today - TRAINING_START) / (CPC_DAY - TRAINING_START))) * 100);
-      document.getElementById('dash-fill').style.width = pct + '%';
-      var pctEl = document.getElementById('dash-pct');
-      pctEl.innerHTML = pct + '<small>%</small>';
-      pctEl.classList.toggle('outside', pct < 12);
+      setSlider('run-runs', doneSlots / slots.length, doneSlots + ' / ' + slots.length);
 
       dashCoach();
+    }
+
+    // The week of the next run: every session with a switch that's on once it's done.
+    function renderWeekList(card, next) {
+      var list = document.getElementById('run-list');
+      list.innerHTML = '';
+      Array.prototype.forEach.call(slotsOf(card), function (item) {
+        var done = item.classList.contains('done');
+        var skippedRun = item.classList.contains('skipped');
+        var activity = item.querySelector('.activity');
+        var day = activity ? dayNumber(activity._run.date) : slotDay(item);
+        var state = done ? 'gedaan' : skippedRun ? 'overgeslagen' : item === next ? 'volgende' : item.classList.contains('missed') ? 'niet gelopen' : 'gepland';
+        var row = el('div', 'switch-row' + (item === next ? ' next' : ''),
+          '<div><div class="k"></div><div class="v"></div></div><span class="switch" role="img"></span>');
+        row.querySelector('.k').textContent = plainLabel(item) + ' · ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + ' · ' + state;
+        row.querySelector('.v').textContent = done ? formatKm(activity._run.distance_km) + ' km' : text(item, '.run-dist');
+        var sw = row.querySelector('.switch');
+        sw.classList.toggle('on', done);
+        sw.classList.toggle('off', skippedRun);
+        sw.setAttribute('aria-label', state);
+        list.appendChild(row);
+      });
     }
 
     // The tips the coach wrote after your latest run.
@@ -2737,8 +2556,8 @@
       list.innerHTML = '';
       var run = activity._run;
       document.getElementById('dash-coach-from').textContent =
-        'Na je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
-      if (summary) {
+        'Na je run van ' + LONG_DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
+      if (summary && summary.tips) {
         summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
       } else {
         list.appendChild(el('li', 'coach-tip')).textContent = 'Wordt geschreven…';
@@ -2750,79 +2569,6 @@
     onCoach = function (activity) {
       if (activity === latestActivity()) dashCoach();
     };
-
-    // ===== Start screen =====
-    var homeMode = 'week';
-    var homeData = null;
-
-    // One sentence on where you stand, from the plan.
-    function homeStatus() {
-      if (CPC_DAY === today) return 'vandaag is het <b>CPC-dag</b>. Geniet ervan!';
-      if (CPC_DAY < today) return 'je hebt de <b>CPC gelopen</b>. Wat een prestatie!';
-      if (skipped.some(function (d) { return today >= d && today < d + 7; })) return 'geniet van je <b>rustweek</b>, je pakt het zo weer op.';
-      // Sessions missed in the past two weeks (not done, not skipped).
-      var missed = Array.prototype.filter.call(document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.missed'), function (item) {
-        return slotDay(item) >= today - 14;
-      }).length;
-      if (missed >= 2) return 'pak de draad <b>rustig weer op</b>, de CPC loopt niet weg.';
-      if (missed === 1) return 'je ligt <b>bijna op schema</b> voor de CPC';
-      return 'je ligt <b>mooi op schema</b> voor de CPC';
-    }
-
-    function renderHome(runs) {
-      setText('home-title', 'Hoi 👋 Ananta<br><span class="home-sun" aria-hidden="true"></span>' + homeStatus());
-      if (runs.length) {
-        var t = totals(runs);
-        setText('home-km', t.km + ' km');
-        setText('home-best', t.best.replace('<small> /km</small>', ' /km'));
-      }
-
-      var next = nextSlot();
-      homeData = { cpcPct: Math.round(Math.max(0, Math.min(1, (today - TRAINING_START) / (CPC_DAY - TRAINING_START))) * 100), cpcDays: CPC_DAY - today };
-      if (next) {
-        var card = next.closest('.week-card');
-        var day = Math.max(slotDay(next), today);
-        var when = day === today ? 'Vandaag' : day === today + 1 ? 'Morgen' : DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day);
-        setText('home-next', 'Volgende run: ' + when + '<br><span>' + text(next, '.run-dist') + ' ' + text(next, '.run-desc') + '</span>');
-        setText('home-dots', dots(card, next));
-        var items = card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item');
-        var weekRuns = card._runs || [];
-        var km = weekRuns.reduce(function (s, r) { return s + r.distance_km; }, 0);
-        var planned = Array.prototype.reduce.call(items, function (s, i) { return s + plannedKm(i); }, 0);
-        homeData.weekPct = planned ? Math.round(Math.min(1, km / planned) * 100) : 0;
-        homeData.weekDone = Math.min(weekRuns.length, items.length);
-        homeData.weekTotal = items.length;
-      } else {
-        setText('home-next', 'Geen geplande runs meer');
-        setText('home-dots', '');
-        homeData.weekPct = 100;
-        homeData.weekDone = homeData.weekTotal = 0;
-      }
-      renderHomeProgress();
-    }
-
-    function renderHomeProgress() {
-      if (!homeData) return;
-      var week = homeMode === 'week';
-      var pct = week ? homeData.weekPct : homeData.cpcPct;
-      setText('home-pct', pct + '%');
-      var mood;
-      if (week) {
-        var left = homeData.weekTotal - homeData.weekDone;
-        mood = !homeData.weekTotal ? 'Alles gelopen ☺' : left === 0 ? 'Week rond ☺' : homeData.weekDone + ' van ' + homeData.weekTotal + ' runs,<br>goed bezig ☺';
-      } else {
-        mood = homeData.cpcDays > 0 ? 'Nog ' + homeData.cpcDays + ' dagen<br>te gaan ☺' : 'Gehaald ☺';
-      }
-      setText('home-mood', mood);
-      Array.prototype.forEach.call(document.querySelectorAll('.home-seg button'), function (b) {
-        b.classList.toggle('on', b.dataset.mode === homeMode);
-        b.setAttribute('aria-pressed', String(b.dataset.mode === homeMode));
-      });
-    }
-
-    Array.prototype.forEach.call(document.querySelectorAll('.home-seg button'), function (b) {
-      b.addEventListener('click', function () { homeMode = b.dataset.mode; renderHomeProgress(); });
-    });
 
     // ===== Three views: the start screen, the next run at #run, and the plan at #schema =====
     var dash = document.getElementById('dash');
