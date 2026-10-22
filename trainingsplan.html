@@ -342,17 +342,26 @@
     .dash-bar i, .dash-fill { transition: none; }
   }
 
-  /* Way back from the plan to the dashboard. */
-  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .topbar .eyebrow { min-width: 0; }
-  .back-link {
-    flex-shrink: 0;
-    color: var(--text-dim);
+  /* On the next run in the plan: the way back to the dashboard. */
+  .dash-link {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+    height: 42px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-stretch: 125%;
     font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     text-decoration: none;
-    margin-bottom: 0;
   }
-  .back-link:hover { color: var(--text); }
 
   /* ===== Floating "back to my week" button ===== */
   .fab {
@@ -1122,7 +1131,7 @@
 </section>
 
 <main class="wrap" id="plan" hidden>
-  <div class="topbar" id="topbar"><div class="eyebrow">Trainingsplan</div><a class="back-link" href="#">← Volgende run</a></div>
+  <div class="topbar" id="topbar"><div class="eyebrow">Trainingsplan</div></div>
   <header class="top" id="top">
     <div class="top-intro">
       <h1>Naar de CPC 10K — maart 2027</h1>
@@ -1626,6 +1635,7 @@
         morph();
         markCompletedPhases();
         refreshCoach();
+        if (dashRuns) renderDash(dashRuns);
         fetch('/api/skips', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2408,11 +2418,16 @@
       }).join('');
     }
 
+    var dashRuns = null;
     function renderDash(runs) {
+      dashRuns = runs;
       var planRuns = runs.filter(function (r) { return r.source !== 'c25k'; });
       var next = nextSlot();
 
+      var oldLink = document.querySelector('.dash-link');
+      if (oldLink) oldLink.remove();
       if (next) {
+        next.appendChild(el('a', 'dash-link', 'Bekijk dashboard <span aria-hidden="true">→</span>')).href = '#';
         var card = next.closest('.week-card');
         var day = Math.max(slotDay(next), today);
         var label = next.querySelector('.run-label').cloneNode(true);
