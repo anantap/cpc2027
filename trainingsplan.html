@@ -161,36 +161,63 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 272px;
+    min-height: 400px;
     padding: 24px 24px 24px;
   }
-  .sun-card-title { font-size: var(--fs-l); line-height: var(--lh-l); max-width: calc(100% - 112px); }
+  .sun-card-title { margin: 0; font-size: var(--fs-l); line-height: var(--lh-l); font-weight: 400; letter-spacing: -0.015em; }
+  .sun-card-title span { display: block; color: var(--text-dim); }
+  .hl { font-weight: 400; color: var(--accent-text); }
   /* The day and date bottom left, across from the distance. */
   .sun-card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
   .sun-card-date { font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text-dim); }
   /* A soft, living blob behind the next run: it drifts and changes shape very slowly. */
   .sun-card { overflow: hidden; background: rgba(255, 255, 255, 0.35); }
   .sun-card > :not(.blob) { position: relative; }
+  /* The blob: a container that wanders slowly through the card, holding two soft shapes that
+     keep changing their outline faster, so it reads as something alive rather than a circle. */
   .blob {
     position: absolute;
-    top: -96px;
-    right: -96px;
+    top: -48px;
+    right: -64px;
     width: 320px;
     height: 320px;
-    border-radius: 46% 54% 58% 42% / 44% 48% 52% 56%;
-    background: radial-gradient(circle at 50% 50%, #f06a3a 0%, #f4a38a 45%, rgba(169, 139, 191, 0.6) 75%, rgba(169, 139, 191, 0) 100%);
-    filter: blur(40px);
-    animation: blob-live 40s ease-in-out infinite alternate;
+    filter: blur(32px);
+    animation: blob-wander 40s ease-in-out infinite alternate;
     pointer-events: none;
   }
-  /* It wanders slowly through the card and keeps changing shape, so the movement is noticeable
-     when you look, but never fast. */
-  @keyframes blob-live {
-    0%   { border-radius: 46% 54% 58% 42% / 44% 48% 52% 56%; transform: translate(0, 0) rotate(0deg) scale(1); }
-    25%  { border-radius: 62% 38% 44% 56% / 52% 62% 38% 48%; transform: translate(-96px, 48px) rotate(40deg) scale(1.08); }
-    50%  { border-radius: 38% 62% 58% 42% / 62% 40% 60% 38%; transform: translate(-160px, 112px) rotate(-24deg) scale(0.92); }
-    75%  { border-radius: 56% 44% 36% 64% / 40% 58% 42% 60%; transform: translate(-48px, 136px) rotate(16deg) scale(1.04); }
-    100% { border-radius: 44% 56% 62% 38% / 56% 44% 56% 44%; transform: translate(-112px, 24px) rotate(-8deg) scale(1); }
+  .blob::before,
+  .blob::after {
+    content: "";
+    position: absolute;
+  }
+  .blob::before {
+    inset: 8% 4% 16% 12%;
+    background: linear-gradient(140deg, #f4733f, #f39a78 55%, #e8a9bd);
+    animation: blob-morph-a 9s ease-in-out infinite alternate;
+  }
+  .blob::after {
+    inset: 40% 36% 0 0;
+    background: linear-gradient(200deg, #c4a6d6, #ef8a62);
+    opacity: 0.85;
+    animation: blob-morph-b 13s ease-in-out infinite alternate;
+  }
+  @keyframes blob-wander {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    25%  { transform: translate(-80px, 64px) rotate(30deg); }
+    50%  { transform: translate(-144px, 120px) rotate(-20deg); }
+    75%  { transform: translate(-40px, 152px) rotate(14deg); }
+    100% { transform: translate(-104px, 32px) rotate(-6deg); }
+  }
+  @keyframes blob-morph-a {
+    0%   { border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%; transform: scale(1) rotate(0deg); }
+    33%  { border-radius: 70% 30% 46% 54% / 30% 62% 38% 70%; transform: scale(1.1, 0.88) rotate(25deg); }
+    66%  { border-radius: 28% 72% 32% 68% / 64% 30% 70% 36%; transform: scale(0.9, 1.12) rotate(-15deg); }
+    100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: scale(1.05) rotate(40deg); }
+  }
+  @keyframes blob-morph-b {
+    0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: translate(0, 0) scale(1); }
+    50%  { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: translate(40px, -48px) scale(1.2); }
+    100% { border-radius: 50% 50% 34% 66% / 56% 68% 32% 44%; transform: translate(-24px, -16px) scale(0.85); }
   }
 
   /* Dots for progress: orange once run, light orange for the next one, pale grey for the rest,
@@ -200,7 +227,7 @@
   .dots-head { margin-bottom: 16px; }
   .dots-title { font-size: var(--fs-l); line-height: var(--lh-l); }
   .dots-sub { font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text-dim); }
-  .dots-note { font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text-dim); }
+  .dots-note { font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text-dim); margin-top: 4px; }
   .dots-km { margin-top: 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
   .dots { display: flex; gap: 8px; flex-shrink: 0; }
   .dots .dot { width: 32px; height: 32px; border-radius: 50%; background: #dcd7cd; }
@@ -296,14 +323,14 @@
 
   @media (max-height: 720px) {
     .view-label { margin-top: 16px; }
-    .sun-card { min-height: 240px; }
+    .sun-card { min-height: 352px; }
   }
 
   @media (max-width: 400px) {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .slider-fill, .blob { transition: none; animation: none; }
+    .slider-fill, .blob, .blob::before, .blob::after { transition: none; animation: none; }
   }
 
   /* On a phone the groups are invisible and everything stacks. On a wide screen the start
@@ -320,16 +347,15 @@
       padding: clamp(24px, 5svh, 48px) 32px;
       display: grid;
       grid-template-columns: 1.15fr 1fr 1fr;
-      grid-template-areas: "title  title title"
+      grid-template-areas:
         "next   week  total"
         "next   bars  coach"
         "schema bars  coach";
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto 1fr auto;
       gap: 16px 24px;
       /* All columns as tall as the tallest, so their bottoms line up. */
       align-items: stretch;
     }
-    #home .view-title { grid-area: title; margin: 0 0 16px; }
     .home-group { display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
     .home-schema { grid-area: schema; margin-top: 0; }
     .home-next { grid-area: next; }
@@ -337,7 +363,7 @@
     .home-week { grid-area: week; }
     .home-bars { grid-area: bars; }
     .home-total { grid-area: total; }
-    #home .sun-card { margin-top: 0 !important; min-height: 0; flex: 1; }
+    #home .sun-card { min-height: 0; flex: 1; }
     /* One tile per column takes up the slack: the sun card, this week's runs, the coach tip. */
     #home .field-card { flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; }
     /* Long tips scroll inside the card rather than pushing the page past one screen. */
@@ -354,12 +380,8 @@
       #home .coach-card { padding: 16px 24px 4px; }
       #home .coach-card .coach-tips { margin-top: 8px; }
       #home .coach-card .coach-tips li { padding: 8px 0; }
-      /* The greeting on one line, to leave room for the tips at full size. */
-      #home .view-title span { display: inline; }
-      #home .view-title span::before { content: " "; }
       #home .list-row span { font-size: var(--fs-m); line-height: var(--lh-m); }
       #home { row-gap: 8px; }
-      #home .view-title { margin-bottom: 8px; }
       #home { --fs-xl: 88px; }
     }
     /* Each tile speaks for itself here, and without labels the columns line up at the top. */
@@ -771,12 +793,10 @@
 </head>
 <body class="loading">
 <section class="view" id="home" aria-label="Overzicht">
-  <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
-
   <div class="home-group home-next">
-  <a class="glass sun-card" href="#schema" style="margin-top: 32px">
+  <a class="glass sun-card" href="#schema">
     <span class="blob" aria-hidden="true"></span>
-    <div class="sun-card-title" id="home-when">–</div>
+    <h1 class="sun-card-title">Hoi Ananta.<span id="home-when">–</span></h1>
     <div class="sun-card-foot">
       <div class="sun-card-date" id="home-date"></div>
       <div class="big" id="home-dist">–</div>
@@ -802,7 +822,7 @@
 
   <div class="home-group home-bars">
   <div class="glass dots-card field-card">
-    <div class="dots-head"><div class="dots-title">Tot de CPC</div><div class="dots-note" id="home-cpc">–</div></div>
+    <div class="dots-head"><div class="dots-title" id="home-cpc">–</div><div class="dots-note" id="home-status"></div></div>
     <div class="dot-field" id="home-field" role="img"></div>
   </div>
   </div>
@@ -2152,7 +2172,7 @@
         // "morgen" then "vrijdag 23 oktober"; further out "zondag" then "25 oktober".
         var weekday = DAYS[new Date(day * DAY).getUTCDay()];
         var soon = day <= today + 1;
-        setText('home-when', 'Je volgende run is ' + (soon ? whenText(day).toLowerCase() : weekday));
+        setText('home-when', 'Je volgende run is ' + (soon ? whenText(day).toLowerCase() : weekday) + '.');
         setText('home-date', (soon ? weekday + '<br>' : '') + formatDay(day));
         setBig('home-dist', next);
         renderWeekList(card, next);
@@ -2160,7 +2180,7 @@
         setText('home-week', w.done + ' van ' + w.total + ' runs');
         setText('home-week-km', formatKm(w.km) + ' van ' + formatKm(w.planned) + ' km');
       } else {
-        setText('home-when', 'Het schema zit erop');
+        setText('home-when', 'Het schema zit erop.');
         setText('home-date', '');
         setText('home-dist', '');
         setText('home-week', 'Alles gelopen');
@@ -2209,7 +2229,8 @@
         field.appendChild(el('i', state));
       });
       var days = CPC_DAY - today;
-      setText('home-cpc', days > 0 ? 'Nog ' + days + ' dagen' : 'Gelopen');
+      setText('home-cpc', days > 0 ? 'Nog <b class="hl">' + days + '</b> ' + (days === 1 ? 'dag' : 'dagen') + ' tot de CPC'
+        : days === 0 ? 'Vandaag is de CPC' : 'De CPC is gelopen');
       field.setAttribute('title', done + ' van ' + slots.length + ' runs');
       field.setAttribute('aria-label', done + ' van ' + slots.length + ' runs in het schema gelopen');
     }
