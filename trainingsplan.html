@@ -655,7 +655,7 @@
   .runs-grid .run-item {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "label label" "dist status" "desc desc" "tag tag" "act act";
+    grid-template-areas: "label label" "dist dist" "desc status" "tag tag" "act act";
     column-gap: 8px;
     align-items: center;
     padding: 16px 16px;
@@ -1347,7 +1347,7 @@
         var skipped = skips.indexOf(id) !== -1;
         setStatus(item, skipped ? 'skipped' : weekOver ? 'missed' : 'planned', '');
         ctl.classList.toggle('is-skipped', skipped);
-        label.textContent = skipped ? 'Overgeslagen' : 'Overslaan';
+        label.textContent = skipped ? 'Overgeslagen' : 'Overslaan ↷';
         if (skipped) { ctl.removeAttribute('role'); ctl.removeAttribute('tabindex'); }
         else { ctl.setAttribute('role', 'button'); ctl.setAttribute('tabindex', '0'); }
       }
