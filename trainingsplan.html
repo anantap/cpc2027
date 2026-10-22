@@ -105,6 +105,255 @@
 
   .phase-stats { margin-bottom: 16px; }
 
+  /* ===== Dashboard: the next run ===== */
+  [hidden] { display: none !important; }
+
+  .dash {
+    --sky-1: #2b2238;
+    --sky-2: #62466b;
+    --sky-3: #a98bbf;
+    --sky-4: #e9a07e;
+    --sky-5: #f2733a;
+    max-width: 560px;
+    margin: 0 auto;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-alt);
+  }
+
+  .dash-sky {
+    position: relative;
+    height: 40svh;
+    min-height: 220px;
+    max-height: 380px;
+    background:
+      radial-gradient(120% 70% at 50% 108%, rgba(255, 196, 120, 0.85), rgba(242, 115, 58, 0) 60%),
+      linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 34%, var(--sky-3) 60%, var(--sky-4) 84%, var(--sky-5) 100%);
+    overflow: hidden;
+  }
+
+  /* Film grain over the gradient. */
+  .dash-sky::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: soft-light;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .dash-dots {
+    position: absolute;
+    top: calc(28px + env(safe-area-inset-top, 0px));
+    left: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 1;
+  }
+
+  .dash-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+  }
+  .dash-dot.done { background: rgba(255, 255, 255, 0.9); border-color: transparent; }
+  .dash-dot.skipped { border-color: rgba(255, 255, 255, 0.3); }
+  .dash-dot.next { background: var(--sky-5); border-color: transparent; box-shadow: 0 0 0 4px rgba(242, 115, 58, 0.25); }
+
+  .dash-head .dash-dot { width: 7px; height: 7px; border-width: 1px; border-color: var(--text-faint); }
+  .dash-head .dash-dot.done { background: var(--sky-3); }
+  .dash-head .dash-dot.skipped { border-color: var(--line); }
+  .dash-head .dash-dot.next { background: var(--sky-5); box-shadow: none; }
+
+  .dash-panel {
+    flex: 1;
+    padding: 24px 24px calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .dash-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .dash-k, .dash-date, .dash-sub, .dash-tile .k, .dash-progress .k {
+    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-stretch: 125%;
+    text-transform: uppercase;
+  }
+
+  .dash-k {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+  }
+  .dash-k .dots { display: inline-flex; gap: 5px; }
+
+  .dash-sub {
+    margin-top: 5px;
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+  }
+
+  .dash-date {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .dash-big {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 18px 0 26px;
+  }
+
+  .dash-num {
+    font-size: clamp(60px, 19vw, 84px);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+  .dash-num small {
+    font-size: 0.32em;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--text-faint);
+    margin-left: 6px;
+  }
+  .dash-desc {
+    margin-top: 10px;
+    font-size: 15px;
+    color: var(--text-dim);
+  }
+
+  .dash-rays { width: 92px; height: 46px; flex-shrink: 0; stroke: var(--text); stroke-width: 1.6; stroke-linecap: round; fill: none; }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    row-gap: 22px;
+  }
+
+  .dash-tile { display: flex; justify-content: space-between; align-items: stretch; gap: 12px; min-width: 0; }
+  .dash-tile .k { font-size: 10.5px; letter-spacing: 0.12em; color: var(--text); line-height: 1.35; }
+  .dash-tile .v { margin-top: 8px; font-size: 24px; letter-spacing: -0.01em; white-space: nowrap; }
+  .dash-tile .v small { font-size: 0.6em; color: var(--text-dim); }
+  .dash-tile .s { margin-top: 3px; font-size: 12px; color: var(--text-dim); }
+
+  /* Small vertical scale with a marker, like a thermometer. */
+  .dash-bar {
+    position: relative;
+    width: 6px;
+    flex-shrink: 0;
+    margin: 4px 6px 2px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, var(--sky-5), var(--sky-3) 60%, #6f86c8);
+  }
+  .dash-bar i {
+    position: absolute;
+    left: -6px;
+    right: -6px;
+    height: 2px;
+    background: var(--text);
+    transform: translateY(-50%);
+    transition: top 0.6s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .dash-coach {
+    margin-top: 28px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .dash-coach .coach-k { margin: 0; }
+  .dash-coach .dash-coach-from { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+  .dash-coach .coach-tips { margin-top: 10px; }
+  .dash-coach .coach-tips li { font-size: 14px; color: var(--text); }
+
+  .dash-progress { margin-top: 28px; }
+  .dash-progress .k { font-size: 10.5px; letter-spacing: 0.12em; margin-bottom: 10px; }
+  .dash-track {
+    position: relative;
+    height: 60px;
+    border-radius: 14px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .dash-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #f4c98f, var(--sky-4) 45%, var(--sky-3));
+    transition: width 0.9s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .dash-pct {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    color: #1a1420;
+    mix-blend-mode: normal;
+  }
+  .dash-pct small { font-size: 0.45em; opacity: 0.6; }
+  .dash-pct.outside { color: var(--text); }
+
+  .dash-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    height: 54px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: "Archivo", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-stretch: 125%;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .dash-empty { color: var(--text-dim); font-size: 15px; margin: 18px 0 0; }
+
+  @media (min-width: 600px) {
+    .dash { min-height: 0; margin: 32px auto; border-radius: 28px; overflow: hidden; border: 1px solid var(--line); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-bar i, .dash-fill { transition: none; }
+  }
+
+  /* Way back from the plan to the dashboard. */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .topbar .eyebrow { min-width: 0; }
+  .back-link {
+    flex-shrink: 0;
+    color: var(--text-dim);
+    font-size: 13px;
+    text-decoration: none;
+    margin-bottom: 0;
+  }
+  .back-link:hover { color: var(--text); }
+
   /* ===== Floating "back to my week" button ===== */
   .fab {
     position: fixed;
@@ -831,8 +1080,49 @@
 </style>
 </head>
 <body>
-<main class="wrap">
-  <div class="topbar" id="topbar"><div class="eyebrow">Trainingsplan</div></div>
+<section class="dash" id="dash" aria-label="Volgende run">
+  <div class="dash-sky"><div class="dash-dots" id="dash-dots" aria-hidden="true"></div></div>
+  <div class="dash-panel">
+    <div class="dash-head">
+      <div>
+        <div class="dash-k">Volgende run <span class="dots" id="dash-head-dots" aria-hidden="true"></span></div>
+        <div class="dash-sub" id="dash-sub">Schema wordt geladen</div>
+      </div>
+      <div class="dash-date" id="dash-date"></div>
+    </div>
+    <div class="dash-big">
+      <div>
+        <div class="dash-num" id="dash-num">–</div>
+        <div class="dash-desc" id="dash-desc"></div>
+      </div>
+      <svg class="dash-rays" viewBox="0 0 92 46" aria-hidden="true">
+        <path d="M14 40a32 32 0 0 1 64 0"/>
+        <path d="M46 4v10M24 10l5 8.5M68 10l-5 8.5M8 24l8.5 5M84 24l-8.5 5M2 40h8M82 40h8M18 44h56"/>
+      </svg>
+    </div>
+    <div class="dash-grid">
+      <div class="dash-tile"><div><div class="k">Wanneer</div><div class="v" id="dash-when">–</div><div class="s" id="dash-when-s"></div></div></div>
+      <div class="dash-tile"><div><div class="k">Tot de CPC</div><div class="v" id="dash-cpc">–</div><div class="s">14 maart 2027</div></div></div>
+      <div class="dash-tile"><div><div class="k">Recent tempo</div><div class="v" id="dash-pace">–</div><div class="s">laatste 3 runs</div></div><div class="dash-bar" title="Ten opzichte van je snelste en traagste run"><i id="dash-pace-bar"></i></div></div>
+      <div class="dash-tile"><div><div class="k">Deze week</div><div class="v" id="dash-week">–</div><div class="s" id="dash-week-s"></div></div><div class="dash-bar"><i id="dash-week-bar"></i></div></div>
+      <div class="dash-tile"><div><div class="k">Langste run</div><div class="v" id="dash-long">–</div><div class="s">op weg naar 10 km</div></div><div class="dash-bar"><i id="dash-long-bar"></i></div></div>
+      <div class="dash-tile"><div><div class="k">Runs gelopen</div><div class="v" id="dash-runs">–</div><div class="s">van het schema</div></div><div class="dash-bar"><i id="dash-runs-bar"></i></div></div>
+    </div>
+    <div class="dash-coach" id="dash-coach" hidden>
+      <div class="coach-k">Tip van de coach</div>
+      <div class="dash-coach-from" id="dash-coach-from"></div>
+      <ul class="coach-tips" id="dash-coach-tips"></ul>
+    </div>
+    <div class="dash-progress">
+      <div class="k">Op weg naar de CPC</div>
+      <div class="dash-track"><div class="dash-fill" id="dash-fill"></div><div class="dash-pct" id="dash-pct">–</div></div>
+    </div>
+    <a class="dash-cta" href="#schema">Bekijk het schema <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<main class="wrap" id="plan" hidden>
+  <div class="topbar" id="topbar"><div class="eyebrow">Trainingsplan</div><a class="back-link" href="#">← Volgende run</a></div>
   <header class="top" id="top">
     <div class="top-intro">
       <h1>Naar de CPC 10K — maart 2027</h1>
@@ -1410,6 +1700,7 @@
       card.querySelector('.act-date').innerHTML = formatRunDate(run);
       card.querySelector('.act-name').textContent = run.name || 'Run';
       card.dataset.runId = run.id;
+      card._run = run;
       return card;
     }
 
@@ -1688,7 +1979,11 @@
         if (start + 7 <= today) setWeekOpen(card, !card.classList.contains('completed'));
       });
       // Coach boxes above the runs change the layout, so scroll once they're in place.
-      coachReady.then(function () { scrollToTrainingWeek(); });
+      coachReady.then(function () {
+        renderDash(runs);
+        ready = true;
+        showView();
+      });
     });
 
     // ===== Couch to 5K: runs from the Apple Health import, grouped by calendar week =====
@@ -1769,7 +2064,13 @@
       summary.tips.forEach(function (tip) {
         box.querySelector('.coach-tips').appendChild(el('li', 'coach-tip')).textContent = tip;
       });
+      onCoach(activity, summary);
     }
+
+    // Set by the dashboard: called whenever a run's coach summary is shown or updated.
+    var onCoach = function () {};
+    // Set by setupCoach: writes a run's missing summary now, even when it isn't on screen.
+    var coachNow = function () {};
 
     // `from` is set when last week's overview is shown at the top of the current week.
     function renderWeekCoach(box, summary, from) {
@@ -1927,9 +2228,10 @@
       // Missing summaries are written when they scroll into view.
       var observer = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
+          if (!entry.isIntersecting || !entry.target._coachTask) return;
           observer.unobserve(entry.target);
           queue.push(entry.target._coachTask);
+          entry.target._coachTask = null;
           pump();
         });
       }) : null;
@@ -1938,6 +2240,14 @@
         target._coachTask = task;
         if (observer) observer.observe(target); else queue.push(task);
       }
+
+      coachNow = function (target) {
+        if (!observer || !target._coachTask) return;
+        observer.unobserve(target);
+        queue.push(target._coachTask);
+        target._coachTask = null;
+        pump();
+      };
 
       function pendingBox(label) {
         return el('div', 'coach pending', '<div class="coach-k">' + label + '</div><p class="coach-text">Samenvatting wordt geschreven…</p>');
@@ -2053,13 +2363,179 @@
     }
 
     function updateFab() {
-      if (!fabCard) return;
+      if (!fabCard || planView.hidden) return;
       var phaseOpen = fabCard.closest('.phase-section').classList.contains('open');
       var box = fabCard.getBoundingClientRect();
       var visible = box.bottom > pinnedHeaderHeight() + 40 && box.top < window.innerHeight - 80;
       fab.classList.toggle('show', phaseOpen && !visible);
       fab.classList.toggle('down', box.top >= window.innerHeight - 80);
     }
+
+    // ===== Dashboard: the next planned run, with the plan one tap away =====
+    var LONG_DAYS = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
+    var TRAINING_START = dayNumber('2026-06-09');
+
+    function setText(id, value) { document.getElementById(id).innerHTML = value; }
+    // Marker on a vertical scale: 1 is the top.
+    function setBar(id, fraction) {
+      var f = Math.max(0, Math.min(1, isFinite(fraction) ? fraction : 0));
+      document.getElementById(id).style.top = ((1 - f) * 100) + '%';
+    }
+
+    function slotDay(item) {
+      var card = item.closest('.week-card');
+      var index = Array.prototype.indexOf.call(card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item'), item);
+      return weekStart(card.dataset.plan, Number(card.dataset.week)) + RUN_DAYS[index];
+    }
+
+    // The first session that's neither done nor skipped, in a week that isn't over yet.
+    function nextSlot() {
+      var slots = document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
+      for (var i = 0; i < slots.length; i++) {
+        var item = slots[i];
+        var card = item.closest('.week-card');
+        if (item.classList.contains('done') || item.classList.contains('skipped')) continue;
+        if (weekStart(card.dataset.plan, Number(card.dataset.week)) + 7 <= today) continue;
+        return item;
+      }
+      return null;
+    }
+
+    function dots(card, next) {
+      return Array.prototype.map.call(card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item'), function (item) {
+        var state = item === next ? 'next' : item.classList.contains('done') ? 'done' : item.classList.contains('skipped') ? 'skipped' : '';
+        return '<span class="dash-dot ' + state + '"></span>';
+      }).join('');
+    }
+
+    function renderDash(runs) {
+      var planRuns = runs.filter(function (r) { return r.source !== 'c25k'; });
+      var next = nextSlot();
+
+      if (next) {
+        var card = next.closest('.week-card');
+        var day = Math.max(slotDay(next), today);
+        var label = next.querySelector('.run-label').cloneNode(true);
+        Array.prototype.forEach.call(label.querySelectorAll('.run-sep, .run-desc, .missed-note'), function (n) { n.remove(); });
+        // Short phase name: "Tussenfase — basis vasthouden" becomes "Tussenfase".
+        var phase = text(card.closest('.phase-section'), '.phase-title').split(/ — |:/)[0];
+        setText('dash-sub', [phase, text(card, '.week-num'), label.textContent.trim()].join(' · '));
+        setText('dash-date', DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day));
+        var dist = text(next, '.run-dist');
+        var km = /^([\d,.]+)\s*km$/.exec(dist);
+        setText('dash-num', km ? km[1] + '<small>km</small>' : dist);
+        document.getElementById('dash-desc').textContent = text(next, '.run-desc');
+        setText('dash-when', day === today ? 'Vandaag' : day === today + 1 ? 'Morgen' : LONG_DAYS[new Date(day * DAY).getUTCDay()].replace(/^./, function (c) { return c.toUpperCase(); }));
+        setText('dash-when-s', day === today ? (slotDay(next) < today ? 'kan nog deze week' : 'staat gepland')
+          : day === today + 1 ? LONG_DAYS[new Date(day * DAY).getUTCDay()] : 'over ' + (day - today) + ' dagen');
+        var dotsHtml = dots(card, next);
+        setText('dash-dots', dotsHtml);
+        setText('dash-head-dots', dotsHtml);
+
+        var weekRuns = card._runs || [];
+        var weekKm = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
+        var items = card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item');
+        var planned = Array.prototype.reduce.call(items, function (sum, i) { return sum + plannedKm(i); }, 0);
+        setText('dash-week', formatKm(weekKm) + '<small> / ' + formatKm(planned) + ' km</small>');
+        setText('dash-week-s', Math.min(weekRuns.length, items.length) + ' van ' + items.length + ' runs');
+        setBar('dash-week-bar', planned ? weekKm / planned : 0);
+      } else {
+        setText('dash-sub', 'Het schema zit erop');
+        setText('dash-num', 'CPC');
+        document.getElementById('dash-desc').textContent = 'Geen geplande runs meer.';
+        setText('dash-when', '–');
+        setText('dash-week', '–');
+        setBar('dash-week-bar', 0);
+      }
+
+      var days = CPC_DAY - today;
+      setText('dash-cpc', days > 0 ? days + '<small> dagen</small>' : days === 0 ? 'Vandaag' : 'Gelopen');
+
+      var recent = planRuns.slice(-3);
+      var paced = runs.filter(function (r) { return r.distance_km >= 1; }).map(function (r) { return r.moving_time_s / r.distance_km; });
+      if (recent.length) {
+        var pace = recent.reduce(function (s, r) { return s + r.moving_time_s; }, 0) / recent.reduce(function (s, r) { return s + r.distance_km; }, 0);
+        setText('dash-pace', formatPaceSec(pace));
+        var fast = Math.min.apply(null, paced);
+        var slow = Math.max.apply(null, paced);
+        setBar('dash-pace-bar', slow > fast ? (slow - pace) / (slow - fast) : 0.5);
+      }
+
+      var longest = runs.reduce(function (m, r) { return Math.max(m, r.distance_km); }, 0);
+      setText('dash-long', longest ? formatKm(longest) + '<small> km</small>' : '–');
+      setBar('dash-long-bar', longest / 10);
+
+      var slots = document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
+      var doneSlots = document.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item.done').length;
+      setText('dash-runs', doneSlots + '<small> / ' + slots.length + '</small>');
+      setBar('dash-runs-bar', doneSlots / slots.length);
+
+      // How far along the road from the first Couch to 5K run to race day.
+      var pct = Math.round(Math.max(0, Math.min(1, (today - TRAINING_START) / (CPC_DAY - TRAINING_START))) * 100);
+      document.getElementById('dash-fill').style.width = pct + '%';
+      var pctEl = document.getElementById('dash-pct');
+      pctEl.innerHTML = pct + '<small>%</small>';
+      pctEl.classList.toggle('outside', pct < 12);
+
+      dashCoach();
+    }
+
+    // The tips the coach wrote after your latest run.
+    function latestActivity() {
+      var list = document.querySelectorAll('.activity[data-run-id]:not(.no-coach)');
+      var latest = null;
+      Array.prototype.forEach.call(list, function (a) {
+        if (!latest || a._run.start > latest._run.start) latest = a;
+      });
+      return latest;
+    }
+
+    function dashCoach() {
+      var activity = latestActivity();
+      var box = document.getElementById('dash-coach');
+      if (!activity) { box.hidden = true; return; }
+      var summary = activity._summary;
+      var list = document.getElementById('dash-coach-tips');
+      list.innerHTML = '';
+      var run = activity._run;
+      document.getElementById('dash-coach-from').textContent =
+        'Na je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
+      if (summary) {
+        summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
+      } else {
+        list.appendChild(el('li', 'coach-tip')).textContent = 'Wordt geschreven…';
+        coachNow(activity);
+      }
+      box.hidden = false;
+    }
+
+    onCoach = function (activity) {
+      if (activity === latestActivity()) dashCoach();
+    };
+
+    // ===== Two views: the dashboard, and the plan at #schema =====
+    var dash = document.getElementById('dash');
+    var planView = document.getElementById('plan');
+    var planShown = false;
+    var ready = false;
+
+    function showView() {
+      var plan = location.hash === '#schema';
+      dash.hidden = plan;
+      planView.hidden = !plan;
+      if (!plan) {
+        window.scrollTo(0, 0);
+        fab.classList.remove('show');
+        return;
+      }
+      updateHeader();
+      if (!ready) return;
+      if (!planShown) { planShown = true; scrollToTrainingWeek(); } else updateFab();
+    }
+
+    window.addEventListener('hashchange', showView);
+    showView();
+
   })();
 </script>
 
