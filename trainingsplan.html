@@ -180,14 +180,17 @@
     border-radius: 46% 54% 58% 42% / 44% 48% 52% 56%;
     background: radial-gradient(circle at 50% 50%, #f06a3a 0%, #f4a38a 45%, rgba(169, 139, 191, 0.6) 75%, rgba(169, 139, 191, 0) 100%);
     filter: blur(40px);
-    animation: blob-live 28s ease-in-out infinite alternate;
+    animation: blob-live 40s ease-in-out infinite alternate;
     pointer-events: none;
   }
+  /* It wanders slowly through the card and keeps changing shape, so the movement is noticeable
+     when you look, but never fast. */
   @keyframes blob-live {
     0%   { border-radius: 46% 54% 58% 42% / 44% 48% 52% 56%; transform: translate(0, 0) rotate(0deg) scale(1); }
-    33%  { border-radius: 58% 42% 46% 54% / 52% 58% 42% 48%; transform: translate(-16px, 8px) rotate(24deg) scale(1.04); }
-    66%  { border-radius: 42% 58% 54% 46% / 58% 44% 56% 42%; transform: translate(-8px, 24px) rotate(-16deg) scale(0.97); }
-    100% { border-radius: 54% 46% 42% 58% / 46% 56% 44% 54%; transform: translate(8px, 16px) rotate(12deg) scale(1.02); }
+    25%  { border-radius: 62% 38% 44% 56% / 52% 62% 38% 48%; transform: translate(-96px, 48px) rotate(40deg) scale(1.08); }
+    50%  { border-radius: 38% 62% 58% 42% / 62% 40% 60% 38%; transform: translate(-160px, 112px) rotate(-24deg) scale(0.92); }
+    75%  { border-radius: 56% 44% 36% 64% / 40% 58% 42% 60%; transform: translate(-48px, 136px) rotate(16deg) scale(1.04); }
+    100% { border-radius: 44% 56% 62% 38% / 56% 44% 56% 44%; transform: translate(-112px, 24px) rotate(-8deg) scale(1); }
   }
 
   /* Dots for progress: orange once run, light orange for the next one, pale grey for the rest,
