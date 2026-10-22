@@ -158,6 +158,8 @@
     padding: 26px 26px 28px;
   }
   .sun-card-title { font-size: 21px; line-height: 1.25; max-width: calc(100% - 110px); }
+  .sun-card-title span { display: block; color: var(--text-dim); }
+  /* The week's progress as a sunrise: the sun fills up from below with every run done (--f, 0 to 1). */
   .sun {
     position: absolute;
     top: 26px;
@@ -165,10 +167,26 @@
     width: 92px;
     height: 92px;
     border-radius: 50%;
-    background: radial-gradient(circle at 38% 32%, #ffd8b4, #f5a06a 50%, var(--accent) 100%);
-    box-shadow: 0 0 46px rgba(239, 125, 60, 0.35);
+    background: radial-gradient(circle at 38% 32%, #f3f0ea, #dcd7cd);
   }
-  .sun.dim { background: radial-gradient(circle at 38% 32%, #f1eee8, #dcd7cd); box-shadow: none; }
+  .sun::before,
+  .sun::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+  /* The glow grows with the sun. */
+  .sun::before {
+    box-shadow: 0 0 46px rgba(239, 125, 60, 0.4);
+    opacity: var(--f, 0);
+    transition: opacity 0.9s ease;
+  }
+  .sun::after {
+    background: radial-gradient(circle at 38% 32%, #ffd8b4, #f5a06a 50%, var(--accent) 100%);
+    clip-path: inset(calc((1 - var(--f, 0)) * 100%) 0 0 0);
+    transition: clip-path 0.9s cubic-bezier(0.2, 0, 0, 1);
+  }
 
   .sun-card-foot { display: flex; align-items: flex-end; gap: 22px; }
   .kv .k { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
@@ -266,7 +284,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .slider-fill { transition: none; }
+    .slider-fill, .sun::before, .sun::after { transition: none; }
   }
 
   /* On the next run in the plan: the way to the run screen. */
@@ -994,10 +1012,9 @@
 <section class="view" id="home" aria-label="Overzicht">
   <h1 class="view-title">Hoi Ananta.<span id="home-status">Op weg naar de CPC 10K.</span></h1>
 
-  <div class="view-label">Je volgende run:</div>
-  <a class="glass sun-card" href="#run">
+  <a class="glass sun-card" href="#run" style="margin-top: 30px">
     <div class="sun-card-title" id="home-when">–</div>
-    <span class="sun" aria-hidden="true"></span>
+    <span class="sun" role="img"></span>
     <div class="sun-card-foot">
       <div class="kv"><div class="k">Sessie</div><div class="v" id="home-session">–</div></div>
       <div class="kv"><div class="k">Soort</div><div class="v" id="home-kind">–</div></div>
@@ -1022,7 +1039,7 @@
 
   <div class="glass sun-card" style="margin-top: 26px">
     <div class="sun-card-title" id="run-desc">–</div>
-    <span class="sun" aria-hidden="true"></span>
+    <span class="sun" role="img"></span>
     <div class="sun-card-foot">
       <div class="kv"><div class="k">Fase</div><div class="v" id="run-phase">–</div></div>
       <div class="kv"><div class="k">Week</div><div class="v" id="run-week">–</div></div>
@@ -2345,6 +2362,15 @@
       };
     }
 
+    // Both suns show how much of this week's runs are done.
+    function setSun(card) {
+      var w = weekNumbers(card);
+      Array.prototype.forEach.call(document.querySelectorAll('.sun'), function (sun) {
+        sun.style.setProperty('--f', w.total ? w.done / w.total : 0);
+        sun.setAttribute('aria-label', w.done + ' van ' + w.total + ' runs deze week gedaan');
+      });
+    }
+
     // One sentence on where you stand, from the plan.
     function homeStatus() {
       if (CPC_DAY === today) return 'Vandaag is het CPC-dag. Geniet ervan!';
@@ -2367,7 +2393,9 @@
       if (next) {
         var card = next.closest('.week-card');
         var day = Math.max(slotDay(next), today);
-        setText('home-when', whenText(day) + '<br>' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day));
+        setText('home-when', 'Je volgende run is ' + (day <= today + 1 ? whenText(day).toLowerCase() : LONG_DAYS[new Date(day * DAY).getUTCDay()]) +
+          '<span>' + LONG_DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + '</span>');
+        setSun(card);
         setText('home-session', plainLabel(next));
         setText('home-kind', capital(text(next, '.run-desc') || 'rustig').split(' + ')[0]);
         setBig('home-dist', next);
@@ -2409,6 +2437,7 @@
         setText('run-week', text(card, '.week-num').replace('Week ', '') + ' · ' + plainLabel(next).replace(' · lang', ''));
         setBig('run-dist', next);
         renderWeekList(card, next);
+        setSun(card);
       } else {
         setText('run-when', 'Het schema zit erop');
         setText('run-desc', 'Geen geplande runs meer');
