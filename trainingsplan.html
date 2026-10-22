@@ -618,7 +618,10 @@
     user-select: none;
   }
   .week-num { font-size: var(--fs-l); line-height: var(--lh-l); font-weight: 400; letter-spacing: -0.015em; white-space: nowrap; }
-  .week-head .chevron { order: 1; margin-left: auto; width: 20px; height: 20px; }
+  .week-head .chevron { order: 1; width: 20px; height: 20px; }
+  .week-dots { order: 1; margin-left: auto; gap: 6px; }
+  .week-dots .dot { width: 16px; height: 16px; }
+  .week-card.completed .week-dots .dot.done { opacity: 0.55; }
   .week-focus { order: 2; flex-basis: 100%; font-size: var(--fs-l); font-weight: 400; letter-spacing: -0.015em; line-height: var(--lh-l); color: var(--text-dim); }
   .week-dates { order: 3; flex-basis: 100%; margin-top: 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
   .week-total { order: 4; flex-basis: 100%; margin-top: 4px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
@@ -638,9 +641,6 @@
   .week-body { padding-top: 16px; }
   .week-card.collapsed .week-body { display: none; }
 
-  .week-slider { height: 48px; margin-bottom: 8px; border-radius: 16px; }
-  .week-slider .slider-fill { border-radius: 16px; padding-left: 16px; font-size: var(--fs-m); line-height: var(--lh-m); }
-  .week-slider .slider-v { padding-right: 16px; font-size: var(--fs-m); line-height: var(--lh-m); }
 
   /* ===== Runs: a small label, the distance large and light, the status as quiet text ===== */
   .runs-grid { display: flex; flex-direction: column; gap: 8px; }
@@ -1495,16 +1495,12 @@
         card.classList.add('current');
       }
 
-      // The week's kilometres as a bar, like on the start screen.
+      // The week's runs and kilometres, under its dates.
       var done = Math.min(weekRuns.length, items.length);
       var km = weekRuns.reduce(function (sum, r) { return sum + r.distance_km; }, 0);
       var planned = items.reduce(function (sum, i) { return sum + plannedKm(i); }, 0);
-      var bar = el('div', 'slider week-slider',
-        '<div class="slider-fill"><span>' + done + ' van ' + items.length + ' runs</span></div>' +
-        '<span class="slider-v">' + formatKm(km) + ' / ' + formatKm(planned) + ' km</span>');
-      bar.querySelector('.slider-fill').style.setProperty('--f', planned ? Math.min(1, km / planned) : 0);
-      var body = card.querySelector('.week-body');
-      body.insertBefore(bar, body.firstChild);
+      card.querySelector('.week-head').appendChild(el('div', 'week-total',
+        done + ' van ' + items.length + ' runs · ' + formatKm(km) + ' van ' + formatKm(planned) + ' km'));
     }
 
     function runsBetween(runs, start, end) {
@@ -1633,10 +1629,27 @@
       return slots.length > 0 && settled.length === slots.length;
     }
 
+    // Every week shows its runs as dots in its header, also when folded:
+    // orange when run, light orange for your next run, an open ring when skipped or missed.
+    function renderWeekDots() {
+      var next = typeof nextSlot === 'function' ? nextSlot() : null;
+      Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
+        var head = card.querySelector('.week-head');
+        var dots = head.querySelector('.dots') || head.insertBefore(el('span', 'dots week-dots'), head.querySelector('.chevron'));
+        dots.innerHTML = '';
+        Array.prototype.forEach.call(card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item'), function (item) {
+          var state = item.classList.contains('done') ? 'done' : item.classList.contains('skipped') ? 'skipped'
+            : item === next ? 'next' : item.classList.contains('missed') ? 'missed' : 'planned';
+          dots.appendChild(el('span', 'dot ' + state));
+        });
+      });
+    }
+
     function markCompletedPhases() {
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
         card.classList.toggle('completed', isSettled(card));
       });
+      renderWeekDots();
       Array.prototype.forEach.call(document.querySelectorAll('.phase-section'), function (section) {
         var slots = section.querySelectorAll('.week-card[data-plan] .runs-grid:not(.extra-runs) .run-item');
         if (!slots.length) return;
@@ -1726,7 +1739,8 @@
         var card = el('div', 'week-card c25k-week completed',
           '<div class="week-head"><div class="week-num">Week ' + (n + 1) + '</div>' +
           '<div class="week-dates">' + formatDay(start) + ' – ' + formatDay(start + 6) + '</div>' +
-          '<div class="week-total"><strong>' + weekRuns.length + '</strong> ' + (weekRuns.length === 1 ? 'run' : 'runs') + ' · ' + formatKm(km) + ' km · ' + formatDuration(time) + '</div>' +
+          '<div class="week-total">' + weekRuns.length + ' ' + (weekRuns.length === 1 ? 'run' : 'runs') + ' · ' + formatKm(km) + ' km · ' + formatDuration(time) + '</div>' +
+          '<span class="dots week-dots">' + weekRuns.map(function () { return '<span class="dot done"></span>'; }).join('') + '</span>' +
           CHEVRON + '</div><div class="week-body"><div class="runs-grid"></div></div>');
         weekRuns.forEach(function (run, i) {
           var item = el('div', 'run-item check-row checked done',
