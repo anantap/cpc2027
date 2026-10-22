@@ -24,7 +24,6 @@
     --accent-text: #c25e27;
     --on-accent: #ffffff;
     --line: rgba(29, 29, 27, 0.09);
-    --glass-edge: rgba(255, 255, 255, 0.55);
   }
 
   * { box-sizing: border-box; }
@@ -167,7 +166,6 @@
 
   .glass {
     background: var(--surface);
-    border: 1px solid var(--glass-edge);
     border-radius: 22px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 10px 30px rgba(60, 55, 40, 0.06);
     -webkit-backdrop-filter: blur(24px) saturate(1.2);
@@ -221,7 +219,6 @@
     height: 64px;
     border-radius: 20px;
     background: rgba(255, 255, 255, 0.38);
-    border: 1px solid var(--glass-edge);
     overflow: hidden;
   }
   .slider-fill {
@@ -235,12 +232,10 @@
     padding: 0 18px 0 26px;
     border-radius: 20px;
     background: rgba(214, 210, 199, 0.85);
-    box-shadow: 4px 0 18px rgba(60, 55, 40, 0.08);
     font-size: 15px;
     white-space: nowrap;
     transition: width 0.8s cubic-bezier(0.2, 0, 0, 1);
   }
-  .slider-fill i { width: 3px; height: 30px; border-radius: 2px; background: var(--text); flex-shrink: 0; margin-left: 12px; }
   .slider-v { margin-left: auto; padding-right: 26px; font-size: 15px; position: relative; font-variant-numeric: tabular-nums; }
   .slider.on .slider-fill { background: rgba(245, 176, 132, 0.6); }
 
@@ -303,7 +298,6 @@
     margin-top: 8px;
     border-radius: 999px;
     background: rgba(214, 210, 199, 0.75);
-    border: 1px solid var(--glass-edge);
     color: var(--text);
     font-size: 15px;
     text-decoration: none;
@@ -437,7 +431,6 @@
 
   .stat {
     background: var(--surface);
-    border: 1px solid var(--line);
     border-radius: 12px;
     padding: 12px;
   }
@@ -526,7 +519,6 @@
     align-items: center;
     padding: 12px;
     background: var(--surface);
-    border: 1px solid var(--glass-edge);
     border-radius: 14px;
     cursor: default;
   }
@@ -564,7 +556,6 @@
 
   .runs-grid .run-item.done {
     background: var(--accent-soft);
-    border-color: var(--accent);
   }
 
   .run-item.done .run-status {
@@ -580,7 +571,6 @@
 
   .runs-grid .run-item.missed {
     background: transparent;
-    border-style: dashed;
   }
 
   .run-item.missed .run-dist,
@@ -590,7 +580,6 @@
 
   .runs-grid .run-item.skipped {
     background: transparent;
-    border-style: solid;
   }
 
   .run-item.skipped .run-dist,
@@ -765,8 +754,8 @@
 
   .week-coach {
     padding: 12px;
-    border: 1px dashed rgba(239, 125, 60, 0.35);
-    border-radius: 10px;
+    background: var(--accent-soft);
+    border-radius: 14px;
   }
 
   .coach-tips {
@@ -923,7 +912,6 @@
 
   .week-card {
     background: var(--bg-alt);
-    border: 1px solid var(--glass-edge);
     border-radius: 20px;
     padding: 14px 14px 16px;
   }
@@ -967,9 +955,6 @@
   .week-card.completed .week-focus { text-decoration: line-through; }
   .week-card.completed .week-progress div { background: var(--text-faint); }
 
-  .week-card.current {
-    border-color: var(--accent);
-  }
 
   .week-head {
     display: flex;
@@ -1033,7 +1018,6 @@
 
   .note {
     background: var(--bg-alt);
-    border: 1px solid var(--line);
     border-radius: 10px;
     padding: 16px 20px;
     font-size: 14px;
@@ -1062,8 +1046,8 @@
       <div class="big" id="home-dist">–</div>
     </div>
   </a>
-  <div class="slider" id="home-week-bar"><div class="slider-fill"><span>Deze week</span><i></i></div><span class="slider-v" id="home-week">–</span></div>
-  <div class="slider" id="home-cpc-bar"><div class="slider-fill"><span>Tot de CPC</span><i></i></div><span class="slider-v" id="home-cpc">–</span></div>
+  <div class="slider" id="home-week-bar"><div class="slider-fill"><span>Deze week</span></div><span class="slider-v" id="home-week">–</span></div>
+  <div class="slider" id="home-cpc-bar"><div class="slider-fill"><span>Tot de CPC</span></div><span class="slider-v" id="home-cpc">–</span></div>
 
   <div class="view-label">Tot nu toe:</div>
   <div class="glass list-card">
@@ -1090,9 +1074,9 @@
       <div class="big" id="run-dist">–</div>
     </div>
   </div>
-  <div class="slider" id="run-pace-bar"><div class="slider-fill"><span>Recent tempo</span><i></i></div><span class="slider-v" id="run-pace">–</span></div>
-  <div class="slider" id="run-long-bar"><div class="slider-fill"><span>Langste run</span><i></i></div><span class="slider-v" id="run-long">–</span></div>
-  <div class="slider" id="run-runs-bar"><div class="slider-fill"><span>Runs gelopen</span><i></i></div><span class="slider-v" id="run-runs">–</span></div>
+  <div class="slider" id="run-pace-bar"><div class="slider-fill"><span>Recent tempo</span></div><span class="slider-v" id="run-pace">–</span></div>
+  <div class="slider" id="run-long-bar"><div class="slider-fill"><span>Langste run</span></div><span class="slider-v" id="run-long">–</span></div>
+  <div class="slider" id="run-runs-bar"><div class="slider-fill"><span>Runs gelopen</span></div><span class="slider-v" id="run-runs">–</span></div>
 
   <div class="view-label">Deze week:</div>
   <div class="glass switch-card" id="run-list"></div>
