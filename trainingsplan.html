@@ -253,10 +253,20 @@
   .week-row.done .status, .week-row.next .status { color: var(--accent-text); }
   .week-row.skipped .v, .week-row.missed .v { color: var(--text-faint); }
 
-  .coach-card { padding: 20px 26px 22px; }
-  .coach-card .coach-k { margin: 0; font-size: 13px; color: var(--accent-text); }
-  .coach-card .coach-from { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
-  .coach-card .coach-tips li { font-size: 15px; color: var(--text); line-height: 1.45; margin-top: 8px; }
+  /* The coach's tips: a two-tone heading like the other cards, then one tip per row. */
+  .coach-card { padding: 22px 26px 8px; }
+  .coach-card .coach-k { margin: 0; font-size: 21px; line-height: 1.25; color: var(--text); }
+  .coach-card .coach-from { font-size: 21px; line-height: 1.25; color: var(--text-dim); }
+  .coach-card .coach-tips { margin-top: 14px; }
+  .coach-card .coach-tips li {
+    margin: 0;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+    font-size: 16px;
+    line-height: 1.45;
+    color: var(--text);
+  }
+  .coach-card .coach-tips li::before { content: none; }
 
   .pill-btn {
     display: flex;
@@ -293,22 +303,24 @@
     #home {
       max-width: 1200px;
       /* On very tall screens it stops growing and sits in the middle. */
-      height: min(100svh, 860px);
-      margin-top: max(0px, calc((100svh - 860px) / 2));
+      height: min(100svh, 920px);
+      margin-top: max(0px, calc((100svh - 920px) / 2));
       padding: clamp(24px, 5svh, 56px) 40px;
       display: grid;
       grid-template-columns: 1.15fr 1fr 1fr;
       grid-template-areas:
-        "title title title"
-        "next  week  total"
-        "next  week  coach";
-      grid-template-rows: auto auto 1fr;
+        "title  title title"
+        "next   week  total"
+        "next   week  coach"
+        "schema week  coach";
+      grid-template-rows: auto auto 1fr auto;
       gap: 16px 20px;
       /* All columns as tall as the tallest, so their bottoms line up. */
       align-items: stretch;
     }
     #home .view-title { grid-area: title; margin: 0 0 18px; font-size: 34px; }
-    .home-group { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .home-group { display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+    .home-schema { grid-area: schema; margin-top: 0; }
     .home-next { grid-area: next; }
     .home-coach { grid-area: coach; }
     .home-week { grid-area: week; }
@@ -317,10 +329,11 @@
     /* One tile per column takes up the slack: the sun card, this week's runs, the coach tip. */
     #home .week-list { flex: 1; display: flex; flex-direction: column; }
     #home .week-row { flex: 1; }
-    #home .coach-card { flex: 1; }
+    /* Long tips scroll inside the card rather than pushing the page past one screen. */
+    #home .coach-card { flex: 1; min-height: 0; overflow-y: auto; }
 
     /* Shorter laptop windows: tighten everything a little so it still fits. */
-    @media (max-height: 760px) {
+    @media (max-height: 820px) {
       #home .view-title { font-size: 28px; margin-bottom: 8px; }
       #home .list-row { padding: 11px 0; }
       #home .list-row span { font-size: 19px; }
@@ -328,8 +341,9 @@
       #home .week-row .v { font-size: 22px; }
       #home .slider { height: 52px; }
       #home .pill-btn { height: 48px; margin-top: 0; }
-      #home .coach-card { padding: 16px 22px; }
-      #home .coach-card .coach-tips li { font-size: 14px; margin-top: 6px; }
+      #home .coach-card { padding: 16px 22px 4px; }
+      #home .coach-card .coach-k, #home .coach-card .coach-from { font-size: 18px; }
+      #home .coach-card .coach-tips li { font-size: 14px; padding: 10px 0; }
       #home .big { font-size: 88px; }
       #home .sun { width: 96px; height: 96px; }
     }
@@ -761,8 +775,8 @@
     <div class="coach-from" id="home-coach-from"></div>
     <ul class="coach-tips" id="home-coach-tips"></ul>
   </div>
-  <a class="pill-btn" href="#schema">Bekijk het schema <span aria-hidden="true">&nbsp;→</span></a>
   </div>
+  <a class="pill-btn home-schema" href="#schema">Bekijk het schema <span aria-hidden="true">&nbsp;→</span></a>
 
   <div class="home-group home-week">
   <div class="view-label">Deze week:</div>
@@ -2192,7 +2206,7 @@
       list.innerHTML = '';
       var run = activity._run;
       document.getElementById('home-coach-from').textContent =
-        'Na je run van ' + LONG_DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
+        'Na je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()] + ' ' + formatDay(dayNumber(run.date));
       if (summary && summary.tips) {
         summary.tips.forEach(function (tip) { list.appendChild(el('li', 'coach-tip')).textContent = tip; });
       } else {
