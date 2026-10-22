@@ -65,12 +65,6 @@
     letter-spacing: -0.01em;
   }
 
-  .subtitle {
-    color: var(--text-dim);
-    font-size: 15px;
-    margin: 0 0 24px 0;
-    line-height: 1.5;
-  }
 
   /* ===== Checkbox (shared across phases & exercises) ===== */
   .checkbox {
@@ -368,22 +362,30 @@
     gap: 8px;
   }
 
-  /* Only the label bar sticks; the title and totals scroll away under it while fading out,
-     then a divider appears under the bar. */
+  /* Appears once a phase title has scrolled away, and shows that phase's name. */
   .topbar {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 50%;
     z-index: 20;
-    margin: 0 -16px;
-    padding: 12px 16px 10px;
+    width: 100%;
+    max-width: 720px;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 10px;
     background: rgba(238, 237, 233, 0.72);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.25s ease;
+    border-bottom: 1px solid var(--line);
+    opacity: 0;
+    transform: translate(-50%, -8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .topbar.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .topbar { transition: none; }
   }
 
-  .topbar.pinned { border-bottom-color: var(--line); }
 
   .topbar .eyebrow {
     margin: 0;
@@ -394,7 +396,6 @@
 
   .top {
     margin-bottom: 28px;
-    will-change: opacity;
   }
 
   .topbar .eyebrow.swap { animation: label-in 0.25s ease; }
@@ -433,20 +434,22 @@
   }
 
   /* ===== Collapsible phases ===== */
+  /* A closed phase is a card like the rest; an open one shows its weeks as cards. */
   .phase-section {
-    border-top: 1px solid var(--line);
+    margin-bottom: 10px;
+    border-radius: 20px;
+    transition: background-color 0.2s ease;
   }
 
-  .phase-section:last-of-type {
-    border-bottom: 1px solid var(--line);
-  }
+  .phase-section:not(.open) { background: var(--bg-alt); }
 
   .phase-toggle {
     width: 100%;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 18px 0;
+    /* Same inset open or closed, so the title doesn't move. */
+    padding: 18px 20px;
     background: none;
     border: 0;
     color: inherit;
@@ -1069,17 +1072,11 @@
 </section>
 
 <main class="wrap" id="plan" hidden>
-  <div class="topbar" id="topbar"><div class="eyebrow">Trainingsplan</div></div>
+  <div class="topbar" id="topbar" aria-hidden="true"><div class="eyebrow"></div></div>
   <header class="top" id="top">
     <div class="top-intro">
       <a class="back-link" href="#">Terug</a>
-      <h1>Naar de CPC 10K — maart 2027</h1>
-      <p class="subtitle">Doel: de 10&nbsp;km van de CPC Loop in Den Haag, half maart 2027. Runs komen automatisch binnen vanuit Suunto.</p>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="k">Totaal km</div><div class="v" id="stat-total">–</div></div>
-      <div class="stat"><div class="k">Gem. tempo</div><div class="v" id="stat-avg">–</div></div>
-      <div class="stat"><div class="k">Snelste tempo</div><div class="v" id="stat-best">–</div></div>
+      <h1>Trainingsplan</h1>
     </div>
   </header>
 
@@ -1782,14 +1779,6 @@
       };
     }
 
-    function applyStats(runs) {
-      if (!runs.length) return;
-      var t = totals(runs);
-      document.getElementById('stat-total').textContent = t.km;
-      document.getElementById('stat-avg').innerHTML = t.avg;
-      document.getElementById('stat-best').innerHTML = t.best;
-    }
-
     // A finished phase gets the same three totals as the header, for its own runs.
     function applyPhaseStats(runs) {
       Array.prototype.forEach.call(document.querySelectorAll('.phase-section'), function (section) {
@@ -1873,24 +1862,18 @@
 
     // ===== Sticky label bar: title and totals fade out as they scroll under it =====
     var topbar = document.getElementById('topbar');
-    var header = document.getElementById('top');
     var label = topbar.querySelector('.eyebrow');
     var phaseSections = Array.prototype.slice.call(document.querySelectorAll('.phase-section'));
     var labelText = label.textContent;
 
     function updateHeader() {
-      var barBottom = topbar.getBoundingClientRect().bottom;
-      var box = header.getBoundingClientRect();
-      // 0 while the header is fully below the bar, 1 once it has fully scrolled under it.
-      var progress = box.height ? Math.min(1, Math.max(0, (barBottom - box.top) / box.height)) : 0;
-      header.style.opacity = String(Math.max(0, 1 - progress * 1.4));
-      topbar.classList.toggle('pinned', progress >= 1);
-      updateLabel(barBottom);
+      updateLabel(topbar.offsetHeight);
+      topbar.classList.toggle('show', labelText !== '');
     }
 
     // The label shows the last phase whose title has scrolled under the bar.
     function updateLabel(line) {
-      var text = 'Trainingsplan';
+      var text = '';
       phaseSections.forEach(function (section) {
         if (section.querySelector('.phase-toggle').getBoundingClientRect().bottom <= line) {
           text = section.querySelector('.phase-title').textContent;
@@ -1916,7 +1899,6 @@
       var runs = results[0];
       if (Array.isArray(results[1])) skips = results[1];
       if (!Array.isArray(runs)) return;
-      applyStats(runs);
       renderC25k(runs);
       applyRuns(runs);
       markCompletedPhases();
