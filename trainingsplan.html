@@ -252,8 +252,8 @@
   .list-row small.dim { color: var(--text-dim); }
 
   /* This week's runs, each with its status on the right. */
-  /* This week's runs as three flat circles: orange once run, light orange for the next one,
-     pale grey for the rest. Run number above, distance inside, weekday underneath. */
+  /* This week's runs as three suns: glowing orange once run, light orange for the next one,
+     pale for the rest. Run number above, distance inside, weekday underneath. */
   .week-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 24px 16px; }
   .week-dot { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
   .week-dot .orb {
@@ -265,15 +265,18 @@
     height: 88px;
     margin: 8px 0;
     border-radius: 50%;
-    background: #dedad1;
+    background: radial-gradient(circle at 38% 32%, #f3f0ea, #dcd7cd);
     font-size: var(--fs-l);
     line-height: var(--lh-l);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
   }
   .week-dot .orb small { font-size: var(--fs-s); line-height: var(--lh-s); margin-left: 2px; align-self: flex-start; margin-top: 24px; }
-  .week-dot.done .orb { background: var(--accent); color: #fff; }
-  .week-dot.next .orb { background: #f7c4a2; }
+  .week-dot.done .orb {
+    background: radial-gradient(circle at 38% 32%, #ffd8b4, #f5a06a 50%, var(--accent) 100%);
+    box-shadow: 0 0 32px rgba(239, 125, 60, 0.35);
+  }
+  .week-dot.next .orb { background: radial-gradient(circle at 38% 32%, #fff0e4, #fbd3b6 60%, #f5b48a 100%); }
   .week-dot.skipped .orb, .week-dot.missed .orb { color: var(--text-faint); }
   .week-dot.skipped .orb { text-decoration: line-through; }
   .week-dot .k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); }
