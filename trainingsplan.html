@@ -2427,7 +2427,7 @@
       var oldLink = document.querySelector('.dash-link');
       if (oldLink) oldLink.remove();
       if (next) {
-        next.appendChild(el('a', 'dash-link', 'Bekijk dashboard <span aria-hidden="true">→</span>')).href = '#';
+        next.appendChild(el('a', 'dash-link', 'Bekijk run <span aria-hidden="true">→</span>')).href = '#';
         var card = next.closest('.week-card');
         var day = Math.max(slotDay(next), today);
         var label = next.querySelector('.run-label').cloneNode(true);
