@@ -7,7 +7,7 @@
 <title>Naar de CPC 10K — maart 2027</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&family=Geist+Pixel&display=swap">
 <style>
   :root {
     color-scheme: light;
@@ -167,6 +167,8 @@
   .sun-card-title { margin: 0; font-size: var(--fs-l); line-height: var(--lh-l); font-weight: 400; letter-spacing: -0.015em; }
   .sun-card-title span { display: block; color: var(--text-dim); }
   .hl { font-weight: 400; color: var(--accent-text); }
+  /* Distances (and the days to the CPC) in Geist Pixel; units and labels stay in Inter Tight. */
+  .px { font-family: "Geist Pixel", "Inter Tight", monospace; font-weight: 400; letter-spacing: 0; }
   /* The day and date bottom left, across from the distance. */
   .sun-card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
   .sun-card-date { font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text-dim); }
@@ -1300,6 +1302,7 @@
       var card = item.closest('.week-card');
       var index = Array.prototype.indexOf.call(card.querySelectorAll('.run-item'), item);
       item.querySelector('.run-label').appendChild(runDate(weekStart(card.dataset.plan, Number(card.dataset.week)) + RUN_DAYS[index]));
+      pxDistances(item.querySelector('.run-dist'));
       var plan = el('div', 'run-plan');
       Array.prototype.slice.call(item.children).forEach(function (child) {
         if (!child.classList.contains('checkbox')) plan.appendChild(child);
@@ -1415,6 +1418,15 @@
       return '<span>' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day) + '</span> · <span>' + run.start.slice(11, 16) + '</span>';
     }
 
+    function pxKm(number) {
+      return '<span class="px">' + number + '</span>';
+    }
+
+    // "5 km" → the 5 in Geist Pixel.
+    function pxDistances(node) {
+      node.innerHTML = node.innerHTML.replace(/(\d+(?:,\d+)?)(\s*km)/g, '<span class="px">$1</span>$2');
+    }
+
     function plannedKm(item) {
       var m = /^([\d,.]+)\s*km$/.exec(item.querySelector('.run-dist').textContent.trim());
       return m ? parseFloat(m[1].replace(',', '.')) : 0;
@@ -1427,7 +1439,7 @@
     function activityCard(run) {
       var card = el('div', 'activity',
         '<div class="act-date"></div><div class="act-name"></div><div class="act-stats">' +
-        stat('Afstand', run.distance_km.toFixed(2).replace('.', ',') + ' km') +
+        stat('Afstand', pxKm(run.distance_km.toFixed(2).replace('.', ',')) + ' km') +
         stat('Tempo', formatPace(run)) +
         stat('Tijd', formatDuration(run.moving_time_s)) +
         '</div>');
@@ -2154,7 +2166,7 @@
     function bigDistance(item) {
       var dist = text(item, '.run-dist');
       var km = /^([\d,.]+)\s*km$/.exec(dist);
-      return km ? km[1] + '<sup>km</sup>' : null;
+      return km ? '<span class="px">' + km[1] + '</span><sup>km</sup>' : null;
     }
 
     function setBig(id, item) {
@@ -2259,7 +2271,7 @@
         field.appendChild(el('i', state));
       });
       var days = CPC_DAY - today;
-      setText('home-cpc', days > 0 ? 'Nog <b class="hl">' + days + '</b> ' + (days === 1 ? 'dag' : 'dagen') + ' tot de CPC'
+      setText('home-cpc', days > 0 ? 'Nog <b class="hl px">' + days + '</b> ' + (days === 1 ? 'dag' : 'dagen') + ' tot de CPC'
         : days === 0 ? 'Vandaag is de CPC' : 'De CPC is gelopen');
       field.setAttribute('title', done + ' van ' + slots.length + ' runs');
       field.setAttribute('aria-label', done + ' van ' + slots.length + ' runs in het schema gelopen');
