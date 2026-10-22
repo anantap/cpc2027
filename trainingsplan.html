@@ -260,6 +260,19 @@
   .coach-card .coach-from { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
   .coach-card .coach-tips li { font-size: 15px; color: var(--text); line-height: 1.45; margin-top: 8px; }
 
+  .pill-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 54px;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: rgba(214, 210, 199, 0.75);
+    color: var(--text);
+    font-size: 15px;
+    text-decoration: none;
+  }
+
   @media (max-height: 720px) {
     .view-label { margin-top: 18px; }
     .sun-card { min-height: 236px; }
@@ -1017,6 +1030,7 @@
     <div class="coach-from" id="home-coach-from"></div>
     <ul class="coach-tips" id="home-coach-tips"></ul>
   </div>
+  <a class="pill-btn" href="#schema">Bekijk het schema</a>
 
   <div class="view-label">Deze week:</div>
   <div class="glass week-list" id="home-runs"></div>
@@ -1340,7 +1354,7 @@
     // Weeks taken off (from Monday), with a note; later consolidation/tussenfase weeks shift one week.
     var SKIPPED_WEEKS = [{ start: '2026-10-12', note: 'Rustweek · shinty mcsplinty' }];
     var DAY = 86400000;
-    var MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+    var MONTHS = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
 
     function dayNumber(date) {
       return Math.floor(Date.parse(date + 'T00:00:00Z') / DAY);
