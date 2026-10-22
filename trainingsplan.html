@@ -158,7 +158,9 @@
     padding: 26px 26px 28px;
   }
   .sun-card-title { font-size: 21px; line-height: 1.25; max-width: calc(100% - 110px); }
-  .sun-card-title span { display: block; color: var(--text-dim); }
+  /* The day and date bottom left, across from the distance. */
+  .sun-card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .sun-card-date { font-size: 21px; line-height: 1.25; color: var(--text-dim); }
   /* The week's progress as a sunrise: the sun fills up from below with every run done (--f, 0 to 1). */
   .sun {
     position: absolute;
@@ -189,7 +191,6 @@
   }
 
   .big {
-    align-self: flex-end;
     font-size: clamp(64px, 20vw, 84px);
     font-weight: 400;
     line-height: 0.8;
@@ -663,7 +664,10 @@
   <a class="glass sun-card" href="#schema" style="margin-top: 30px">
     <div class="sun-card-title" id="home-when">–</div>
     <span class="sun" role="img"></span>
-    <div class="big" id="home-dist">–</div>
+    <div class="sun-card-foot">
+      <div class="sun-card-date" id="home-date"></div>
+      <div class="big" id="home-dist">–</div>
+    </div>
   </a>
   <div class="glass coach-card" id="home-coach" hidden>
     <div class="coach-k">Tip van de coach</div>
@@ -2028,8 +2032,8 @@
         // "morgen" then "vrijdag 23 oktober"; further out "zondag" then "25 oktober".
         var weekday = LONG_DAYS[new Date(day * DAY).getUTCDay()];
         var soon = day <= today + 1;
-        setText('home-when', 'Je volgende run is ' + (soon ? whenText(day).toLowerCase() : weekday) +
-          '<span>' + (soon ? weekday + ' ' : '') + formatDay(day) + '</span>');
+        setText('home-when', 'Je volgende run is ' + (soon ? whenText(day).toLowerCase() : weekday));
+        setText('home-date', (soon ? weekday + '<br>' : '') + formatDay(day));
         setSun(card);
         setBig('home-dist', next);
         renderWeekList(card, next);
@@ -2037,6 +2041,7 @@
         setSlider('home-week', w.planned ? w.km / w.planned : 0, formatKm(w.km) + ' / ' + formatKm(w.planned) + ' km');
       } else {
         setText('home-when', 'Het schema zit erop');
+        setText('home-date', '');
         setText('home-dist', '');
         setSlider('home-week', 1, '–');
         setText('home-runs', '');
