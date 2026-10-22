@@ -245,7 +245,10 @@
 
   /* This week's runs, each with its status on the right. */
   .week-list { padding: 8px 26px; }
-  .week-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+  /* The label across the full width; the distance with the status beside it. */
+  .week-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .week-row > div { display: contents; }
+  .week-row .k { grid-column: 1 / -1; }
   .week-row:first-child { border-top: 0; }
   .week-row .k { font-size: 13px; color: var(--text-dim); margin-bottom: 3px; }
   .week-row .v { font-size: 26px; letter-spacing: -0.02em; }
@@ -1226,7 +1229,7 @@
       setWeekOpen(card, start <= today && today < start + 7);
     });
 
-    var DAYS = ['zo', 'ma', 'di', 'wo', 'do', 'vr', 'za'];
+    var DAYS = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
     // Usual run days, counted from Monday: Run 1 on Wednesday, Run 2 on Friday, Run 3 on Sunday.
     var RUN_DAYS = [2, 4, 6];
 
@@ -2037,7 +2040,6 @@
     }
 
     // ===== Start screen =====
-    var LONG_DAYS = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
     var TRAINING_START = dayNumber('2026-06-09');
 
     function setText(id, value) { document.getElementById(id).innerHTML = value; }
@@ -2077,7 +2079,7 @@
     }
 
     function whenText(day) {
-      return day === today ? 'Vandaag' : day === today + 1 ? 'Morgen' : capital(LONG_DAYS[new Date(day * DAY).getUTCDay()]);
+      return day === today ? 'Vandaag' : day === today + 1 ? 'Morgen' : capital(DAYS[new Date(day * DAY).getUTCDay()]);
     }
 
     function bigDistance(item) {
@@ -2137,7 +2139,7 @@
         var card = next.closest('.week-card');
         var day = Math.max(slotDay(next), today);
         // "morgen" then "vrijdag 23 oktober"; further out "zondag" then "25 oktober".
-        var weekday = LONG_DAYS[new Date(day * DAY).getUTCDay()];
+        var weekday = DAYS[new Date(day * DAY).getUTCDay()];
         var soon = day <= today + 1;
         setText('home-when', 'Je volgende run is ' + (soon ? whenText(day).toLowerCase() : weekday));
         setText('home-date', (soon ? weekday + '<br>' : '') + formatDay(day));
