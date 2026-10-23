@@ -66,27 +66,6 @@
       var(--bg);
   }
 
-  /* The weather at your next run rises from the bottom of the screen: icy blue when it's cold,
-     the usual peach when it's mild, deep orange when it's hot. The colours are set from the
-     forecast and fade in when it arrives. */
-  @property --wx-deep { syntax: "<color>"; inherits: true; initial-value: rgba(0, 0, 0, 0); }
-  @property --wx-mid { syntax: "<color>"; inherits: true; initial-value: rgba(0, 0, 0, 0); }
-  html { transition: --wx-deep 1.2s ease, --wx-mid 1.2s ease; }
-  /* The blob's colours; the one in the next-run card takes on the weather too. */
-  @property --blob-1 { syntax: "<color>"; inherits: true; initial-value: #f4733f; }
-  @property --blob-2 { syntax: "<color>"; inherits: true; initial-value: #f39a78; }
-  @property --blob-3 { syntax: "<color>"; inherits: true; initial-value: #e8a9bd; }
-  @property --blob-4 { syntax: "<color>"; inherits: true; initial-value: #c4a6d6; }
-  @property --blob-5 { syntax: "<color>"; inherits: true; initial-value: #ef8a62; }
-  .sun-card { transition: --blob-1 1.2s ease, --blob-2 1.2s ease, --blob-3 1.2s ease, --blob-4 1.2s ease, --blob-5 1.2s ease; }
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: radial-gradient(160% 50% at 50% 100%, var(--wx-deep) 0%, var(--wx-mid) 45%, rgba(238, 237, 233, 0) 100%);
-  }
 
   .eyebrow {
     color: var(--text);
@@ -200,7 +179,6 @@
   /* The day and date bottom left, across from the distance. */
   .sun-card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
   .sun-card-date { font-size: var(--fs-l); line-height: var(--lh-l); color: var(--text-dim); }
-  .sun-card-wx { margin-top: 8px; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text-dim); }
   /* A soft, living blob behind the next run: it drifts and changes shape very slowly. */
   .sun-card { overflow: hidden; background: rgba(255, 255, 255, 0.35); }
   .sun-card > :not(.blob) { position: relative; }
@@ -223,12 +201,12 @@
   }
   .blob::before {
     inset: 8% 4% 16% 12%;
-    background: linear-gradient(140deg, var(--blob-1), var(--blob-2) 55%, var(--blob-3));
+    background: linear-gradient(140deg, #f4733f, #f39a78 55%, #e8a9bd);
     animation: blob-morph-a 9s ease-in-out infinite alternate;
   }
   .blob::after {
     inset: 40% 36% 0 0;
-    background: linear-gradient(200deg, var(--blob-4), var(--blob-5));
+    background: linear-gradient(200deg, #c4a6d6, #ef8a62);
     opacity: 0.85;
     animation: blob-morph-b 13s ease-in-out infinite alternate;
   }
@@ -940,10 +918,7 @@
   <div class="home-group home-next">
   <a class="glass sun-card" href="#schema">
     <span class="blob" aria-hidden="true"></span>
-    <div>
-      <h1 class="sun-card-title">Hoi Ananta.<span id="home-when">–</span></h1>
-      <div class="sun-card-wx" id="home-wx" hidden></div>
-    </div>
+    <h1 class="sun-card-title">Hoi Ananta.<span id="home-when">–</span></h1>
     <div class="sun-card-foot">
       <div class="sun-card-date" id="home-date"></div>
       <div class="big" id="home-dist">–</div>
@@ -2370,108 +2345,6 @@
 
     var homeRuns = null;
 
-    // ===== Weather at the next run (Open-Meteo, Den Haag) =====
-    var forecast = null;
-    var forecastLoading = false;
-    var weatherDay = null;
-
-    // The hour you usually start, from your last runs; noon when there are none.
-    function runHour() {
-      var hours = (homeRuns || []).slice(-10).map(function (r) { return Number((r.start || '').slice(11, 13)); })
-        .filter(function (h) { return h >= 5 && h <= 22; }).sort(function (a, b) { return a - b; });
-      return hours.length ? hours[Math.floor(hours.length / 2)] : 12;
-    }
-
-    function loadForecast() {
-      if (forecast || forecastLoading) return;
-      forecastLoading = true;
-      fetch('https://api.open-meteo.com/v1/forecast?latitude=52.08&longitude=4.30' +
-        '&hourly=temperature_2m,apparent_temperature,weather_code,wind_speed_10m' +
-        '&wind_speed_unit=ms&timezone=Europe%2FAmsterdam&forecast_days=16')
-        .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (data) {
-          if (!data || !data.hourly) return;
-          forecast = data.hourly;
-          if (weatherDay !== null) showWeather(weatherDay);
-        })
-        .catch(function () {});
-    }
-
-    function weatherWord(code) {
-      if (code === 0) return 'helder';
-      if (code <= 2) return 'licht bewolkt';
-      if (code === 3) return 'bewolkt';
-      if (code <= 48) return 'mist';
-      if (code <= 57) return 'motregen';
-      if (code <= 65) return 'regen';
-      if (code <= 67) return 'ijzel';
-      if (code <= 77) return 'sneeuw';
-      if (code <= 82) return 'buien';
-      if (code <= 86) return 'sneeuwbuien';
-      return 'onweer';
-    }
-
-    function beaufort(ms) {
-      var limits = [0.3, 1.6, 3.4, 5.5, 8, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7];
-      for (var b = 0; b < limits.length; b++) if (ms < limits[b]) return b;
-      return 12;
-    }
-
-    // Colours by feels-like temperature: the wash (deep, mid) and the blob's five colours.
-    // Mild is the usual peach; the blob colours at 11° are the ones it always had.
-    var WX_STOPS = [
-      { t: -5, deep: [74, 106, 158], mid: [196, 210, 228], blob: [[74, 106, 158], [143, 168, 200], [201, 195, 221], [183, 179, 214], [111, 143, 191]] },
-      { t: 5, deep: [104, 136, 176], mid: [208, 216, 224], blob: [[106, 140, 184], [159, 180, 204], [216, 195, 207], [192, 174, 212], [138, 163, 196]] },
-      { t: 11, deep: [239, 157, 114], mid: [243, 220, 202], blob: [[244, 115, 63], [243, 154, 120], [232, 169, 189], [196, 166, 214], [239, 138, 98]] },
-      { t: 18, deep: [238, 122, 51], mid: [246, 206, 150], blob: [[242, 112, 54], [244, 156, 104], [238, 178, 168], [214, 162, 180], [240, 138, 82]] },
-      { t: 26, deep: [196, 66, 18], mid: [240, 160, 70], blob: [[236, 104, 48], [244, 150, 86], [242, 192, 150], [232, 150, 120], [240, 140, 72]] },
-    ];
-    var WX_RAIN = [128, 142, 160];
-
-    function mix(a, b, t) {
-      return a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); });
-    }
-
-    function weatherColours(feels, wet) {
-      var lo = WX_STOPS[0], hi = WX_STOPS[0], t = 0;
-      for (var i = 0; i < WX_STOPS.length - 1; i++) {
-        lo = WX_STOPS[i]; hi = WX_STOPS[i + 1];
-        if (feels <= hi.t) break;
-      }
-      t = Math.max(0, Math.min(1, (feels - lo.t) / (hi.t - lo.t)));
-      var deep = mix(lo.deep, hi.deep, t), mid = mix(lo.mid, hi.mid, t);
-      var blob = lo.blob.map(function (c, n) { return mix(c, hi.blob[n], t); });
-      // Rain greys the colours a little, like a wet day does.
-      if (wet) {
-        deep = mix(deep, WX_RAIN, 0.35); mid = mix(mid, WX_RAIN, 0.2);
-        blob = blob.map(function (c) { return mix(c, WX_RAIN, 0.2); });
-      }
-      return {
-        deep: 'rgba(' + deep + ', 0.85)',
-        mid: 'rgba(' + mid + ', 0.55)',
-        blob: blob.map(function (c) { return 'rgb(' + c + ')'; }),
-      };
-    }
-
-    function showWeather(day) {
-      weatherDay = day;
-      if (!forecast) return loadForecast();
-      var hour = new Date(day * DAY).toISOString().slice(0, 10) + 'T' + ('0' + runHour()).slice(-2) + ':00';
-      var i = forecast.time.indexOf(hour);
-      var node = document.getElementById('home-wx');
-      if (i < 0) { node.hidden = true; return; }
-      var code = forecast.weather_code[i];
-      var feels = forecast.apparent_temperature[i];
-      var wet = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || code >= 95;
-      var c = weatherColours(feels, wet);
-      document.documentElement.style.setProperty('--wx-deep', c.deep);
-      document.documentElement.style.setProperty('--wx-mid', c.mid);
-      var sun = document.querySelector('#home .sun-card');
-      c.blob.forEach(function (colour, n) { sun.style.setProperty('--blob-' + (n + 1), colour); });
-      node.textContent = Math.round(forecast.temperature_2m[i]) + '° · ' + weatherWord(code) + ' · wind ' + beaufort(forecast.wind_speed_10m[i]) + ' bft';
-      node.hidden = false;
-    }
-
     function renderHome(runs) {
       homeRuns = runs;
       setText('home-status', homeStatus());
@@ -2485,7 +2358,6 @@
         setText('home-when', 'Je volgende run is ' + (soon ? whenText(day).toLowerCase() : weekday) + '.');
         setText('home-date', (soon ? weekday + '<br>' : '') + formatDay(day));
         setBig('home-dist', next);
-        showWeather(day);
         renderWeekList(card, next);
         var w = weekNumbers(card);
         setText('home-week', w.done + ' van ' + w.total + ' runs');
