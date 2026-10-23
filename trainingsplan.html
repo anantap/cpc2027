@@ -254,6 +254,14 @@
   .feel-card .alert-actions.save { grid-template-columns: 1fr; }
   .feel-card .chip-btn { height: 48px; }
   .shin { margin-top: 16px; }
+  /* A little more air between the parts on a phone. */
+  @media (max-width: 999px) {
+    .feel-card { padding: 32px 24px; }
+    .feel-card .alert-actions { margin-top: 24px; }
+    .feel-card .shin { margin-top: 32px; }
+    .feel-card .shin-dots { margin-top: 16px; }
+    .feel-card .alert-actions.save { margin-top: 32px; }
+  }
   .shin-row { display: flex; justify-content: space-between; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
   .shin-row b { font-weight: 400; color: var(--text); }
   /* Ten dots for shin pain: grey that deepens from left to right; up to the one you tap they turn
