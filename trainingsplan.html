@@ -249,6 +249,39 @@
   .chip-btn.on { background: var(--text); color: #fff; }
   .chip-btn.primary { background: var(--accent); color: #fff; }
   .chip-btn:disabled { opacity: 0.4; cursor: default; }
+  /* Bars you drag to answer; the part you've filled is the living blob. */
+  .blob-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    margin-top: 16px;
+    padding: 0 24px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.45);
+    overflow: hidden;
+    cursor: ew-resize;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .blob-bar-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #f4b08a;
+    transition: width 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .blob-bar.dragging .blob-bar-fill { transition: none; }
+  .blob-bar-fill .blob { top: -140px; right: auto; left: -40px; width: 380px; height: 340px; filter: blur(24px); }
+  .blob-bar-k, .blob-bar-v { position: relative; font-size: var(--fs-m); line-height: var(--lh-m); pointer-events: none; }
+  .blob-bar-v { color: var(--text-dim); }
+  .blob-bar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .feel-card .blob-bar:first-of-type { margin-top: 24px; }
+
   /* The answers fill the card's width, like the row of dots. */
   .feel-card .alert-actions { display: grid; grid-template-columns: repeat(3, 1fr); }
   .feel-card .alert-actions.save { grid-template-columns: 1fr; }
@@ -2513,42 +2546,21 @@
       var run = activity._run;
       var card = alertCard('Hoe ging het?', 'Je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()], null);
       card.classList.add('feel-card');
-      var actions = card.appendChild(el('div', 'alert-actions'));
+      // Two bars you drag; the fill is the living blob.
       var effort = null;
-      Object.keys(EFFORT_LABELS).forEach(function (key) {
-        var b = actions.appendChild(el('button', 'chip-btn', EFFORT_LABELS[key]));
-        b.type = 'button';
-        b.addEventListener('click', function () {
-          effort = key;
-          Array.prototype.forEach.call(actions.querySelectorAll('.chip-btn'), function (x) { x.classList.toggle('on', x === b); });
-          save.disabled = false;
-        });
-      });
-      var shin = card.appendChild(el('div', 'shin',
-        '<div class="shin-row"><span>Scheenbeen</span><b>0 · geen pijn</b></div><div class="shin-dots" role="radiogroup" aria-label="Scheenbeenpijn van 0 tot 10"></div>'));
       var level = 0;
-      var dots = shin.querySelector('.shin-dots');
-      for (var n = 1; n <= 10; n++) {
-        var dot = dots.appendChild(el('button', ''));
-        dot.type = 'button';
-        dot.style.setProperty('--i', n - 1);
-        dot.setAttribute('role', 'radio');
-        dot.setAttribute('aria-label', String(n));
-        dot.addEventListener('click', (function (v) {
-          // Tapping the same dot again goes back to no pain.
-          return function () { setLevel(level === v ? 0 : v); };
-        })(n));
-      }
-      function setLevel(v) {
-        level = v;
-        Array.prototype.forEach.call(dots.children, function (d, i) {
-          d.classList.toggle('on', i < v);
-          // Each dot lights up a moment after the one before it.
-          d.style.transitionDelay = (i < v ? i * 25 : 0) + 'ms';
-          d.setAttribute('aria-checked', String(i === v - 1));
-        });
-        shin.querySelector('b').textContent = v + (v === 0 ? ' · geen pijn' : v >= 7 ? ' · veel pijn' : v >= 4 ? ' · pijnlijk' : ' · een beetje');
-      }
+      var EFFORTS = ['makkelijk', 'goed', 'zwaar'];
+      var effortBar = blobBar('Inspanning', function (f) {
+        effort = EFFORTS[Math.min(2, Math.floor(f * 3))];
+        save.disabled = false;
+        return EFFORT_LABELS[effort];
+      }, 3);
+      var shinBar = blobBar('Scheenbeen', function (f) {
+        level = Math.round(f * 10);
+        return level + (level === 0 ? ' · geen pijn' : level >= 7 ? ' · veel pijn' : level >= 4 ? ' · pijnlijk' : ' · een beetje');
+      }, 10);
+      card.appendChild(effortBar);
+      card.appendChild(shinBar);
       var row = card.appendChild(el('div', 'alert-actions save'));
       var save = row.appendChild(el('button', 'chip-btn primary', 'Opslaan'));
       save.type = 'button';
@@ -2562,6 +2574,50 @@
         }).catch(function () { save.disabled = false; });
       });
       return card;
+    }
+
+    // A bar you drag (or tap) to set a value; its fill is the blob. `steps` snaps the value on release:
+    // 3 for Makkelijk/Goed/Zwaar, 10 for the shin.
+    function blobBar(label, onChange, steps) {
+      var bar = el('div', 'blob-bar',
+        '<div class="blob-bar-fill"><span class="blob" aria-hidden="true"></span></div>' +
+        '<span class="blob-bar-k"></span><span class="blob-bar-v"></span>');
+      bar.querySelector('.blob-bar-k').textContent = label;
+      bar.setAttribute('role', 'slider');
+      bar.setAttribute('tabindex', '0');
+      bar.setAttribute('aria-label', label);
+      var fill = bar.querySelector('.blob-bar-fill');
+      var value = bar.querySelector('.blob-bar-v');
+      var f = 0;
+      value.textContent = steps === 3 ? 'sleep' : '0 · geen pijn';
+      function set(next, snap) {
+        f = Math.max(0, Math.min(1, next));
+        if (snap) f = steps === 3 ? (Math.min(2, Math.floor(f * 3)) + 0.5) / 3 : Math.round(f * steps) / steps;
+        fill.style.width = (f * 100) + '%';
+        var text = onChange(f);
+        value.textContent = text;
+        bar.setAttribute('aria-valuetext', text);
+      }
+      function at(e) {
+        var r = bar.getBoundingClientRect();
+        return (e.clientX - r.left) / r.width;
+      }
+      bar.addEventListener('pointerdown', function (e) {
+        bar.setPointerCapture(e.pointerId);
+        bar.classList.add('dragging');
+        set(at(e));
+      });
+      bar.addEventListener('pointermove', function (e) {
+        if (bar.hasPointerCapture(e.pointerId)) set(at(e));
+      });
+      bar.addEventListener('pointerup', function () { bar.classList.remove('dragging'); set(f, true); });
+      bar.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          set(f + (e.key === 'ArrowRight' ? 1 : -1) / steps, true);
+        }
+      });
+      return bar;
     }
 
     // A change the coach proposes for a coming session; nothing changes until you tap.
