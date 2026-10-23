@@ -2480,7 +2480,12 @@
           .reduce(function (s, r) { return s + r.distance_km; }, 0);
       };
       var now = km(today - 7, today);
-      var before = km(today - 14, today - 7);
+      // Compare with the 7 days before; after a rest week, with the last normal week before it.
+      var from = today - 14;
+      var rest = skipped.filter(function (d) { return d + 6 > from && d <= today - 7; }).sort()[0];
+      // (up to and including the rest week's Monday, when a missed run is often made up)
+      if (rest !== undefined) from = rest - 7;
+      var before = km(from, from + 7);
       if (before > 0 && now > before * 1.1 && now - before >= 1.5) {
         out.push({ t: 'Je bouwt snel op',
           s: formatKm(now) + ' km in de afgelopen 7 dagen, ' + Math.round((now / before - 1) * 100) + '% meer dan de week ervoor. Hooguit zo’n 10% per week is veiliger.' });
