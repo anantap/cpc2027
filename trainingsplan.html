@@ -363,8 +363,10 @@
       padding: clamp(24px, 5svh, 48px) 32px;
       display: grid;
       grid-template-columns: 1.15fr 1fr 1fr;
+      /* The CPC card fills the middle; this week, the coach and the button share the right,
+         so both columns hold about as much and neither ends in empty space. */
       grid-template-areas:
-        "next   week  coach"
+        "next   bars  week"
         "next   bars  coach"
         "next   bars  schema";
       grid-template-rows: auto auto auto;
@@ -380,7 +382,10 @@
     .home-bars { grid-area: bars; }
     #home .sun-card { min-height: 0; flex: 1; }
     /* One tile per column takes up the slack: the sun card, this week's runs, the coach tip. */
-    #home .field-card { flex: 1; }
+    /* The totals spread out to fill the card, so it ends level with the right column. */
+    #home .field-card { flex: 1; display: flex; flex-direction: column; align-items: stretch; }
+    #home .field-list { flex: 1; display: flex; flex-direction: column; }
+    #home .field-list .list-row { flex: 1; align-items: center; }
     /* Long tips scroll inside the card rather than pushing the page past one screen. */
     #home .coach-card { flex: 1; min-height: 0; overflow-y: auto; }
     /* Wide here, so the heading fits on one line and the tips sit side by side. */
@@ -398,15 +403,6 @@
       #home .list-row span { font-size: var(--fs-m); line-height: var(--lh-m); }
       #home { row-gap: 8px; }
       #home { --fs-xl: 88px; }
-    }
-    /* Very short windows: this week moves to the right column, above the coach. */
-    @media (max-height: 700px) {
-      #home {
-        grid-template-areas:
-          "next   bars  week"
-          "next   bars  coach"
-          "next   bars  schema";
-      }
     }
     /* Each tile speaks for itself here, and without labels the columns line up at the top. */
     #home .view-label { display: none; }
