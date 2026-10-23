@@ -252,11 +252,21 @@
   .shin { margin-top: 16px; }
   .shin-row { display: flex; justify-content: space-between; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
   .shin-row b { font-weight: 400; color: var(--text); }
-  .shin input { width: 100%; height: 24px; margin: 8px 0 0; background: none; -webkit-appearance: none; appearance: none; }
-  .shin input::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: rgba(29, 29, 27, 0.1); }
-  .shin input::-moz-range-track { height: 8px; border-radius: 4px; background: rgba(29, 29, 27, 0.1); }
-  .shin input::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -8px; border-radius: 50%; background: var(--accent); }
-  .shin input::-moz-range-thumb { width: 24px; height: 24px; border: 0; border-radius: 50%; background: var(--accent); }
+  /* Ten dots for shin pain: grey that deepens from left to right; up to the one you tap they turn
+     orange, from soft to deep. */
+  .shin-dots { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 8px; }
+  .shin-dots button {
+    aspect-ratio: 1;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: hsl(40, 8%, calc(90% - var(--i) * 2.6%));
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+  .shin-dots button.on { background: hsl(calc(32deg - var(--i) * 1.4deg), 85%, calc(80% - var(--i) * 3.4%)); }
+  .shin-dots button:active { transform: scale(0.9); }
+  @media (prefers-reduced-motion: reduce) { .shin-dots button { transition: none; } }
   .run-override { color: var(--accent-text); }
   .override-reset { margin-left: 4px; padding: 0; border: 0; background: none; color: var(--text-dim); font: inherit; text-decoration: underline; cursor: pointer; }
 
@@ -2497,19 +2507,37 @@
         });
       });
       var shin = card.appendChild(el('div', 'shin',
-        '<div class="shin-row"><span>Scheenbeen</span><b>0 · geen pijn</b></div><input type="range" min="0" max="10" step="1" value="0" aria-label="Scheenbeenpijn van 0 tot 10">'));
-      var input = shin.querySelector('input');
-      input.addEventListener('input', function () {
-        var v = Number(input.value);
+        '<div class="shin-row"><span>Scheenbeen</span><b>0 · geen pijn</b></div><div class="shin-dots" role="radiogroup" aria-label="Scheenbeenpijn van 0 tot 10"></div>'));
+      var level = 0;
+      var dots = shin.querySelector('.shin-dots');
+      for (var n = 1; n <= 10; n++) {
+        var dot = dots.appendChild(el('button', ''));
+        dot.type = 'button';
+        dot.style.setProperty('--i', n - 1);
+        dot.setAttribute('role', 'radio');
+        dot.setAttribute('aria-label', String(n));
+        dot.addEventListener('click', (function (v) {
+          // Tapping the same dot again goes back to no pain.
+          return function () { setLevel(level === v ? 0 : v); };
+        })(n));
+      }
+      function setLevel(v) {
+        level = v;
+        Array.prototype.forEach.call(dots.children, function (d, i) {
+          d.classList.toggle('on', i < v);
+          // Each dot lights up a moment after the one before it.
+          d.style.transitionDelay = (i < v ? i * 25 : 0) + 'ms';
+          d.setAttribute('aria-checked', String(i === v - 1));
+        });
         shin.querySelector('b').textContent = v + (v === 0 ? ' · geen pijn' : v >= 7 ? ' · veel pijn' : v >= 4 ? ' · pijnlijk' : ' · een beetje');
-      });
+      }
       var row = card.appendChild(el('div', 'alert-actions'));
       var save = row.appendChild(el('button', 'chip-btn primary', 'Opslaan'));
       save.type = 'button';
       save.disabled = true;
       save.addEventListener('click', function () {
         save.disabled = true;
-        postJson('/api/feel', { id: run.id, effort: effort, shin: Number(input.value) }).then(function (entry) {
+        postJson('/api/feel', { id: run.id, effort: effort, shin: level }).then(function (entry) {
           feels[run.id] = entry;
           coachRewrite(activity);
           renderAlerts(homeRuns);
