@@ -250,14 +250,47 @@
   .chip-btn.primary { background: var(--accent); color: #fff; }
   .chip-btn:disabled { opacity: 0.4; cursor: default; }
   /* The answers fill the card's width, like the row of dots. */
-  .feel-card .alert-actions { display: grid; grid-template-columns: repeat(3, 1fr); }
-  .feel-card .alert-actions.save { grid-template-columns: 1fr; }
+  .feel-card .alert-actions.save { display: grid; grid-template-columns: 1fr; }
   .feel-card .chip-btn { height: 48px; }
   .shin { margin-top: 16px; }
+  /* Effort as a scale: a thin line with three ticks; your answer is an orange dot on its tick. */
+  .effort { margin-top: 16px; }
+  .effort-track {
+    position: relative;
+    height: 48px;
+    margin: 0 8px;
+    cursor: pointer;
+    touch-action: none;
+  }
+  .effort-track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--line); }
+  .effort-track .tick { position: absolute; top: 50%; width: 2px; height: 16px; margin: -8px 0 0 -1px; background: var(--line); transition: opacity 0.15s ease; }
+  .effort-track .tick:nth-child(1) { left: 0; }
+  .effort-track .tick:nth-child(2) { left: 50%; }
+  .effort-track .tick:nth-child(3) { left: 100%; }
+  .effort-track .tick.hidden { opacity: 0; }
+  .effort-dot {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--at, 0) * 100%);
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transform: scale(0.4);
+    transition: left 0.25s cubic-bezier(0.2, 0, 0, 1), opacity 0.15s ease, transform 0.2s ease;
+  }
+  .effort.set .effort-dot { opacity: 1; transform: none; }
+  .effort-track:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+  .effort-labels { display: grid; grid-template-columns: 1fr auto 1fr; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
+  .effort-labels :last-child { text-align: right; }
+  .effort-labels .on { color: var(--text); }
+  @media (prefers-reduced-motion: reduce) { .effort-dot, .effort-track .tick { transition: none; } }
   /* A little more air between the parts on a phone. */
   @media (max-width: 999px) {
     .feel-card { padding: 32px 24px; }
-    .feel-card .alert-actions { margin-top: 24px; }
+    .feel-card .effort { margin-top: 24px; }
     .feel-card .shin { margin-top: 32px; }
     .feel-card .shin-dots { margin-top: 16px; }
     .feel-card .alert-actions.save { margin-top: 32px; }
@@ -2513,16 +2546,39 @@
       var run = activity._run;
       var card = alertCard('Hoe ging het?', 'Je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()], null);
       card.classList.add('feel-card');
-      var actions = card.appendChild(el('div', 'alert-actions'));
       var effort = null;
-      Object.keys(EFFORT_LABELS).forEach(function (key) {
-        var b = actions.appendChild(el('button', 'chip-btn', EFFORT_LABELS[key]));
-        b.type = 'button';
-        b.addEventListener('click', function () {
-          effort = key;
-          Array.prototype.forEach.call(actions.querySelectorAll('.chip-btn'), function (x) { x.classList.toggle('on', x === b); });
-          save.disabled = false;
-        });
+      var keys = Object.keys(EFFORT_LABELS);
+      var scale = card.appendChild(el('div', 'effort',
+        '<div class="shin-row"><span>Inspanning</span></div>' +
+        '<div class="effort-track" role="slider" tabindex="0" aria-label="Inspanning" aria-valuemin="0" aria-valuemax="2">' +
+        '<i class="tick"></i><i class="tick"></i><i class="tick"></i><span class="effort-dot"></span></div>' +
+        '<div class="effort-labels"></div>'));
+      var track = scale.querySelector('.effort-track');
+      var labels = scale.querySelector('.effort-labels');
+      keys.forEach(function (key) { labels.appendChild(el('span', '', EFFORT_LABELS[key])); });
+      // Tap or drag along the line; the orange dot takes the place of the nearest tick.
+      function setEffort(i) {
+        i = Math.max(0, Math.min(keys.length - 1, i));
+        effort = keys[i];
+        scale.classList.add('set');
+        scale.style.setProperty('--at', i / (keys.length - 1));
+        Array.prototype.forEach.call(track.querySelectorAll('.tick'), function (t, n) { t.classList.toggle('hidden', n === i); });
+        Array.prototype.forEach.call(labels.children, function (l, n) { l.classList.toggle('on', n === i); });
+        track.setAttribute('aria-valuenow', i);
+        track.setAttribute('aria-valuetext', EFFORT_LABELS[effort]);
+        save.disabled = false;
+      }
+      function nearest(e) {
+        var r = track.getBoundingClientRect();
+        return Math.round((e.clientX - r.left) / r.width * (keys.length - 1));
+      }
+      track.addEventListener('pointerdown', function (e) { track.setPointerCapture(e.pointerId); setEffort(nearest(e)); });
+      track.addEventListener('pointermove', function (e) { if (track.hasPointerCapture(e.pointerId)) setEffort(nearest(e)); });
+      track.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        var i = effort ? keys.indexOf(effort) : (e.key === 'ArrowRight' ? -1 : 1);
+        setEffort(i + (e.key === 'ArrowRight' ? 1 : -1));
       });
       var shin = card.appendChild(el('div', 'shin',
         '<div class="shin-row"><span>Scheenbeen</span><b>0 · geen pijn</b></div><div class="shin-dots" role="radiogroup" aria-label="Scheenbeenpijn van 0 tot 10"></div>'));
