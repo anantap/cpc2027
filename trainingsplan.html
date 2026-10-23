@@ -812,14 +812,12 @@
     .skip-ctl.is-skipped .skip-x, .coach, .coach.pending .coach-text { animation: none; }
   }
 
-  /* On a wide screen the schema gets three columns of weeks, like the dashboard. */
+  /* On a wide screen the schema uses the dashboard's width, with three columns inside each week. */
   @media (min-width: 1000px) {
     #plan.wrap { max-width: 1200px; padding-left: 32px; padding-right: 32px; }
     .topbar { max-width: 1200px; padding-left: 32px; padding-right: 32px; }
-    .weeks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
+    /* Weeks stay one per row at full width; inside an open week the three runs sit side by side. */
     .phase-body > .note, .phase-body > .phase-stats { max-width: calc((100% - 32px) / 3 * 2 + 16px); }
-    /* An open week spans the full width, with its three runs side by side. */
-    .weeks > .week-card[data-plan]:not(.collapsed) { grid-column: 1 / -1; }
     .week-card:not(.collapsed) .runs-grid:not(.extra-runs) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
   }
 
