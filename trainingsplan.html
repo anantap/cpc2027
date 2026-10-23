@@ -14,8 +14,17 @@
 <title>CPC 10K</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&family=Geist+Pixel&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300..600&display=swap">
+<link rel="preload" href="/fonts/geist-pixel-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  /* Geist Pixel is served from this site, so it loads even where Google's font server doesn't. */
+  @font-face {
+    font-family: "Geist Pixel";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("/fonts/geist-pixel-latin.woff2") format("woff2");
+  }
   :root {
     color-scheme: light;
     --bg: #eeede9;
