@@ -234,7 +234,7 @@
   .dots-card { padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .field-card { display: block; }
   .field-label { margin-top: 24px; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text); }
-  .field-list { margin-top: 8px; border-top: 1px solid var(--line); }
+  .field-list { margin-top: 24px; border-top: 1px solid var(--line); }
   .field-list .list-row:first-child { border-top: 0; }
   .dots-head { margin-bottom: 16px; }
   .dots-title { font-size: var(--fs-l); line-height: var(--lh-l); }
@@ -354,20 +354,20 @@
   .home-group { display: contents; }
 
   @media (min-width: 1000px) {
-    /* Exactly one screen tall: the tiles stretch or shrink with the window, no scrolling. */
+    /* The tiles take the height of their content (no stretched, empty cards) and the whole
+       dashboard sits in the middle of the window. */
     #home {
       max-width: 1200px;
-      /* On very tall screens it stops growing and sits in the middle. */
-      height: min(100svh, 920px);
-      margin-top: max(0px, calc((100svh - 920px) / 2));
+      min-height: 100svh;
+      align-content: center;
       padding: clamp(24px, 5svh, 48px) 32px;
       display: grid;
       grid-template-columns: 1.15fr 1fr 1fr;
       grid-template-areas:
         "next   week  coach"
         "next   bars  coach"
-        "schema bars  coach";
-      grid-template-rows: auto 1fr auto;
+        "next   bars  schema";
+      grid-template-rows: auto auto auto;
       gap: 16px 24px;
       /* All columns as tall as the tallest, so their bottoms line up. */
       align-items: stretch;
@@ -380,7 +380,7 @@
     .home-bars { grid-area: bars; }
     #home .sun-card { min-height: 0; flex: 1; }
     /* One tile per column takes up the slack: the sun card, this week's runs, the coach tip. */
-    #home .field-card { flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; }
+    #home .field-card { flex: 1; }
     /* Long tips scroll inside the card rather than pushing the page past one screen. */
     #home .coach-card { flex: 1; min-height: 0; overflow-y: auto; }
     /* Wide here, so the heading fits on one line and the tips sit side by side. */
@@ -405,7 +405,7 @@
         grid-template-areas:
           "next   bars  week"
           "next   bars  coach"
-          "schema bars  coach";
+          "next   bars  schema";
       }
     }
     /* Each tile speaks for itself here, and without labels the columns line up at the top. */
