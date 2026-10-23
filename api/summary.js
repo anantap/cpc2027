@@ -26,6 +26,27 @@ function pace(run) {
   return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0') + ' /km';
 }
 
+function cleanUpcoming(list) {
+  return (Array.isArray(list) ? list : []).slice(0, 4).map((s) => s && typeof s === 'object' && typeof s.id === 'string' && SESSION_ID.test(s.id)
+    ? { id: s.id, label: clean(s.label), distance: clean(s.distance), km: Number(s.km) || 0, description: clean(s.description), week: clean(s.week) }
+    : null).filter(Boolean);
+}
+
+const DAY = 86400000;
+
+// Kilometres in the 7 days up to this run and the 7 days before, and runs on back-to-back days.
+function load(runs, index) {
+  const at = Date.parse(runs[index].date);
+  const km = (from, to) => Math.round(runs.filter((r) => { const t = Date.parse(r.date); return t > from && t <= to; })
+    .reduce((s, r) => s + r.distance_km, 0) * 10) / 10;
+  const week = runs.filter((r) => { const t = Date.parse(r.date); return t > at - 7 * DAY && t <= at; }).map((r) => Date.parse(r.date));
+  return {
+    km_last_7_days: km(at - 7 * DAY, at),
+    km_previous_7_days: km(at - 14 * DAY, at - 7 * DAY),
+    back_to_back_days: week.some((t) => week.includes(t - DAY)),
+  };
+}
+
 function describe(run) {
   return { date: run.date, start: run.start, name: run.name, distance_km: run.distance_km, moving_time_s: run.moving_time_s, pace: pace(run) };
 }
@@ -46,17 +67,21 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
   // POST: write the summary for one run, once. Only runs we imported can be summarised.
-  const { id, planned, next, skipped } = req.body || {};
+  const { id, planned, next, skipped, upcoming } = req.body || {};
   const index = runs.findIndex((r) => r.id === id);
   if (index === -1) return res.status(404).send('Unknown run');
 
   const key = 'summary:' + id;
   const nextId = next && typeof next.id === 'string' && SESSION_ID.test(next.id) ? next.id : null;
-  const existing = await redis.get(key);
+  const [existing, feels] = await Promise.all([redis.get(key), redis.hgetall('feel')]);
+  const feel = (feels || {})[id] || null;
+  // How the run felt is added after the run; a new answer gets the tips rewritten once.
+  const feelAt = feel ? feel.at : null;
+  const feelChanged = !!existing && (existing.feel_at || null) !== feelAt;
   // Summaries from before the current splits get checked once (see below).
   const current = existing && existing.splits === SPLITS;
   const badSplits = existing && existing.splits === 'moving' && existing.created >= BAD_SPLITS_SINCE;
-  if (current && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
+  if (current && !feelChanged && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
     return res.status(200).json(existing);
   }
   if (!process.env.ANTHROPIC_API_KEY) return res.status(503).send('Coach not configured');
@@ -79,7 +104,7 @@ module.exports = async (req, res) => {
     }
     // An old summary is rewritten if its splits were off (a stop, or the first moving-time version)
     // or its next session changed.
-    if (existing && !current && !badSplits && !stopped && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
+    if (existing && !current && !badSplits && !stopped && !feelChanged && (existing.next_id === nextId || (existing.rewrites || 0) >= MAX_REWRITES)) {
       const checked = { ...existing, splits: SPLITS };
       await redis.set(key, checked);
       return res.status(200).json(checked);
@@ -95,10 +120,16 @@ module.exports = async (req, res) => {
       next_planned_session: cleanSession(next),
       skipped_since: (Array.isArray(skipped) ? skipped : []).slice(0, 4).map(cleanSession),
       recent_runs: runs.slice(Math.max(0, index - 6), index).map(describe),
+      feel,
+      recent_feel: runs.slice(Math.max(0, index - 6), index).filter((r) => feels && feels[r.id])
+        .map((r) => ({ date: r.date, effort: feels[r.id].effort, shin: feels[r.id].shin })),
+      load: load(runs, index),
+      upcoming_sessions: cleanUpcoming(upcoming),
     });
     const stored = {
       ...summary,
       next_id: nextId,
+      feel_at: feelAt,
       splits: SPLITS,
       rewrites: existing ? (existing.rewrites || 0) + 1 : 0,
       created: new Date().toISOString(),

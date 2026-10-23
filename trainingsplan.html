@@ -229,6 +229,37 @@
     100% { border-radius: 50% 50% 34% 66% / 56% 68% 32% 44%; transform: translate(-24px, -16px) scale(0.85); }
   }
 
+  /* Cards that ask or warn: how a run felt, load warnings, a coach suggestion. */
+  .alert-card { padding: 24px; }
+  .alert-card .alert-k { font-size: var(--fs-s); line-height: var(--lh-s); color: var(--accent-text); }
+  .alert-card .alert-t { margin-top: 4px; font-size: var(--fs-l); line-height: var(--lh-l); }
+  .alert-card .alert-s { margin-top: 4px; font-size: var(--fs-m); line-height: var(--lh-m); color: var(--text-dim); }
+  .alert-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .chip-btn {
+    height: 40px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-m);
+    cursor: pointer;
+  }
+  .chip-btn.on { background: var(--text); color: #fff; }
+  .chip-btn.primary { background: var(--accent); color: #fff; }
+  .chip-btn:disabled { opacity: 0.4; cursor: default; }
+  .shin { margin-top: 16px; }
+  .shin-row { display: flex; justify-content: space-between; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
+  .shin-row b { font-weight: 400; color: var(--text); }
+  .shin input { width: 100%; height: 24px; margin: 8px 0 0; background: none; -webkit-appearance: none; appearance: none; }
+  .shin input::-webkit-slider-runnable-track { height: 8px; border-radius: 4px; background: rgba(29, 29, 27, 0.1); }
+  .shin input::-moz-range-track { height: 8px; border-radius: 4px; background: rgba(29, 29, 27, 0.1); }
+  .shin input::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; margin-top: -8px; border-radius: 50%; background: var(--accent); }
+  .shin input::-moz-range-thumb { width: 24px; height: 24px; border: 0; border-radius: 50%; background: var(--accent); }
+  .run-override { color: var(--accent-text); }
+  .override-reset { margin-left: 4px; padding: 0; border: 0; background: none; color: var(--text-dim); font: inherit; text-decoration: underline; cursor: pointer; }
+
   /* Dots for progress: orange once run, light orange for the next one, pale grey for the rest,
      an open ring for a session skipped or missed. */
   .dots-card { padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
@@ -365,11 +396,13 @@
       grid-template-columns: 1.15fr 1fr 1fr;
       /* The CPC card fills the middle; this week, the coach and the button share the right,
          so both columns hold about as much and neither ends in empty space. */
+      /* Questions and warnings sit under the next-run card, which gives up the room. */
       grid-template-areas:
         "next   bars  week"
         "next   bars  coach"
-        "next   bars  schema";
-      grid-template-rows: auto auto auto;
+        "alerts bars  coach"
+        "alerts bars  schema";
+      grid-template-rows: auto 1fr auto auto;
       gap: 16px 24px;
       /* All columns as tall as the tallest, so their bottoms line up. */
       align-items: stretch;
@@ -378,9 +411,11 @@
     .home-schema { grid-area: schema; margin-top: 0; }
     .home-next { grid-area: next; }
     .home-coach { grid-area: coach; }
+    .home-alerts { grid-area: alerts; align-self: end; }
+
     .home-week { grid-area: week; }
     .home-bars { grid-area: bars; }
-    #home .sun-card { min-height: 0; flex: 1; }
+    #home .sun-card { min-height: 288px; flex: 1; }
     /* One tile per column takes up the slack: the sun card, this week's runs, the coach tip. */
     /* The totals spread out to fill the card, so it ends level with the right column. */
     #home .field-card { flex: 1; display: flex; flex-direction: column; align-items: stretch; }
@@ -835,6 +870,8 @@
     </div>
   </a>
   </div>
+
+  <div class="home-group home-alerts" id="home-alerts" hidden></div>
 
   <div class="home-group home-coach">
   <div class="glass coach-card" id="home-coach" hidden>
@@ -1732,10 +1769,13 @@
     window.addEventListener('resize', updateHeader);
     updateHeader();
 
-    Promise.all([getJson('/api/runs', []), getJson('/api/skips', [])]).then(function (results) {
+    Promise.all([getJson('/api/runs', []), getJson('/api/skips', []), getJson('/api/feel', {}), getJson('/api/plan', {})]).then(function (results) {
       var runs = results[0];
       if (Array.isArray(results[1])) skips = results[1];
       if (!Array.isArray(runs)) return;
+      feels = results[2] || {};
+      planChanges = results[3] || {};
+      applyOverrides((planChanges.overrides) || {});
       renderC25k(runs);
       applyRuns(runs);
       markCompletedPhases();
@@ -1821,6 +1861,7 @@
         id: item.dataset.id,
         label: label.textContent.replace(/\s+/g, ' ').trim(),
         distance: text(item, '.run-dist'),
+        km: plannedKm(item),
         description: text(item, '.run-desc'),
         week: [text(phase, '.phase-title'), text(card, '.week-num'), text(card, '.week-focus')].filter(Boolean).join(' · '),
       };
@@ -1841,6 +1882,8 @@
     var onCoach = function () {};
     // Set by setupCoach: writes a run's missing summary now, even when it isn't on screen.
     var coachNow = function () {};
+    // Set by setupCoach: rewrites a run's summary, e.g. after you said how it felt.
+    var coachRewrite = function () {};
 
     // `from` is set when last week's overview is shown at the top of the current week.
     function renderWeekCoach(box, summary, from) {
@@ -1894,6 +1937,16 @@
         return null;
       }
 
+      // The next few sessions that aren't done or skipped, for the coach to suggest changes to.
+      function upcomingSessions(item) {
+        var from = item.classList.contains('extra')
+          ? slots.indexOf(item.closest('.week-card').querySelector('.runs-grid:not(.extra-runs) .run-item:last-child'))
+          : slots.indexOf(item);
+        return slots.slice(from + 1).filter(function (s) {
+          return !s.classList.contains('skipped') && !s.classList.contains('done') && !s.classList.contains('missed');
+        }).slice(0, 3);
+      }
+
       // Sessions skipped between this run and the next session.
       function skippedBefore(item) {
         var from = slots.indexOf(item);
@@ -1924,6 +1977,7 @@
               planned: item.classList.contains('extra') ? { label: 'Extra run, niet in het schema' } : sessionInfo(item),
               next: sessionInfo(nextSession(item)),
               skipped: skippedBefore(item).map(sessionInfo),
+              upcoming: upcomingSessions(item).map(sessionInfo),
             };
           },
           render: function (summary) { activity._summary = summary; renderCoach(activity, summary); },
@@ -1951,7 +2005,9 @@
         activities.forEach(function (activity) {
           var item = activity.closest('.run-item');
           if (!activity._summary || writtenFor(activity._summary, item) === nextId(item)) return;
-          if (activity._refreshing) return;
+          // Ask once per next session; the server may decline to rewrite (after six rewrites).
+          if (activity._refreshing || activity._refreshedFor === nextId(item)) return;
+          activity._refreshedFor = nextId(item);
           activity._refreshing = true;
           var box = activity.querySelector('.coach');
           if (box) box.classList.add('updating');
@@ -2010,6 +2066,14 @@
         target._coachTask = task;
         if (observer) observer.observe(target); else queue.push(task);
       }
+
+      coachRewrite = function (activity) {
+        if (disabled) return;
+        var box = activity.querySelector('.coach');
+        if (box) box.classList.add('updating');
+        queue.push(summaryTask(activity));
+        pump();
+      };
 
       coachNow = function (target) {
         if (!observer || !target._coachTask) return;
@@ -2251,6 +2315,7 @@
         setText('home-runs', '');
       }
       homeCoach();
+      renderAlerts(runs);
       renderField(next);
 
       if (runs.length) {
@@ -2334,8 +2399,173 @@
     }
 
     onCoach = function (activity) {
-      if (activity === latestActivity()) homeCoach();
+      if (activity === latestActivity()) { homeCoach(); renderAlerts(homeRuns); }
     };
+
+    // ===== How a run felt, load warnings and coach suggestions =====
+    var feels = {};
+    var planChanges = {};
+    var EFFORT_LABELS = { makkelijk: 'Makkelijk', goed: 'Goed', zwaar: 'Zwaar' };
+
+    function postJson(url, body) {
+      return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); });
+    }
+
+    // Sessions you agreed to shorten: the new distance, and what it was.
+    function applyOverrides(overrides) {
+      Object.keys(overrides).forEach(function (id) {
+        var item = document.querySelector('.run-item[data-id="' + id + '"]');
+        var change = overrides[id];
+        if (!item || !change || !(change.km > 0)) return;
+        var dist = item.querySelector('.run-dist');
+        var was = plannedKm(item);
+        dist.innerHTML = '<span class="px">' + String(change.km).replace('.', ',') + '</span><sup class="u">km</sup>';
+        dist.classList.add('km');
+        var desc = item.querySelector('.run-desc');
+        var note = el('span', 'run-override', ' · aangepast, was ' + formatKmShort(was) + ' km ');
+        var reset = el('button', 'override-reset', 'terugzetten');
+        reset.type = 'button';
+        reset.addEventListener('click', function () {
+          postJson('/api/plan', { action: 'reset', session_id: id }).then(function () { location.reload(); });
+        });
+        note.appendChild(reset);
+        if (desc) desc.appendChild(note); else item.querySelector('.run-plan').appendChild(note);
+      });
+    }
+
+    function formatKmShort(km) {
+      return String(km).replace('.', ',');
+    }
+
+    function planRunsOf(runs) {
+      return runs.filter(function (r) { return r.source !== 'c25k'; });
+    }
+
+    // Signs that the load is going up too fast, from your runs and how they felt.
+    function loadWarnings(runs) {
+      var list = planRunsOf(runs);
+      var out = [];
+      var recent = list.filter(function (r) { return dayNumber(r.date) > today - 7; });
+      var days = recent.map(function (r) { return dayNumber(r.date); });
+      var pair = days.filter(function (d) { return days.indexOf(d - 1) !== -1; })[0];
+      if (pair) {
+        out.push({ t: 'Twee dagen achter elkaar gelopen',
+          s: 'Op ' + DAYS[new Date((pair - 1) * DAY).getUTCDay()] + ' en ' + DAYS[new Date(pair * DAY).getUTCDay()] + '. Houd een rustdag tussen je runs, dat is beter voor je scheenbenen.' });
+      }
+      var km = function (from, to) {
+        return list.filter(function (r) { var d = dayNumber(r.date); return d > from && d <= to; })
+          .reduce(function (s, r) { return s + r.distance_km; }, 0);
+      };
+      var now = km(today - 7, today);
+      var before = km(today - 14, today - 7);
+      if (before > 0 && now > before * 1.1 && now - before >= 1.5) {
+        out.push({ t: 'Je bouwt snel op',
+          s: formatKm(now) + ' km in de afgelopen 7 dagen, ' + Math.round((now / before - 1) * 100) + '% meer dan de week ervoor. Hooguit zo’n 10% per week is veiliger.' });
+      }
+      var last = list[list.length - 1];
+      var feel = last && feels[last.id];
+      if (feel && feel.shin >= 7) {
+        out.push({ t: 'Je scheenbeen scoorde ' + feel.shin, s: 'Rust tot het over is, en laat een fysiotherapeut ernaar kijken als het niet snel beter wordt.' });
+      } else if (feel && feel.shin >= 4) {
+        out.push({ t: 'Je scheenbeen scoorde ' + feel.shin, s: 'Neem een extra rustdag en kort je volgende run in als het blijft.' });
+      }
+      return out;
+    }
+
+    function alertCard(k, t, s) {
+      var card = el('div', 'glass alert-card', '<div class="alert-k"></div><div class="alert-t"></div><div class="alert-s"></div>');
+      card.querySelector('.alert-k').textContent = k;
+      card.querySelector('.alert-t').textContent = t;
+      if (s) card.querySelector('.alert-s').textContent = s; else card.querySelector('.alert-s').remove();
+      return card;
+    }
+
+    // Two taps after a run: how hard it felt, and the shin.
+    function feelCard(activity) {
+      var run = activity._run;
+      var card = alertCard('Hoe ging het?', 'Je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()], null);
+      var actions = card.appendChild(el('div', 'alert-actions'));
+      var effort = null;
+      Object.keys(EFFORT_LABELS).forEach(function (key) {
+        var b = actions.appendChild(el('button', 'chip-btn', EFFORT_LABELS[key]));
+        b.type = 'button';
+        b.addEventListener('click', function () {
+          effort = key;
+          Array.prototype.forEach.call(actions.querySelectorAll('.chip-btn'), function (x) { x.classList.toggle('on', x === b); });
+          save.disabled = false;
+        });
+      });
+      var shin = card.appendChild(el('div', 'shin',
+        '<div class="shin-row"><span>Scheenbeen</span><b>0 · geen pijn</b></div><input type="range" min="0" max="10" step="1" value="0" aria-label="Scheenbeenpijn van 0 tot 10">'));
+      var input = shin.querySelector('input');
+      input.addEventListener('input', function () {
+        var v = Number(input.value);
+        shin.querySelector('b').textContent = v + (v === 0 ? ' · geen pijn' : v >= 7 ? ' · veel pijn' : v >= 4 ? ' · pijnlijk' : ' · een beetje');
+      });
+      var row = card.appendChild(el('div', 'alert-actions'));
+      var save = row.appendChild(el('button', 'chip-btn primary', 'Opslaan'));
+      save.type = 'button';
+      save.disabled = true;
+      save.addEventListener('click', function () {
+        save.disabled = true;
+        postJson('/api/feel', { id: run.id, effort: effort, shin: Number(input.value) }).then(function (entry) {
+          feels[run.id] = entry;
+          coachRewrite(activity);
+          renderAlerts(homeRuns);
+        }).catch(function () { save.disabled = false; });
+      });
+      return card;
+    }
+
+    // A change the coach proposes for a coming session; nothing changes until you tap.
+    function suggestionCard(activity) {
+      var summary = activity._summary;
+      var v = summary && summary.voorstel;
+      var answers = planChanges.answers || {};
+      if (!v || v.soort === 'geen' || answers[activity._run.id]) return null;
+      var item = document.querySelector('.run-item[data-id="' + v.sessie_id + '"]');
+      if (!item || item.classList.contains('done') || item.classList.contains('skipped') || item.classList.contains('missed')) return null;
+      var info = sessionInfo(item);
+      var what = v.soort === 'overslaan'
+        ? info.label + ' overslaan'
+        : info.label + ': ' + formatKmShort(v.km) + ' km in plaats van ' + formatKmShort(info.km) + ' km';
+      var card = alertCard('Voorstel van je coach', what, v.reden);
+      var row = card.appendChild(el('div', 'alert-actions'));
+      var yes = row.appendChild(el('button', 'chip-btn primary', v.soort === 'overslaan' ? 'Overslaan' : 'Aanpassen'));
+      var no = row.appendChild(el('button', 'chip-btn', 'Nee, laat staan'));
+      yes.type = no.type = 'button';
+      function answer(action) {
+        yes.disabled = no.disabled = true;
+        postJson('/api/plan', { action: action, run_id: activity._run.id }).then(function () {
+          if (action === 'accept') { location.reload(); return; }
+          (planChanges.answers = planChanges.answers || {})[activity._run.id] = 'declined';
+          renderAlerts(homeRuns);
+        }).catch(function () { yes.disabled = no.disabled = false; });
+      }
+      yes.addEventListener('click', function () { answer('accept'); });
+      no.addEventListener('click', function () { answer('decline'); });
+      return card;
+    }
+
+    var feelNode = null;
+
+    function renderAlerts(runs) {
+      var box = document.getElementById('home-alerts');
+      box.innerHTML = '';
+      if (!runs) { box.hidden = true; return; }
+      var activity = latestActivity();
+      // Ask about a run from the last three days that you haven't rated yet.
+      // The same card is kept across re-renders, so a half-filled answer isn't lost.
+      if (activity && !feels[activity._run.id] && dayNumber(activity._run.date) >= today - 3) {
+        if (!feelNode || feelNode._runId !== activity._run.id) { feelNode = feelCard(activity); feelNode._runId = activity._run.id; }
+        box.appendChild(feelNode);
+      }
+      loadWarnings(runs).forEach(function (w) { box.appendChild(alertCard('Let op', w.t, w.s)); });
+      var suggestion = activity && suggestionCard(activity);
+      if (suggestion) box.appendChild(suggestion);
+      box.hidden = !box.children.length;
+    }
 
     // ===== Two views: the start screen, and the plan at #schema =====
     var home = document.getElementById('home');
