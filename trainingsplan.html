@@ -249,6 +249,10 @@
   .chip-btn.on { background: var(--text); color: #fff; }
   .chip-btn.primary { background: var(--accent); color: #fff; }
   .chip-btn:disabled { opacity: 0.4; cursor: default; }
+  /* The answers fill the card's width, like the row of dots. */
+  .feel-card .alert-actions { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .feel-card .alert-actions.save { grid-template-columns: 1fr; }
+  .feel-card .chip-btn { height: 48px; }
   .shin { margin-top: 16px; }
   .shin-row { display: flex; justify-content: space-between; font-size: var(--fs-s); line-height: var(--lh-s); color: var(--text-dim); }
   .shin-row b { font-weight: 400; color: var(--text); }
@@ -2495,6 +2499,7 @@
     function feelCard(activity) {
       var run = activity._run;
       var card = alertCard('Hoe ging het?', 'Je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()], null);
+      card.classList.add('feel-card');
       var actions = card.appendChild(el('div', 'alert-actions'));
       var effort = null;
       Object.keys(EFFORT_LABELS).forEach(function (key) {
@@ -2531,7 +2536,7 @@
         });
         shin.querySelector('b').textContent = v + (v === 0 ? ' · geen pijn' : v >= 7 ? ' · veel pijn' : v >= 4 ? ' · pijnlijk' : ' · een beetje');
       }
-      var row = card.appendChild(el('div', 'alert-actions'));
+      var row = card.appendChild(el('div', 'alert-actions save'));
       var save = row.appendChild(el('button', 'chip-btn primary', 'Opslaan'));
       save.type = 'button';
       save.disabled = true;
