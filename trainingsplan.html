@@ -266,13 +266,16 @@
     user-select: none;
     -webkit-user-select: none;
   }
+  /* The fill runs 64px past your finger and fades out over those 64px, so its edge is as soft
+     as the blob on the start screen; when full, the fade falls outside the bar. */
   .blob-bar-fill {
     position: absolute;
     inset: 0 auto 0 0;
-    width: 0;
+    width: calc(var(--f, 0) * (100% + 64px));
     overflow: hidden;
-    border-radius: 20px;
     background: #f4b08a;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 64px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 64px), transparent);
     transition: width 0.25s cubic-bezier(0.2, 0, 0, 1);
   }
   .blob-bar.dragging .blob-bar-fill { transition: none; }
@@ -2593,7 +2596,7 @@
       function set(next, snap) {
         f = Math.max(0, Math.min(1, next));
         if (snap) f = steps === 3 ? (Math.min(2, Math.floor(f * 3)) + 0.5) / 3 : Math.round(f * steps) / steps;
-        fill.style.width = (f * 100) + '%';
+        fill.style.setProperty('--f', f);
         var text = onChange(f);
         value.textContent = text;
         bar.setAttribute('aria-valuetext', text);
