@@ -418,6 +418,26 @@
     color: var(--text);
   }
   .coach-card .coach-tips li::before { content: none; }
+  .coach-feel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    font-size: var(--fs-s);
+    line-height: var(--lh-s);
+    color: var(--text-dim);
+  }
+  .coach-feel[hidden] { display: none; }
+  .coach-feel button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--accent-text);
+    cursor: pointer;
+  }
 
   .pill-btn {
     display: flex;
@@ -943,6 +963,7 @@
     <div class="coach-k">Coach</div>
     <div class="coach-from" id="home-coach-from"></div>
     <ul class="coach-tips" id="home-coach-tips"></ul>
+    <div class="coach-feel" id="home-coach-feel" hidden><span></span><button type="button">Aanpassen</button></div>
   </div>
   </div>
 
@@ -2460,6 +2481,21 @@
         list.appendChild(el('li', 'coach-tip')).textContent = 'Wordt geschreven…';
         coachNow(activity);
       }
+      // What you said about this run, with a way to change it.
+      var feel = feels[activity._run.id];
+      var foot = document.getElementById('home-coach-feel');
+      foot.hidden = !feel || editingFeel === activity._run.id;
+      if (feel) {
+        foot.querySelector('span').textContent = 'Hoe het ging: ' + EFFORT_LABELS[feel.effort].toLowerCase() + ' · scheenbeen ' + feel.shin;
+        foot.querySelector('button').onclick = function () {
+          editingFeel = activity._run.id;
+          feelNode = null;
+          homeCoach();
+          renderAlerts(homeRuns);
+          var card = document.querySelector('#home-alerts .feel-card');
+          if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+      }
       box.hidden = false;
     }
 
@@ -2552,7 +2588,7 @@
     }
 
     // Two taps after a run: how hard it felt, and the shin.
-    function feelCard(activity) {
+    function feelCard(activity, saved) {
       var run = activity._run;
       var card = alertCard('Hoe ging het?', 'Je run van ' + DAYS[new Date(dayNumber(run.date) * DAY).getUTCDay()], null);
       card.classList.add('feel-card');
@@ -2623,10 +2659,18 @@
         save.disabled = true;
         postJson('/api/feel', { id: run.id, effort: effort, shin: level }).then(function (entry) {
           feels[run.id] = entry;
+          editingFeel = null;
+          feelNode = null;
+          homeCoach();
           coachRewrite(activity);
           renderAlerts(homeRuns);
         }).catch(function () { save.disabled = false; });
       });
+      // Changing earlier answers: start from what you saved.
+      if (saved) {
+        setEffort(keys.indexOf(saved.effort));
+        setLevel(saved.shin);
+      }
       return card;
     }
 
@@ -2661,6 +2705,8 @@
     }
 
     var feelNode = null;
+    // The run whose answers you're changing with "Aanpassen".
+    var editingFeel = null;
 
     function renderAlerts(runs) {
       var box = document.getElementById('home-alerts');
@@ -2669,8 +2715,9 @@
       var activity = latestActivity();
       // Ask about a run from the last three days that you haven't rated yet.
       // The same card is kept across re-renders, so a half-filled answer isn't lost.
-      if (activity && !feels[activity._run.id] && dayNumber(activity._run.date) >= today - 3) {
-        if (!feelNode || feelNode._runId !== activity._run.id) { feelNode = feelCard(activity); feelNode._runId = activity._run.id; }
+      var editing = activity && editingFeel === activity._run.id;
+      if (activity && (editing || (!feels[activity._run.id] && dayNumber(activity._run.date) >= today - 3))) {
+        if (!feelNode || feelNode._runId !== activity._run.id) { feelNode = feelCard(activity, editing && feels[activity._run.id]); feelNode._runId = activity._run.id; }
         box.appendChild(feelNode);
       }
       loadWarnings(runs).forEach(function (w) { box.appendChild(alertCard('Let op', w.t, w.s)); });
