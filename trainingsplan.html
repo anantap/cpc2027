@@ -1431,6 +1431,12 @@
     var DAYS = ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'];
     // Usual run days, counted from Monday: Run 1 on Wednesday, Run 2 on Friday, Run 3 on Sunday.
     var RUN_DAYS = [2, 4, 6];
+    // Sessions moved to another day; within a week they're listed in the order you run them.
+    var MOVED_SESSIONS = {
+      // Marathon in the city on Sunday 1 November: long run on Friday, Friday's run on Monday.
+      'tussen-w2-r3': '2026-10-30',
+      'tussen-w2-r2': '2026-11-02',
+    };
 
     // Run sessions are ticked from Suunto data.
     var runRows = Array.prototype.slice.call(document.querySelectorAll('.week-card[data-plan] .run-item'));
@@ -1439,11 +1445,31 @@
       return el('span', 'run-date', ' · ' + DAYS[new Date(day * DAY).getUTCDay()] + ' ' + formatDay(day));
     }
 
-    // Lay each run session out as: planned run · status (activity card goes below).
+    // Each session's day, counted from the week's Monday: its usual weekday, or the day it moved to.
     runRows.forEach(function (item) {
       var card = item.closest('.week-card');
       var index = Array.prototype.indexOf.call(card.querySelectorAll('.run-item'), item);
-      item.querySelector('.run-label').appendChild(runDate(weekStart(card.dataset.plan, Number(card.dataset.week)) + RUN_DAYS[index]));
+      var start = weekStart(card.dataset.plan, Number(card.dataset.week));
+      var moved = MOVED_SESSIONS[item.dataset.id];
+      item._offset = moved ? dayNumber(moved) - start : RUN_DAYS[index];
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan] .runs-grid'), function (grid) {
+      Array.prototype.slice.call(grid.children).sort(function (a, b) { return a._offset - b._offset; })
+        .forEach(function (item) { grid.appendChild(item); });
+    });
+
+    // The day after a week's last session (a session can move to the Monday after).
+    function weekEnd(card) {
+      var start = weekStart(card.dataset.plan, Number(card.dataset.week));
+      var last = Array.prototype.reduce.call(card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item'),
+        function (m, item) { return Math.max(m, item._offset); }, 6);
+      return start + last + 1;
+    }
+
+    // Lay each run session out as: planned run · status (activity card goes below).
+    runRows.forEach(function (item) {
+      var card = item.closest('.week-card');
+      item.querySelector('.run-label').appendChild(runDate(weekStart(card.dataset.plan, Number(card.dataset.week)) + item._offset));
       pxDistances(item.querySelector('.run-dist'));
       var plan = el('div', 'run-plan');
       Array.prototype.slice.call(item.children).forEach(function (child) {
@@ -1598,7 +1624,8 @@
 
     // Pair runs with sessions in date order, matching as many as possible and keeping each run
     // as close to its session's usual day as it can. Returns the run (or undefined) per session.
-    function assignRuns(weekRuns, start, slotCount) {
+    function assignRuns(weekRuns, start, slotDays) {
+      var slotCount = slotDays.length;
       var offsets = weekRuns.map(function (r) { return dayNumber(r.date) - start; });
       var pairs = Math.min(weekRuns.length, slotCount);
       var best = null;
@@ -1609,7 +1636,7 @@
         }
         if (run >= weekRuns.length || slot >= slotCount) return;
         picked.push([run, slot]);
-        search(run + 1, slot + 1, matched + 1, cost + Math.abs(offsets[run] - RUN_DAYS[slot]), picked);
+        search(run + 1, slot + 1, matched + 1, cost + Math.abs(offsets[run] - slotDays[slot]), picked);
         picked.pop();
         search(run, slot + 1, matched, cost, picked);
         search(run + 1, slot, matched, cost, picked);
@@ -1622,8 +1649,8 @@
     // Runs go to the session for their weekday; any beyond the plan are listed as extra.
     function matchWeek(card, weekRuns, start) {
       var items = Array.prototype.slice.call(card.querySelectorAll('.run-item'));
-      var weekOver = start + 7 <= today;
-      var bySlot = assignRuns(weekRuns, start, items.length);
+      var weekOver = weekEnd(card) <= today;
+      var bySlot = assignRuns(weekRuns, start, items.map(function (item) { return item._offset; }));
 
       items.forEach(function (item, i) {
         var run = bySlot[i];
@@ -1869,8 +1896,7 @@
       var coachReady = setupCoach();
       // Past weeks that still have open sessions stay open; finished weeks fold away.
       Array.prototype.forEach.call(document.querySelectorAll('.week-card[data-plan]'), function (card) {
-        var start = weekStart(card.dataset.plan, Number(card.dataset.week));
-        if (start + 7 <= today) setWeekOpen(card, !card.classList.contains('completed'));
+        if (weekEnd(card) <= today) setWeekOpen(card, !card.classList.contains('completed'));
       });
       // Coach boxes above the runs change the layout, so scroll once they're in place.
       coachReady.then(function () {
@@ -2304,8 +2330,7 @@
 
     function slotDay(item) {
       var card = item.closest('.week-card');
-      var index = Array.prototype.indexOf.call(card.querySelectorAll('.runs-grid:not(.extra-runs) .run-item'), item);
-      return weekStart(card.dataset.plan, Number(card.dataset.week)) + RUN_DAYS[index];
+      return weekStart(card.dataset.plan, Number(card.dataset.week)) + item._offset;
     }
 
     function slotsOf(card) {
@@ -2319,7 +2344,7 @@
         var item = slots[i];
         var card = item.closest('.week-card');
         if (item.classList.contains('done') || item.classList.contains('skipped')) continue;
-        if (weekStart(card.dataset.plan, Number(card.dataset.week)) + 7 <= today) continue;
+        if (weekEnd(card) <= today) continue;
         return item;
       }
       return null;
