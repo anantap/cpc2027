@@ -12,12 +12,17 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#eeede9">
 <title>CPC 10K</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&display=swap">
+<link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/geist-pixel-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  /* Geist Pixel is served from this site, so it loads even where Google's font server doesn't. */
+  /* Both fonts are served from this site, so they load even where Google's font server doesn't. */
+  @font-face {
+    font-family: "Geist";
+    font-style: normal;
+    font-weight: 300 600;
+    font-display: swap;
+    src: url("/fonts/geist-latin.woff2") format("woff2");
+  }
   @font-face {
     font-family: "Geist Pixel";
     font-style: normal;
