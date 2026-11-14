@@ -1310,6 +1310,7 @@
     // Weeks taken off (from Monday), with a note; later consolidation/tussenfase weeks shift one week.
     var SKIPPED_WEEKS = [
       { start: '2026-10-12', note: 'Rustweek · shinty mcsplinty' },
+      { start: '2026-11-16', note: 'Rustweek · scheen laten herstellen' },
       { start: '2026-11-23', note: 'Rustweek · fris de opbouw in' },
     ];
     var DAY = 86400000;
@@ -1401,10 +1402,13 @@
       var start = weekStart(card.dataset.plan, Number(card.dataset.week));
       card.querySelector('.week-num').insertAdjacentElement('afterend',
         el('div', 'week-dates', formatDay(start) + ' – ' + formatDay(start + 6)));
-      if (skipped.indexOf(start - 7) !== -1) {
-        var note = SKIPPED_WEEKS[skipped.indexOf(start - 7)].note;
-        var marker = el('div', 'week-card skipped', note + ' · ' + formatDay(start - 7) + ' – ' + formatDay(start - 1));
-        marker.dataset.start = String(start - 7);
+      // Rest weeks right before this week, oldest first (there can be more than one in a row).
+      var first = start;
+      while (skipped.indexOf(first - 7) !== -1) first -= 7;
+      for (var day = first; day < start; day += 7) {
+        var note = SKIPPED_WEEKS[skipped.indexOf(day)].note;
+        var marker = el('div', 'week-card skipped', note + ' · ' + formatDay(day) + ' – ' + formatDay(day + 6));
+        marker.dataset.start = String(day);
         // A rest week right before the build-up closes the Tussenfase rather than opening the build-up.
         if (card.dataset.plan === 'build' && Number(card.dataset.week) === 1) document.getElementById('tussenfase-weeks').appendChild(marker);
         else card.parentNode.insertBefore(marker, card);
@@ -2601,7 +2605,11 @@
       var from = today - 14;
       var rest = skipped.filter(function (d) { return d + 6 > from && d <= today - 7; }).sort()[0];
       // (up to and including the rest week's Monday, when a missed run is often made up)
-      if (rest !== undefined) from = rest - 7;
+      if (rest !== undefined) {
+        // Step back over rest weeks in a row, to the last week you actually ran.
+        while (skipped.indexOf(rest - 7) !== -1) rest -= 7;
+        from = rest - 7;
+      }
       var before = km(from, from + 7);
       if (before > 0 && now > before * 1.1 && now - before >= 1.5) {
         out.push({ t: 'Je bouwt snel op',
